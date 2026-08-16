@@ -1,0 +1,9 @@
+version: 1
+templateId: modern
+protagonist: 陆沉舟
+narrativeGuard: true
+progressionGuard: true
+randomEvent: true
+pickedEventIds: []
+pendingEventId: null
+createdAt: 2026-08-16T00:00:00.000Z

@@ -1,0 +1,8 @@
+# Load InfiniteDSH from this checkout. Replace the name path if you move the repo.
+# From deepseek-harness: pnpm dsh web --patch F:/DocProject/InfiniteDSH/examples/play.cordis.yml
+- insert:
+    - id: dsh-infinite
+      name: F:/DocProject/InfiniteDSH/packages/dsh-infinite/dist/index.js
+      config:
+        templatesDir: F:/DocProject/InfiniteDSH/packages/dsh-infinite-preset/templates
+        dshHome: ''

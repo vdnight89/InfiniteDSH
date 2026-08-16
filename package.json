@@ -1,0 +1,27 @@
+{
+  "name": "infinite-dsh",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "DSH plugin workspace: literary text-adventure engine as dsh-infinite",
+  "scripts": {
+    "build": "npm run build -w infinite-core && npm run build -w dsh-infinite",
+    "import:airp": "node scripts/import-airp-presets.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -b --pretty false"
+  },
+  "workspaces": [
+    "packages/infinite-core",
+    "packages/dsh-infinite",
+    "packages/dsh-infinite-preset"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  }
+}

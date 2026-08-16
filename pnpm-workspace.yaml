@@ -1,0 +1,4 @@
+packages:
+  - packages/infinite-core
+  - packages/dsh-infinite
+  - packages/dsh-infinite-preset

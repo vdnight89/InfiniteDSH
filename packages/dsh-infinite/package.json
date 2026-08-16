@@ -1,0 +1,35 @@
+{
+  "name": "dsh-infinite",
+  "version": "0.2.0",
+  "type": "module",
+  "description": "DSH host bundle: literary session as a story",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./restrict": {
+      "types": "./dist/restrict.d.ts",
+      "import": "./dist/restrict.js"
+    }
+  },
+  "files": [
+    "dist",
+    "static",
+    "cordis.patch.yml"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "dependencies": {
+    "infinite-core": "0.2.0",
+    "dsh-infinite-preset": "0.2.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  }
+}

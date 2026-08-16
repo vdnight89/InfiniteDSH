@@ -1,0 +1,7 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/infinite-core" },
+    { "path": "./packages/dsh-infinite" }
+  ]
+}
