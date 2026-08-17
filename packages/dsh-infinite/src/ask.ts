@@ -1,7 +1,19 @@
 import type { AskAnswerItem, AskItem, CommandInvocation, InfiniteContext } from './types.js'
 
+export function isNoAskProvider(error: unknown): boolean {
+  if (error && typeof error === 'object' && 'code' in error && (error as { code?: string }).code === 'NO_PROVIDER') {
+    return true
+  }
+  const message = error instanceof Error ? error.message : String(error ?? '')
+  return /NO_PROVIDER|no user-questions provider/i.test(message)
+}
+
+/** True only when a UI provider is known to exist. Headless still exposes ask(). */
 export function canAsk(ctx: InfiniteContext): boolean {
-  return typeof ctx.userQuestions?.ask === 'function'
+  const questions = ctx.userQuestions
+  if (typeof questions?.ask !== 'function') return false
+  if (questions.hasProvider === false) return false
+  return true
 }
 
 export function stripRecommend(label: string): string {
@@ -21,11 +33,16 @@ export async function askUser(
   inv: CommandInvocation,
   questions: readonly AskItem[],
 ): Promise<readonly AskAnswerItem[] | null> {
-  if (!ctx.userQuestions) return null
-  const result = await ctx.userQuestions.ask({
-    questions,
-    agent: inv.agent,
-    signal: inv.signal,
-  })
-  return result.answers
+  if (typeof ctx.userQuestions?.ask !== 'function') return null
+  try {
+    const result = await ctx.userQuestions.ask({
+      questions,
+      agent: inv.agent,
+      signal: inv.signal,
+    })
+    return result.answers
+  } catch (error) {
+    if (isNoAskProvider(error)) return null
+    throw error
+  }
 }

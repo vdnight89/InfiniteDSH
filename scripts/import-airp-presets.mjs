@@ -12,7 +12,7 @@ const BOOK_FOLDERS = {
   'wb-builtin-urban': { id: 'urban', label: '都市异能', aliases: ['都市异能', '异能', 'urban'] },
   'wb-builtin-modern': { id: 'modern', label: '现代', aliases: ['现代', '现实', '都市', 'modern'] },
   'wb-builtin-infinite': { id: 'infinite', label: '无限流', aliases: ['无限', '副本', '轮回', 'infinite'] },
-  'wb-builtin-scifi': { id: 'scifi', label: '科幻', aliases: ['科幻', '未来', '星际', '赛博', 'scifi'] },
+  'wb-builtin-scifi': { id: 'scifi', label: '科幻', aliases: ['科幻', '未来', '星际', 'scifi'] },
   'wb-builtin-apocalypse': { id: 'apocalypse', label: '末世', aliases: ['末世', '丧尸', 'apocalypse'] },
   'wb-builtin-entertainment': { id: 'entertainment', label: '娱乐圈', aliases: ['娱乐圈', '娱乐', 'entertainment'] },
   'wb-builtin-palace': { id: 'palace', label: '宫廷', aliases: ['宫廷', '朝堂', '古代', 'palace'] },
@@ -86,9 +86,54 @@ function loadCharacters() {
 
 function loadStyleCards() {
   const src = readFileSync(join(AIRP, 'lib', 'db.ts'), 'utf8')
-  const block = src.match(/const builtins:[\s\S]*?=\s*(\[[\s\S]*?\];)/)
+  const block = src.match(/const builtins: Omit<PromptTemplate[\s\S]*?=\s*(\[[\s\S]*?\];)/)
   if (!block) throw new Error('style cards not found')
   return new Function(`return ${block[1]}`)()
+}
+
+function styleFields(style) {
+  const title = String(style.title || style.name || '').trim()
+  const body = String(
+    style.content
+    || [style.description, style.systemPrompt].filter(Boolean).join('。'),
+  ).trim()
+  const keys = Array.isArray(style.tags) && style.tags.length
+    ? style.tags
+    : (title ? [title] : [])
+  if (!title || !body) return null
+  return { id: String(style.id || title), title, body, keys }
+}
+
+/** Schemes whose openings belong to one book, even if worldBaseId is shared. */
+const EXCLUSIVE_TOPICS = {
+  末世: ['apocalypse'],
+  无限流: ['infinite'],
+  规则怪谈: ['rulehorror'],
+  娱乐圈: ['entertainment'],
+  民俗悬疑: ['folklore'],
+  '宅斗 / 宫廷': ['palace', 'zhaidou'],
+  年代生活: ['retro'],
+}
+
+function plotAllowedOn(templateId, plot) {
+  const exclusive = EXCLUSIVE_TOPICS[plot.topic]
+  if (exclusive) return exclusive.includes(templateId)
+  return true
+}
+
+function writeStyleCards(dir, styles) {
+  for (const style of styles) {
+    const fields = styleFields(style)
+    if (!fields) continue
+    writeMd(join(dir, 'worldbook', `style-${fields.id}.md`), {
+      id: `style-${fields.id}`,
+      title: fields.title,
+      category: '写法',
+      constant: false,
+      keys: fields.keys,
+      order: 90,
+    }, fields.body)
+  }
 }
 
 const EXTRA_TEMPLATES = [
@@ -141,7 +186,7 @@ const EXTRA_TEMPLATES = [
   {
     id: 'cyber',
     label: '赛博',
-    aliases: ['赛博朋克', '义体', 'cyber'],
+    aliases: ['赛博', '赛博朋克', '义体', 'cyber'],
     description: '义体、公司、记忆备份与下层街区。',
     protagonist: '顾晚棠',
     world: [
@@ -332,18 +377,23 @@ function addPlot(templateId, plot) {
 for (const scheme of topics) {
   const fallback = BASE_TO_TEMPLATES[scheme.worldBaseId] || ['modern']
   for (const seed of scheme.openingSeeds || []) {
-    const bases = seed.bases?.length ? seed.bases : [scheme.worldBaseId]
     const targets = new Set()
-    for (const base of bases) {
-      for (const id of BASE_TO_TEMPLATES[base] || []) targets.add(id)
+    const exclusive = EXCLUSIVE_TOPICS[scheme.label]
+    if (exclusive) {
+      exclusive.forEach((id) => targets.add(id))
+    } else {
+      const bases = seed.bases?.length ? seed.bases : [scheme.worldBaseId]
+      for (const base of bases) {
+        for (const id of BASE_TO_TEMPLATES[base] || []) targets.add(id)
+      }
+      if (scheme.id.includes('apocalypse')) targets.add('apocalypse')
+      if (scheme.id.includes('folklore')) targets.add('folklore')
+      if (scheme.id.includes('rules')) targets.add('rulehorror')
+      if (scheme.id.includes('entertainment')) targets.add('entertainment')
+      if (scheme.id.includes('palace')) targets.add('palace')
+      if (scheme.id.includes('infinite')) targets.add('infinite')
+      if (targets.size === 0) fallback.forEach((id) => targets.add(id))
     }
-    if (scheme.id.includes('apocalypse')) targets.add('apocalypse')
-    if (scheme.id.includes('folklore')) targets.add('folklore')
-    if (scheme.id.includes('rules')) targets.add('rulehorror')
-    if (scheme.id.includes('entertainment')) targets.add('entertainment')
-    if (scheme.id.includes('palace')) targets.add('palace')
-    if (scheme.id.includes('infinite')) targets.add('infinite')
-    if (targets.size === 0) fallback.forEach((id) => targets.add(id))
     for (const id of targets) {
       addPlot(id, {
         id: `${scheme.id}-${seed.id}`,
@@ -385,16 +435,7 @@ for (const book of books) {
     }, entry.content)
   }
 
-  for (const style of styles) {
-    writeMd(join(dir, 'worldbook', `style-${style.id}.md`), {
-      id: `style-${style.id}`,
-      title: style.name,
-      category: '写法',
-      constant: false,
-      keys: style.tags || [style.name],
-      order: 90,
-    }, `${style.description}。${style.systemPrompt}`)
-  }
+  writeStyleCards(dir, styles)
 
   if (meta.id === 'cultivation') {
     writeMd(join(dir, 'worldbook', '藏经阁.md'), {
@@ -407,7 +448,7 @@ for (const book of books) {
     }, '藏经阁分三层。一层外门可入，只放基础吐纳与杂役口诀。二层需内门推荐。三层由金丹执事守钥，夜半阁顶常有灯。')
   }
 
-  const plots = plotsByTemplate.get(meta.id) || []
+  const plots = (plotsByTemplate.get(meta.id) || []).filter((plot) => plotAllowedOn(meta.id, plot))
   for (const plot of plots) {
     writeMd(join(dir, 'plots', `${slug(plot.id)}.md`), {
       id: plot.id,
@@ -479,16 +520,7 @@ for (const extra of EXTRA_TEMPLATES) {
       order: entry.order,
     }, entry.content)
   }
-  for (const style of styles) {
-    writeMd(join(dir, 'worldbook', `style-${style.id}.md`), {
-      id: `style-${style.id}`,
-      title: style.name,
-      category: '写法',
-      constant: false,
-      keys: style.tags || [style.name],
-      order: 90,
-    }, `${style.description}。${style.systemPrompt}`)
-  }
+  writeStyleCards(dir, styles)
   const plots = plotsByTemplate.get(extra.id) || extra.plots
   for (const plot of plots) {
     writeMd(join(dir, 'plots', `${slug(plot.id)}.md`), {

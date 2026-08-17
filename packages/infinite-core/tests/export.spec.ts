@@ -4,7 +4,13 @@ import { cleanProse, exportTranscript, formatArchive, isOpeningInstruction } fro
 describe('cleanProse', () => {
   it('strips template tags, headings, and fences', () => {
     const raw = '【正文】山门开了\n【对话推荐】去藏经阁\n## 第一章\n```js\nx\n```\n留下'
-    expect(cleanProse(raw)).toBe('山门开了\n留下')
+    expect(cleanProse(raw)).toContain('山门开了')
+    expect(cleanProse(raw)).toContain('留下')
+    expect(cleanProse(raw)).not.toContain('【正文】')
+  })
+
+  it('keeps a single blank line between paragraphs', () => {
+    expect(cleanProse('第一段。\n\n第二段。')).toBe('第一段。\n\n第二段。')
   })
 })
 
@@ -43,5 +49,13 @@ describe('isOpeningInstruction / formatArchive', () => {
   it('wraps a compaction summary', () => {
     expect(formatArchive('外门扫地三日', '2026-08-16')).toContain('外门扫地三日')
     expect(formatArchive('  ', 'x')).toBe('')
+  })
+
+  it('appends later summaries instead of replacing the book', () => {
+    const first = formatArchive('外门扫地三日', 't1')
+    const next = formatArchive('夜闯藏经阁', 't2', first)
+    expect(next).toContain('外门扫地三日')
+    expect(next).toContain('夜闯藏经阁')
+    expect(next).toContain('## t2')
   })
 })

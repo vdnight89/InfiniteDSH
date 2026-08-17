@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.0 — 2026-08-16
+
+Review-hardened release. Command and world-rule behavior changed; treat this as the first Web-stable line.
+
+- `/export-story` replaces `/export`, so DSH Web’s session-log ZIP keeps `/export`.
+- Headless `/new 修仙` no longer throws `NO_PROVIDER`; missing UI uses template defaults or asks for `force`.
+- World-rule injection no longer reads `plots/` or 写法 cards. Cross-genre 末世 openings are gone from 修仙.
+- Style cards import `title`/`content`; no more `undefined` lore files.
+- `/cast` demotes the old constant hero. `/bind` asks before overwrite, or requires `force`.
+- `/new 赛博` opens the 赛博 template. `都市` stays 现代; `都市异能` is urban.
+- `/export-story` keeps paragraph breaks. Compaction **appends** to `archive.md`.
+- `/new` `/bind` `/cast` write a small `infinite/bind` session event.
+- Card CSS hides the original option stack. Cover `HEAD` returns no body.
+- Genre covers that shared AIRP filenames are original paintings, not copies.
+- Root package is now the installable bundle `dsh-infinite` (`dsh.bundle` + `prepare`).  
+  `dsh plugin --profile web add github:vdnight89/InfiniteDSH` works in one line.
+
 ## 0.2.0 — 2026-08-16
 
 - 开书改为可选卡片：`/new`、`/bind`、`/cast` 走 DSH 问答；Web 上封面网格点选。

@@ -14,7 +14,7 @@ export function cleanProse(text: string): string {
     .replace(BODY_TAG, '')
   return withoutMeta
     .replace(/^\s*#{1,6}\s+.*$/gm, '')
-    .replace(/\n{2,}/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
     .trim()
 }
 
@@ -54,8 +54,11 @@ export function exportTranscript(
   return `${lines.join('\n').replace(/\n{3,}/g, '\n\n').trim()}\n`
 }
 
-export function formatArchive(summary: string, at: string): string {
+export function formatArchive(summary: string, at: string, previous = ''): string {
   const body = summary.trim()
-  if (!body) return ''
-  return `# 剧情档案\n\n更新：${at}\n\n${body}\n`
+  const prior = previous.trim()
+  if (!body) return prior
+  const section = `## ${at}\n\n${body}\n`
+  if (!prior) return `# 剧情档案\n\n${section}`
+  return `${prior}\n\n${section}`
 }

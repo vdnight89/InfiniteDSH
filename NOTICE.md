@@ -14,5 +14,5 @@ The「深海实验室」template (鲸鱼娘, 梁组, 梁圣, 牢梁, 梁子) is 
 fan fiction. It is not affiliated with, endorsed by, or a depiction of
 any real company or person.
 
-World cover JPEGs under packages/dsh-infinite-preset/covers/ that share
-names with airp-desktop world art are copied from that MIT-licensed tree.
+Cover JPEGs under packages/dsh-infinite-preset/covers/ are original
+generations for this plugin. They are not 灵叙 / Narra illustration assets.

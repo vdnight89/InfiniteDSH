@@ -27,14 +27,24 @@ export function safeCoverName(name: string): string | null {
   return name
 }
 
-function sendFile(res: { writeHead(code: number, headers?: Record<string, string>): void; end(body?: string | Buffer): void }, file: string): void {
+function sendFile(
+  res: { writeHead(code: number, headers?: Record<string, string>): void; end(body?: string | Buffer): void },
+  file: string,
+  method = 'GET',
+): void {
   const ext = extname(file).toLowerCase()
   const type = MIME[ext] ?? 'application/octet-stream'
+  const body = readFileSync(file)
   res.writeHead(200, {
     'content-type': type,
     'cache-control': 'public, max-age=86400',
+    'content-length': String(body.length),
   })
-  res.end(readFileSync(file) as unknown as string)
+  if (method === 'HEAD') {
+    res.end()
+    return
+  }
+  res.end(body as unknown as string)
 }
 
 function resolveUnder(root: string, name: string): string | null {
@@ -67,6 +77,10 @@ export function registerCoverServer(ctx: InfiniteContext, config: Required<Plugi
       const rest = url.pathname.replace(/^\/infinite\/?/, '')
       if (rest === 'manifest.json') {
         res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
+        if (method === 'HEAD') {
+          res.end()
+          return
+        }
         res.end(manifest)
         return
       }
@@ -77,7 +91,7 @@ export function registerCoverServer(ctx: InfiniteContext, config: Required<Plugi
           res.end('missing')
           return
         }
-        sendFile(res, file)
+        sendFile(res, file, method)
         return
       }
       if (rest.startsWith('covers/')) {
@@ -87,7 +101,7 @@ export function registerCoverServer(ctx: InfiniteContext, config: Required<Plugi
           res.end('missing cover')
           return
         }
-        sendFile(res, file)
+        sendFile(res, file, method)
         return
       }
       res.writeHead(404)

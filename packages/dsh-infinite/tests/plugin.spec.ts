@@ -4,16 +4,15 @@ import { dirname, join, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it } from 'vitest'
 import { apply } from '../src/index.ts'
-import { handleCast, handleExport, handleNew } from '../src/commands.ts'
+import { handleBind, handleCast, handleExport, handleNew } from '../src/commands.ts'
 import { installUserPreset } from '../src/install-preset.ts'
 import { onSessionEvent } from '../src/lifecycle.ts'
 import { safeCoverName } from '../src/covers-host.ts'
 import { defaultTemplatesDir, infiniteRoot, resolveSessionDir } from '../src/paths.ts'
-import { loadArchive, loadMeta } from '../src/story-files.ts'
+import { loadArchive, loadCharacters, loadMeta, loadWorldbook } from '../src/story-files.ts'
 import type { CommandInvocation, DuckSession, InfiniteContext, PluginConfig } from '../src/types.ts'
 import { resolveConfig } from '../src/types.ts'
-import { buildWorldContext, parseLoreEntry } from 'infinite-core'
-import { loadWorldbook } from '../src/story-files.ts'
+import { buildWorldContext, parseLoreEntry, resolveTemplateId } from 'infinite-core'
 
 const TEMPLATES = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'dsh-infinite-preset', 'templates')
 
@@ -106,10 +105,17 @@ describe('dsh-infinite plugin', () => {
     expect(res.body).toContain('修仙')
   })
 
+  it('ships a root dsh.bundle so github/npm add can load the plugin', () => {
+    const manifest = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'package.json'), 'utf8'))
+    expect(manifest.name).toBe('dsh-infinite')
+    expect(manifest.dsh.bundle.patch).toBe('./cordis.patch.yml')
+    expect(manifest.scripts.prepare).toContain('prepare-bundle')
+  })
+
   it('registers the four human commands', () => {
     const { ctx, config } = setup()
     apply(ctx, config)
-    expect(ctx.commandsList.sort()).toEqual(['bind', 'cast', 'export', 'new'])
+    expect(ctx.commandsList.sort()).toEqual(['bind', 'cast', 'export-story', 'new'])
   })
 
   it('injects world context only after /new on that session', async () => {
@@ -273,6 +279,138 @@ describe('dsh-infinite plugin', () => {
     expect(liang).toBeTruthy()
     const card = parseLoreEntry(readFileSync(join(dir, 'characters', liang!), 'utf8'), 'x')
     expect(card.keys).toEqual(expect.arrayContaining(['梁组', '梁圣', '牢梁', '梁子']))
+  })
+
+  it('maps 赛博 to the cyber template, not scifi', () => {
+    expect(resolveTemplateId('赛博')).toBe('cyber')
+    expect(resolveTemplateId('赛博朋克')).toBe('cyber')
+    expect(resolveTemplateId('科幻')).toBe('scifi')
+    expect(resolveTemplateId('都市')).toBe('modern')
+    expect(resolveTemplateId('都市异能')).toBe('urban')
+  })
+
+  it('does not ship undefined style cards or cross-genre plot seeds', () => {
+    const style = parseLoreEntry(
+      readFileSync(join(TEMPLATES, 'cultivation', 'worldbook', 'style-tpl-opening.md'), 'utf8'),
+      'style',
+    )
+    expect(style.title).not.toBe('undefined')
+    expect(style.content).not.toMatch(/undefined/)
+    const plots = readdirSync(join(TEMPLATES, 'cultivation', 'plots')).join(' ')
+    expect(plots).not.toMatch(/apocalypse/)
+  })
+
+  it('keeps plots out of world-rule injection', async () => {
+    const { ctx, config } = setup()
+    await handleNew(ctx, config, inv('rules', '修仙'))
+    const root = infiniteRoot(resolveSessionDir(ctx, session('rules'), config))
+    const world = loadWorldbook(root)
+    expect(world.some((entry) => entry.category === '剧情')).toBe(false)
+    expect(world.some((entry) => entry.category === '写法')).toBe(false)
+    const built = buildWorldContext(world, '尸潮围山挑战', '修仙')
+    expect(built.text).not.toContain('尸潮')
+  })
+
+  it('demotes the template hero when /cast picks someone else', async () => {
+    const { ctx, config } = setup()
+    await handleNew(ctx, config, inv('cast', '修仙'))
+    const root = infiniteRoot(resolveSessionDir(ctx, session('cast'), config))
+    const before = loadCharacters(root).find((card) => card.title === '谢无妄')
+    expect(before?.constant).toBe(true)
+    await handleCast(ctx, config, inv('cast', '江澄'))
+    const cards = loadCharacters(root)
+    expect(cards.find((card) => card.title === '江澄')?.constant).toBe(true)
+    expect(cards.find((card) => card.title === '谢无妄')?.constant).toBe(false)
+  })
+
+  it('asks before /bind replaces an existing story', async () => {
+    const { ctx, config } = setup()
+    await handleNew(ctx, config, inv('bind', '修仙'))
+    const asking = {
+      ...ctx,
+      userQuestions: {
+        async ask(request: { questions: Array<{ id: string }> }) {
+          const id = request.questions[0]?.id
+          if (id === 'bind') return { answers: [{ id: 'bind', selected: ['末世'] }] }
+          return { answers: [{ id: 'overwrite', selected: ['取消'] }] }
+        },
+      },
+    }
+    const cancelled = await handleBind(asking, config, inv('bind', ''))
+    expect(cancelled.text).toMatch(/取消/)
+    expect(loadMeta(infiniteRoot(resolveSessionDir(ctx, session('bind'), config)))?.templateId).toBe('cultivation')
+    const refused = await handleBind(ctx, config, inv('bind', '末世'))
+    expect(refused.kind).toBe('error')
+    expect(refused.text).toMatch(/force/)
+    const forced = await handleBind(ctx, config, inv('bind', '末世 force'))
+    expect(forced.kind).toBe('success')
+    expect(loadMeta(infiniteRoot(resolveSessionDir(ctx, session('bind'), config)))?.templateId).toBe('apocalypse')
+  })
+
+  it('treats NO_PROVIDER as no UI and still opens with /new 修仙', async () => {
+    const { ctx, config } = setup()
+    const headless = {
+      ...ctx,
+      userQuestions: {
+        async ask() {
+          const error = new Error('no user-questions provider is registered') as Error & { code: string }
+          error.code = 'NO_PROVIDER'
+          throw error
+        },
+      },
+    }
+    const result = await handleNew(headless, config, inv('hd', '修仙'))
+    expect(result.kind).toBe('success')
+    expect(loadMeta(infiniteRoot(resolveSessionDir(headless, session('hd'), config)))?.templateId).toBe('cultivation')
+  })
+
+  it('records infinite/bind on the session and appends archive sections', async () => {
+    const { ctx, config } = setup()
+    const binds: Array<{ type: string; data?: Record<string, unknown> }> = []
+    const sess = session('ev')
+    sess.append = (type, data) => {
+      binds.push({ type, data })
+    }
+    await handleNew(ctx, config, {
+      agent: { session: sess },
+      rawInput: '修仙',
+      signal: new AbortController().signal,
+    })
+    expect(binds.some((item) => item.type === 'infinite/bind' && item.data?.templateId === 'cultivation')).toBe(true)
+    onSessionEvent(ctx, config, sess, {
+      type: 'compaction/summary',
+      data: { summary: [{ type: 'text', text: '第一段档案。' }] },
+    })
+    onSessionEvent(ctx, config, sess, {
+      type: 'compaction/summary',
+      data: { summary: [{ type: 'text', text: '第二段档案。' }] },
+    })
+    const archive = loadArchive(infiniteRoot(resolveSessionDir(ctx, sess, config)))
+    expect(archive).toContain('第一段档案。')
+    expect(archive).toContain('第二段档案。')
+  })
+
+  it('answers HEAD for static covers without a body', () => {
+    const { ctx, config } = setup()
+    const routes: Array<{ path: string; handler: Function }> = []
+    apply({
+      ...ctx,
+      webServer: {
+        register(route: { path: string; handler: Function }) {
+          routes.push(route)
+          return () => undefined
+        },
+      },
+    } as never, config)
+    const res = { code: 0, body: 'unset', writeHead(code: number) { this.code = code }, end(body?: string) { this.body = body ?? '' } }
+    routes[0]?.handler({ url: '/infinite/cards.css', method: 'HEAD' }, res)
+    expect(res.code).toBe(200)
+    expect(res.body).toBe('')
+  })
+
+  it('hides original option markup once the card grid is on', () => {
+    const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'static', 'cards.css'), 'utf8')
+    expect(css).toContain(':not(.infinite-card-cover):not(.infinite-card-copy)')
   })
 
   it('imports a full cultivation worldbook from AIRP', () => {

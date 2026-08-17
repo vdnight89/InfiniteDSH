@@ -1,11 +1,60 @@
 {
-  "name": "infinite-dsh",
-  "version": "0.2.0",
-  "private": true,
+  "name": "dsh-infinite",
+  "version": "0.3.0",
+  "private": false,
   "type": "module",
-  "description": "DSH plugin workspace: literary text-adventure engine as dsh-infinite",
+  "license": "MIT",
+  "description": "DeepSeek Harness literary plugin: one session is one book",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "interactive-fiction",
+    "text-adventure"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vdnight89/InfiniteDSH.git"
+  },
+  "homepage": "https://github.com/vdnight89/InfiniteDSH#readme",
+  "bugs": {
+    "url": "https://github.com/vdnight89/InfiniteDSH/issues"
+  },
+  "author": "InfiniteDSH contributors",
+  "main": "./packages/dsh-infinite/dist/index.js",
+  "types": "./packages/dsh-infinite/dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./packages/dsh-infinite/dist/index.d.ts",
+      "import": "./packages/dsh-infinite/dist/index.js"
+    },
+    "./restrict": {
+      "types": "./packages/dsh-infinite/dist/restrict.d.ts",
+      "import": "./packages/dsh-infinite/dist/restrict.js"
+    }
+  },
+  "files": [
+    "cordis.patch.yml",
+    "LICENSE",
+    "NOTICE.md",
+    "packages/dsh-infinite/dist",
+    "packages/dsh-infinite/static",
+    "packages/dsh-infinite/cordis.patch.yml",
+    "packages/infinite-core/dist",
+    "packages/infinite-core/package.json",
+    "packages/dsh-infinite-preset/package.json",
+    "packages/dsh-infinite-preset/templates",
+    "packages/dsh-infinite-preset/covers",
+    "packages/dsh-infinite-preset/infinite-play"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
   "scripts": {
-    "build": "npm run build -w infinite-core && npm run build -w dsh-infinite",
+    "prepare": "node scripts/prepare-bundle.mjs",
+    "build": "npm run build -w infinite-core && npm run build -w @infinite-dsh/host",
     "import:airp": "node scripts/import-airp-presets.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -16,9 +65,13 @@
     "packages/dsh-infinite",
     "packages/dsh-infinite-preset"
   ],
+  "dependencies": {
+    "dsh-infinite-preset": "file:packages/dsh-infinite-preset",
+    "infinite-core": "file:packages/infinite-core",
+    "typescript": "^5.8.3"
+  },
   "devDependencies": {
     "@types/node": "^22.15.0",
-    "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   },
   "engines": {

@@ -68,6 +68,6 @@
   overflow: hidden;
 }
 
-[role='radiogroup'].infinite-card-grid > button > span:first-child:not(.infinite-card-cover) {
+[role='radiogroup'].infinite-card-grid > button > :not(.infinite-card-cover):not(.infinite-card-copy) {
   display: none;
 }

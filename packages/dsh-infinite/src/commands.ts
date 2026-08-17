@@ -11,10 +11,12 @@ import {
   topicChoice,
   type TemplateId,
 } from 'infinite-core'
-import { askUser, canAsk, pickAnswer } from './ask.js'
+import { askUser, pickAnswer } from './ask.js'
 import { infiniteRoot, resolveSessionDir, templatesDir } from './paths.js'
 import {
+  appendStoryBind,
   applyOpening,
+  applyProtagonistIdentity,
   hasStory,
   listTemplateCharacters,
   listTemplatePlots,
@@ -23,10 +25,9 @@ import {
   saveExport,
   saveMeta,
   seedStory,
-  writeProtagonistCard,
 } from './story-files.js'
 import { sessionMessages } from './transcript.js'
-import type { AskItem, CommandInvocation, CommandResult, InfiniteContext, PluginConfig } from './types.js'
+import type { AskItem, CommandInvocation, CommandResult, DuckSession, InfiniteContext, PluginConfig } from './types.js'
 import { readdirSync } from 'node:fs'
 
 function sessionOf(inv: CommandInvocation) {
@@ -105,19 +106,13 @@ function overwriteQuestion(): AskItem {
   }
 }
 
-function applyProtagonist(
-  root: string,
-  templateId: TemplateId,
-  chosen: string,
-): string {
+function applyProtagonist(root: string, templateId: TemplateId, chosen: string): string {
   const name = !chosen || chosen === KEEP_DEFAULT_PROTAGONIST
     ? defaultProtagonist(templateId)
     : chosen
   const meta = loadMeta(root)
   if (meta) saveMeta(root, { ...meta, protagonist: name })
-  const already = loadCharacters(root).some((card) => card.title === name)
-  if (!already) writeProtagonistCard(root, name)
-  return name
+  return applyProtagonistIdentity(root, name)
 }
 
 function openedText(templateId: TemplateId, protagonist: string): string {
@@ -126,6 +121,33 @@ function openedText(templateId: TemplateId, protagonist: string): string {
     `主角：${protagonist}。`,
     '会话请切到 Infinite Play。输入第一个行动即可开写。',
   ].join('')
+}
+
+function bindSnapshot(root: string, session: DuckSession): void {
+  const meta = loadMeta(root)
+  if (!meta) return
+  appendStoryBind(session, {
+    templateId: meta.templateId,
+    protagonist: meta.protagonist,
+    narrativeGuard: meta.narrativeGuard,
+    progressionGuard: meta.progressionGuard,
+    randomEvent: meta.randomEvent,
+    pendingEventId: meta.pendingEventId,
+    pickedEventIds: meta.pickedEventIds,
+    dir: 'infinite',
+  })
+}
+
+async function confirmOverwrite(
+  ctx: InfiniteContext,
+  inv: CommandInvocation,
+  root: string,
+  force: boolean,
+): Promise<'ok' | 'cancel' | 'need-force'> {
+  if (!hasStory(root) || force) return 'ok'
+  const answers = await askUser(ctx, inv, [overwriteQuestion()])
+  if (!answers) return 'need-force'
+  return pickAnswer(answers, 'overwrite') === '覆盖重开' ? 'ok' : 'cancel'
 }
 
 export async function handleNew(
@@ -137,18 +159,10 @@ export async function handleNew(
   const namedProtagonist = rest.slice(1).join(' ').trim()
   const root = infiniteRoot(resolveSessionDir(ctx, sessionOf(inv), config))
 
-  let useForce = force
-  if (hasStory(root) && !useForce) {
-    if (canAsk(ctx)) {
-      const answers = await askUser(ctx, inv, [overwriteQuestion()])
-      if (!answers) return { kind: 'error', text: '无法弹出选项。' }
-      if (pickAnswer(answers, 'overwrite') !== '覆盖重开') {
-        return { kind: 'success', text: '已取消，仍使用当前故事。' }
-      }
-      useForce = true
-    } else {
-      return { kind: 'error', text: 'this session already has a story; pass force to replace it' }
-    }
+  const overwrite = await confirmOverwrite(ctx, inv, root, force)
+  if (overwrite === 'cancel') return { kind: 'success', text: '已取消，仍使用当前故事。' }
+  if (overwrite === 'need-force') {
+    return { kind: 'error', text: 'this session already has a story; pass force to replace it' }
   }
 
   let templateId: TemplateId | null = topic ? resolveTemplateId(topic) : null
@@ -156,38 +170,38 @@ export async function handleNew(
     return { kind: 'error', text: `unknown topic "${topic}". try: ${knownTemplates(config)}` }
   }
   if (!templateId) {
-    if (!canAsk(ctx)) {
+    const answers = await askUser(ctx, inv, [topicQuestion()])
+    if (!answers) {
       return {
         kind: 'error',
         text: `选择题材：/new ${TOPIC_CHOICES.map((item) => item.label).join(' | ')}`,
       }
     }
-    const answers = await askUser(ctx, inv, [topicQuestion()])
-    if (!answers) return { kind: 'error', text: '无法弹出选项。' }
     templateId = templateIdFromLabel(pickAnswer(answers, 'topic'))
     if (!templateId) return { kind: 'error', text: '未选择题材。' }
   }
 
   let protagonist = namedProtagonist
-  if (!protagonist && canAsk(ctx)) {
+  if (!protagonist) {
     const answers = await askUser(ctx, inv, [protagonistQuestion(templateId, config)])
     if (answers) protagonist = pickAnswer(answers, 'protagonist')
   }
 
   let opening = ''
-  const openingAsk = canAsk(ctx) ? openingQuestion(templateId, config) : null
+  const openingAsk = openingQuestion(templateId, config)
   if (openingAsk) {
     const answers = await askUser(ctx, inv, [openingAsk])
     if (answers) opening = pickAnswer(answers, 'opening')
   }
 
   try {
-    seedStory(root, templateId, config, useForce)
+    seedStory(root, templateId, config, true)
     const name = applyProtagonist(root, templateId, protagonist)
     if (opening && opening !== KEEP_DEFAULT_OPENING) {
       const plot = listTemplatePlots(config, templateId).find((item) => item.title === opening)
       if (plot) applyOpening(root, plot)
     }
+    bindSnapshot(root, sessionOf(inv))
     return { kind: 'success', text: openedText(templateId, name) }
   } catch (error) {
     return { kind: 'error', text: error instanceof Error ? error.message : String(error) }
@@ -201,15 +215,9 @@ export async function handleBind(
 ): Promise<CommandResult> {
   const { topic, force } = parseCommandArgs(inv.rawInput)
   const root = infiniteRoot(resolveSessionDir(ctx, sessionOf(inv), config))
+
   if (!topic) {
     const meta = loadMeta(root)
-    if (!canAsk(ctx)) {
-      if (!meta) return { kind: 'error', text: 'no story in this session. use /new [topic] first.' }
-      return {
-        kind: 'success',
-        text: `bound template ${meta.templateId}; protagonist ${meta.protagonist || '(none)'}.`,
-      }
-    }
     const answers = await askUser(ctx, inv, [{
       ...topicQuestion(),
       id: 'bind',
@@ -218,20 +226,39 @@ export async function handleBind(
         ? `当前是「${topicChoice(meta.templateId as TemplateId).label}」。更换会覆盖本会话设定。`
         : '这个会话还没有故事，选一本即开书。',
     }])
-    if (!answers) return { kind: 'error', text: '无法弹出选项。' }
+    if (!answers) {
+      if (!meta) return { kind: 'error', text: 'no story in this session. use /new [topic] first.' }
+      return {
+        kind: 'success',
+        text: `bound template ${meta.templateId}; protagonist ${meta.protagonist || '(none)'}.`,
+      }
+    }
     const picked = templateIdFromLabel(pickAnswer(answers, 'bind'))
     if (!picked) return { kind: 'error', text: '未选择规则书。' }
+    const overwrite = await confirmOverwrite(ctx, inv, root, force)
+    if (overwrite === 'cancel') return { kind: 'success', text: '已取消，仍使用当前故事。' }
+    if (overwrite === 'need-force') {
+      return { kind: 'error', text: 'this session already has a story; pass force to replace it' }
+    }
     try {
       const next = seedStory(root, picked, config, true)
+      bindSnapshot(root, sessionOf(inv))
       return { kind: 'success', text: `已绑定「${bookNameForTemplate(next.templateId as TemplateId)}」。` }
     } catch (error) {
       return { kind: 'error', text: error instanceof Error ? error.message : String(error) }
     }
   }
+
   const templateId = resolveTemplateId(topic)
   if (!templateId) return { kind: 'error', text: `unknown topic "${topic}". try: ${knownTemplates(config)}` }
+  const overwrite = await confirmOverwrite(ctx, inv, root, force)
+  if (overwrite === 'cancel') return { kind: 'success', text: '已取消，仍使用当前故事。' }
+  if (overwrite === 'need-force') {
+    return { kind: 'error', text: 'this session already has a story; pass force to replace it' }
+  }
   try {
-    const meta = seedStory(root, templateId, config, force || !hasStory(root))
+    const meta = seedStory(root, templateId, config, true)
+    bindSnapshot(root, sessionOf(inv))
     return { kind: 'success', text: `rebound this session to ${bookNameForTemplate(templateId)} (${meta.templateId}).` }
   } catch (error) {
     return { kind: 'error', text: error instanceof Error ? error.message : String(error) }
@@ -248,13 +275,13 @@ export async function handleCast(
   const meta = loadMeta(root)
   if (!meta) return { kind: 'error', text: 'no story in this session. use /new [topic] first.' }
   if (!name) {
-    if (!canAsk(ctx)) return { kind: 'error', text: 'usage: /cast <protagonist name>' }
     const answers = await askUser(ctx, inv, [protagonistQuestion(meta.templateId as TemplateId, config)])
-    if (!answers) return { kind: 'error', text: '无法弹出选项。' }
+    if (!answers) return { kind: 'error', text: 'usage: /cast <protagonist name>' }
     name = pickAnswer(answers, 'protagonist')
     if (!name) return { kind: 'error', text: '未选择主角。' }
   }
   const applied = applyProtagonist(root, meta.templateId as TemplateId, name)
+  bindSnapshot(root, sessionOf(inv))
   const cards = loadCharacters(root)
   return { kind: 'success', text: `protagonist is now ${applied} (${cards.length} character file(s)).` }
 }
@@ -274,29 +301,40 @@ export function handleExport(
   return { kind: 'success', text: `wrote ${text.length} chars to ${path}` }
 }
 
-export function registerCommands(ctx: InfiniteContext, config: Required<PluginConfig>): void {
-  ctx.commands.register({
+const COMMANDS = [
+  {
     name: 'new',
     description: '开一本故事：弹出选题材/主角，或 /new 修仙 [主角] [force]',
-    input: { hint: '修仙 | 末世 | 都市  [主角]  [force]' },
-    handler: (inv) => handleNew(ctx, config, inv),
-  })
-  ctx.commands.register({
+    input: { hint: '修仙 | 末世 | 都市异能 | 现代  [主角]  [force]' },
+    handler: handleNew,
+  },
+  {
     name: 'bind',
     description: '查看或选择更换本会话规则书',
     input: { hint: '[题材] [force]' },
-    handler: (inv) => handleBind(ctx, config, inv),
-  })
-  ctx.commands.register({
+    handler: handleBind,
+  },
+  {
     name: 'cast',
     description: '选择或输入主角名',
     input: { hint: '[名字]' },
-    handler: (inv) => handleCast(ctx, config, inv),
-  })
-  ctx.commands.register({
-    name: 'export',
-    description: 'Export clean prose from this session to export.txt',
+    handler: handleCast,
+  },
+  {
+    name: 'export-story',
+    description: '把洗净正文写到本会话 export.txt（不占用 DSH Web 的 /export）',
     input: { hint: '[player]' },
-    handler: (inv) => handleExport(ctx, config, inv),
-  })
+    handler: handleExport,
+  },
+] as const
+
+export function registerCommands(ctx: InfiniteContext, config: Required<PluginConfig>): void {
+  for (const command of COMMANDS) {
+    ctx.effect(() => ctx.commands.register({
+      name: command.name,
+      description: command.description,
+      input: command.input,
+      handler: (inv) => command.handler(ctx, config, inv),
+    }), `infinite.cmd.${command.name}`)
+  }
 }

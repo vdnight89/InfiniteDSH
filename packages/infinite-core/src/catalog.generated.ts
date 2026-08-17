@@ -76,7 +76,6 @@ export const TEMPLATE_CATALOG: readonly TemplateInfo[] = [
       "科幻",
       "未来",
       "星际",
-      "赛博",
       "scifi"
     ],
     "defaultProtagonist": "顾晚棠"
@@ -211,6 +210,7 @@ export const TEMPLATE_CATALOG: readonly TemplateInfo[] = [
     "label": "赛博",
     "description": "义体、公司、记忆备份与下层街区。",
     "aliases": [
+      "赛博",
       "赛博朋克",
       "义体",
       "cyber"

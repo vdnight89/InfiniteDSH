@@ -17,12 +17,12 @@ export function apply(ctx: InfiniteContext, raw?: PluginConfig): void {
   registerCoverServer(ctx, config)
   registerCommands(ctx, config)
   registerPrompt(ctx, config)
-  ctx.on('session/event', (...args: unknown[]) => {
+  ctx.effect(() => ctx.on('session/event', (...args: unknown[]) => {
     const session = args[0] as DuckSession
     const event = args[1] as DuckEvent
     if (!session || !event) return
     onSessionEvent(ctx, config, session, event)
-  })
+  }), 'infinite.session')
 }
 
 export { apply as default }

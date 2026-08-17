@@ -63,8 +63,11 @@ function readMarkdownEntries(dir: string): LoreEntry[] {
   return entries
 }
 
+/** Session world rules: worldbook only. Plots stay in plots/ for the opening picker. */
 export function loadWorldbook(root: string): LoreEntry[] {
-  return [...readMarkdownEntries(join(root, WORLD_DIR)), ...readMarkdownEntries(join(root, PLOT_DIR))]
+  return readMarkdownEntries(join(root, WORLD_DIR)).filter(
+    (entry) => entry.category !== '写法' && entry.category !== '剧情',
+  )
 }
 
 export function loadCharacters(root: string): LoreEntry[] {
@@ -115,6 +118,44 @@ export function saveArchive(root: string, text: string): void {
   if (!text) return
   mkdirSync(root, { recursive: true })
   writeFileSync(join(root, ARCHIVE_FILE), text, 'utf8')
+}
+
+function rewriteConstant(raw: string, constant: boolean): string {
+  if (/^constant:\s*\S+/m.test(raw)) return raw.replace(/^constant:\s*\S+/m, `constant: ${constant}`)
+  return raw.replace(/^---\r?\n/, `---\nconstant: ${constant}\n`)
+}
+
+/** Keep only this name as the constant hero; other cards become NPCs. */
+export function applyProtagonistIdentity(root: string, name: string): string {
+  mkdirSync(join(root, CHAR_DIR), { recursive: true })
+  let found = false
+  let names: string[] = []
+  try {
+    names = readdirSync(join(root, CHAR_DIR))
+  } catch {
+    names = []
+  }
+  for (const file of names) {
+    if (!file.endsWith('.md')) continue
+    const full = join(root, CHAR_DIR, file)
+    const raw = readFileSync(full, 'utf8')
+    const entry = parseLoreEntry(raw, file.replace(/\.md$/i, ''))
+    const isHero = entry.title === name
+    if (isHero) found = true
+    if (Boolean(entry.constant) !== isHero) {
+      writeFileSync(full, rewriteConstant(raw, isHero), 'utf8')
+    }
+  }
+  if (!found) writeProtagonistCard(root, name)
+  return name
+}
+
+export function appendStoryBind(session: { append?: (type: string, data?: Record<string, unknown>) => void }, data: Record<string, unknown>): void {
+  try {
+    session.append?.('infinite/bind', data)
+  } catch {
+    // Host may reject unknown event types; meta.yml remains the working copy.
+  }
 }
 
 export function saveExport(root: string, text: string): string {

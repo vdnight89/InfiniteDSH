@@ -14,6 +14,7 @@ export interface DuckSession {
   readonly header?: { readonly id?: string; readonly cwd?: string }
   readonly events?: readonly DuckEvent[]
   deriveMessages?: () => readonly unknown[]
+  append?: (type: string, data?: Record<string, unknown>) => void
 }
 
 export interface DuckEvent {
@@ -62,6 +63,7 @@ export interface WebRoute {
 
 export interface InfiniteContext {
   readonly userQuestions?: {
+    readonly hasProvider?: boolean
     ask(request: {
       questions: readonly AskItem[]
       agent?: DuckAgent

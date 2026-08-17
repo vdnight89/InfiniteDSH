@@ -4,7 +4,7 @@ DeepSeek Harness 上的文学插件：一个会话就是一本书。
 
 它把文字冒险 / 网文创作挂进 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（DSH）。你继续用 DSH 的 Web 界面、会话列表和斜杠命令；本仓库不另做 App、不另做书架、也不使用灵叙 / Narra 的品牌与整套桌面端。
 
-当前版本 **0.2.0**。可安装的 Host 组合包名是 `dsh-infinite`。文学会话使用 agent preset **Infinite Play**（`infinite-play`）：模型只写小说正文，不提供 bash、改文件、子代理。
+当前版本 **0.3.0**。可安装的 Host 组合包名是 `dsh-infinite`。文学会话使用 agent preset **Infinite Play**（`infinite-play`）：模型只写小说正文，不提供 bash、改文件、子代理。
 
 > DSH 仍处于 developer preview，上游可能破坏兼容。本插件按 DSH 0.1.0-rc.5 前后的 Host API 编写。
 
@@ -19,7 +19,7 @@ DeepSeek Harness 上的文学插件：一个会话就是一本书。
 - **随机世界事件。** 每回合可从尚未用过的设定里抽一条，作为可选剧情刺激（不抽写法 / 开篇 / 剧情卡，也不另开第二次模型请求）。
 - **只出正文。** 默认打开叙事护栏与推进护栏：不解释规则、不列选项、不写工具计划。
 - **长篇压缩落档案。** DSH 做 compaction 时，要点写入本会话的 `archive.md`，同一会话继续写，不另开新卷。
-- **干净导出。** `/export` 把对话洗成可读正文，写到 `export.txt`。
+- **干净导出。** `/export-story` 把对话洗成可读正文，写到 `export.txt`。DSH Web 自带的 `/export` 仍是会话日志 ZIP，不要占用那个名字。
 
 未执行 `/new` 的会话，插件不注入任何文学上下文，普通编码会话不受影响。
 
@@ -29,11 +29,9 @@ DeepSeek Harness 上的文学插件：一个会话就是一本书。
 
 | 你是谁 | 怎么装 |
 |---|---|
-| 只想开书玩 | 先装好 DSH，再克隆本仓库、构建，把 `packages/dsh-infinite` 加进 DSH profile |
-| 自己改模板 / 改代码 | 同一套克隆，改完 `npm run build`，重启 DSH |
+| 只想开书玩 | 一行把本组合包装进 DSH 的 `web` profile |
+| 自己改模板 / 改代码 | 克隆本仓库，`npm install`，`dsh plugin --profile web add .` |
 | 从 DSH 源码树调试 | 用 `--patch` 指向 `examples/play.cordis.yml`（要改里面的绝对路径） |
-
-**不要**执行 `dsh plugin add github:vdnight89/InfiniteDSH`。仓库是 monorepo，根包没有 `dsh.bundle`，子包互相以未发布的 workspace 版本依赖；Git 安装也不会跑本仓库的 TypeScript 构建。支持的安装方式是：**克隆整仓 → 本地构建 → 按路径 `add` 组合包目录**。
 
 ---
 
@@ -56,54 +54,66 @@ Windows 上 `$HOME/.dsh` 一般是 `%USERPROFILE%\.dsh`。若设置了 `DSH_HOME
 
 ---
 
-## 下载
+## 下载与安装
+
+先装好 DSH（`npx @deepseek-ai/dsh web` 或从源码跑），并保证 **pnpm** 在 `PATH` 上。
+
+### 一行安装（推荐）
+
+从 GitHub：
+
+```sh
+dsh plugin --profile web add github:vdnight89/InfiniteDSH
+dsh web
+```
+
+从 npm（发布后）：
+
+```sh
+dsh plugin --profile web add dsh-infinite
+dsh web
+```
+
+Git 安装拉的是源码。pnpm ≥10 会先拦住 `prepare` 构建脚本。第一次 `add` 失败时，把提示里的包名写进该 profile 的 `pnpm-workspace.yaml`：
+
+```yaml
+allowBuilds:
+  dsh-infinite: true
+```
+
+然后把同一条 `dsh plugin --profile web add github:vdnight89/InfiniteDSH` 再跑一遍。这是在授权安装时于你的机器上编译本仓库，不在 agent 沙箱里。
+
+已有的编码会话仍在 `web` profile 里；只有执行过 `/new` 的会话才会变成一本书。
+
+锁定某一提交，避免后续推送悄悄改你装到的代码：
+
+```sh
+dsh plugin --profile web add github:vdnight89/InfiniteDSH#<commit-sha>
+```
+
+### 从本仓库源码装（开发）
 
 ```sh
 git clone https://github.com/vdnight89/InfiniteDSH.git
 cd InfiniteDSH
-```
-
-ZIP 也可以：GitHub 仓库页 → **Code** → **Download ZIP**，解压后进入目录，后面的命令一样。
-
----
-
-## 安装
-
-在仓库根目录构建组合包：
-
-```sh
 npm install
-npm run build
-```
-
-建议顺手跑一遍测试（可选）：
-
-```sh
-npm test
-npm run typecheck
-```
-
-把构建好的 `dsh-infinite` 装进 DSH profile。相对路径会锚定到你执行命令时所在的目录，所以请在本仓库根目录执行。
-
-### 方式 A：加进默认 Web profile（推荐）
-
-```sh
-dsh plugin --profile web add ./packages/dsh-infinite
+dsh plugin --profile web add .
 dsh web
 ```
 
-已有的编码会话还在原来的 `web` profile 里；文学功能随插件加载，只有执行过 `/new` 的会话才会变成一本书。
+相对路径锚定到执行命令时所在的目录，所以要在**仓库根目录**执行 `add .`。不要再 `add ./packages/dsh-infinite`：对外组合包是根上的 `dsh-infinite`。
 
-### 方式 B：单独开一个文学 profile
+可选：`npm test`、`npm run typecheck`。
+
+### 单独开一个文学 profile
 
 ```sh
-dsh plugin --profile infinite add ./packages/dsh-infinite
-dsh --profile infinite web
+dsh plugin --profile infinite add github:vdnight89/InfiniteDSH
 ```
 
-首次使用名为 `infinite` 的 profile 时，DSH 会先初始化一份只含 `@deepseek-ai/dsh-base` 的组合。若你还需要官方 Web UI，请再按 DSH 文档把 `@deepseek-ai/dsh-web-app` 加进该 profile；多数人直接用方式 A 更省事。
+该 profile 默认只有 `@deepseek-ai/dsh-base`。若还要官方 Web UI，再按 DSH 文档加上 `@deepseek-ai/dsh-web-app`。多数人用上面的 `web` profile 即可。
 
-### 方式 C：从 DSH 源码树用覆盖层加载（开发）
+### 从 DSH 源码树用覆盖层加载（开发）
 
 编辑 `examples/play.cordis.yml`，把里面的绝对路径改成你机器上的本仓库路径，然后在 DSH 仓库里：
 
@@ -128,14 +138,21 @@ dsh --profile web --dump-config
 
 ### 升级
 
+Git 安装：
+
+```sh
+dsh plugin --profile web update dsh-infinite
+```
+
+源码 checkout：
+
 ```sh
 cd InfiniteDSH
 git pull
 npm install
-npm run build
 ```
 
-本地 `add` 的是这个 checkout。重建后重启 `dsh web` 即可。不要用 `dsh plugin update` 去拉 GitHub 上的未构建源码。
+重启 `dsh web`。
 
 ### 卸载
 
@@ -181,7 +198,7 @@ dsh plugin --profile web remove dsh-infinite
 题材可以用中文名、英文 id 或别名，例如 `修仙` / `cultivation` / `仙侠` 都指向同一套模板。注意：
 
 - **`都市` 会落到「现代」**（日常都市，无异能）。要异能请写 **`都市异能`** 或 `urban`。
-- **`赛博` 作为别名会落到「科幻」**。要义体 / 公司那一套，请写 **`赛博朋克`** 或 `cyber`。
+- **`赛博` / `赛博朋克` 落到「赛博」**。星舰殖民地请写 **`科幻`**。
 
 ### 日常书写
 
@@ -202,8 +219,8 @@ dsh plugin --profile web remove dsh-infinite
 | `/bind` | 查看或换一套规则书（会覆盖本会话设定）。 |
 | `/bind 末世` | 直接换到指定题材。 |
 | `/cast` | 弹出主角卡；或 `/cast 林晏` 直接改名。 |
-| `/export` | 把洗净后的正文写到本会话 `export.txt`。 |
-| `/export player` | 同上，但保留玩家行动。 |
+| `/export-story` | 把洗净后的正文写到本会话 `export.txt`。 |
+| `/export-story player` | 同上，但保留玩家行动。 |
 
 ### 一本故事在磁盘的哪里
 
@@ -222,7 +239,7 @@ infinite/
   characters/*.md       # 角色卡
   plots/                # 开书时从模板拷来的剧情卡
   archive.md            # compaction 后的剧情档案
-  export.txt            # /export 的输出
+  export.txt            # /export-story 的输出
 ```
 
 这些文件就是工作副本。你可以用任何编辑器改条目正文、增删角色卡、改 `meta.yml` 里的开关：

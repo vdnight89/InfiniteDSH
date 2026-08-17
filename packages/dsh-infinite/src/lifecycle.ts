@@ -1,6 +1,6 @@
 import { formatArchive, pickRandomEventEntry } from 'infinite-core'
 import { infiniteRoot, resolveSessionDir } from './paths.js'
-import { loadMeta, loadWorldbook, saveArchive, saveMeta } from './story-files.js'
+import { appendStoryBind, loadArchive, loadMeta, loadWorldbook, saveArchive, saveMeta } from './story-files.js'
 import { recentText, summaryFromCompaction } from './transcript.js'
 import type { DuckEvent, DuckSession, InfiniteContext, PluginConfig } from './types.js'
 
@@ -30,17 +30,25 @@ export function onSessionEvent(
   if (event.type === 'turn/end') {
     const latest = loadMeta(root)
     if (!latest?.pendingEventId) return
-    saveMeta(root, {
+    const next = {
       ...latest,
       pickedEventIds: [...latest.pickedEventIds, latest.pendingEventId],
       pendingEventId: null,
+    }
+    saveMeta(root, next)
+    appendStoryBind(session, {
+      templateId: next.templateId,
+      protagonist: next.protagonist,
+      pendingEventId: next.pendingEventId,
+      pickedEventIds: next.pickedEventIds,
+      dir: 'infinite',
     })
     return
   }
 
   if (event.type === 'compaction/summary') {
     const summary = summaryFromCompaction(event.data)
-    const text = formatArchive(summary, new Date().toISOString())
+    const text = formatArchive(summary, new Date().toISOString(), loadArchive(root))
     saveArchive(root, text)
   }
 }

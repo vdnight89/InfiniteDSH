@@ -1,6 +1,6 @@
 {
   "name": "infinite-core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "description": "Pure narrative engine: worldbook match, guards, export",
   "main": "./dist/index.js",
