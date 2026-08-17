@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.2 — 2026-08-17
+
+- 根包去掉 `file:` 依赖，宿主打成单文件 `index.bundle.js`。Git 安装不再去 profile 目录里找 `packages/dsh-infinite-preset`。
+
 ## 0.3.1 — 2026-08-17
 
 - Git 安装不再跑 `prepare`。编译产物随仓库发布，避开 pnpm `onlyBuiltDependencies` 拦截。

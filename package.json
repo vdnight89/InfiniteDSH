@@ -1,6 +1,6 @@
 {
   "name": "dsh-infinite",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": false,
   "type": "module",
   "license": "MIT",
@@ -21,12 +21,12 @@
     "url": "https://github.com/vdnight89/InfiniteDSH/issues"
   },
   "author": "InfiniteDSH contributors",
-  "main": "./packages/dsh-infinite/dist/index.js",
+  "main": "./packages/dsh-infinite/dist/index.bundle.js",
   "types": "./packages/dsh-infinite/dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./packages/dsh-infinite/dist/index.d.ts",
-      "import": "./packages/dsh-infinite/dist/index.js"
+      "import": "./packages/dsh-infinite/dist/index.bundle.js"
     },
     "./restrict": {
       "types": "./packages/dsh-infinite/dist/restrict.d.ts",
@@ -37,11 +37,10 @@
     "cordis.patch.yml",
     "LICENSE",
     "NOTICE.md",
-    "packages/dsh-infinite/dist",
+    "packages/dsh-infinite/dist/index.bundle.js",
+    "packages/dsh-infinite/dist/index.d.ts",
     "packages/dsh-infinite/static",
     "packages/dsh-infinite/cordis.patch.yml",
-    "packages/infinite-core/dist",
-    "packages/infinite-core/package.json",
     "packages/dsh-infinite-preset/package.json",
     "packages/dsh-infinite-preset/templates",
     "packages/dsh-infinite-preset/covers",
@@ -53,7 +52,7 @@
     }
   },
   "scripts": {
-    "build": "npm run build -w infinite-core && npm run build -w @infinite-dsh/host",
+    "build": "npm run build -w infinite-core && npm run build -w @infinite-dsh/host && node scripts/bundle-host.mjs",
     "import:airp": "node scripts/import-airp-presets.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -64,12 +63,9 @@
     "packages/dsh-infinite",
     "packages/dsh-infinite-preset"
   ],
-  "dependencies": {
-    "dsh-infinite-preset": "file:packages/dsh-infinite-preset",
-    "infinite-core": "file:packages/infinite-core"
-  },
   "devDependencies": {
     "@types/node": "^22.15.0",
+    "esbuild": "^0.25.0",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   },

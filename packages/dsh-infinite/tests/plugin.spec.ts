@@ -109,7 +109,8 @@ describe('dsh-infinite plugin', () => {
     const manifest = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'package.json'), 'utf8'))
     expect(manifest.name).toBe('dsh-infinite')
     expect(manifest.dsh.bundle.patch).toBe('./cordis.patch.yml')
-    expect(manifest.main).toContain('packages/dsh-infinite/dist/index.js')
+    expect(manifest.main).toContain('index.bundle.js')
+    expect(manifest.dependencies ?? {}).toEqual({})
   })
 
   it('registers the four human commands', () => {
