@@ -27,7 +27,7 @@ Add vdnight89/InfiniteDSH to Skills
 
 ```
 Repo declares a dsh.bundle manifest (installable via dsh plugin add).
-Monorepo: the root package is dsh-infinite; prepare builds TypeScript.
+Monorepo: the root package is dsh-infinite; compiled dist is in the repo.
 
 Install:
 dsh plugin --profile web add github:vdnight89/InfiniteDSH

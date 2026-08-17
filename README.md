@@ -9,7 +9,7 @@
 > 一个会话，就是一扇门。  
 > 推开它，你不是在聊天。你是在写，在杀，在活，在死，在诸天万界里把自己活成主角。
 
-这是 DeepSeek Harness 上的文学插件。仓库名 InfiniteDSH，组合包名 `dsh-infinite`。当前 **0.3.0**。  
+这是 DeepSeek Harness 上的文学插件。仓库名 InfiniteDSH，组合包名 `dsh-infinite`。当前 **0.3.1**。  
 不另做 App，不另做书架。DSH 侧栏里的一项会话，就是你脚下这一整本。切会话，就是切界。
 
 文学预设叫 **Infinite Play**：模型只许吐小说正文。bash、改文件、子代理，全部收刀。你要的不是助手。你要的是世界自己在呼吸。
@@ -80,14 +80,16 @@ dsh plugin --profile web add dsh-infinite
 dsh web
 ```
 
-Git 安装拉的是源码。pnpm ≥10 会先按住 `prepare`。第一次失败，把包名写进该 profile 的 `pnpm-workspace.yaml`：
+0.3.1 起仓库里带着编好的 `dist/`，Git 安装**不必**再授权 `prepare`。若你装的是更早的提交，pnpm 会要你把包名写进该 profile 的 `pnpm-workspace.yaml`：
 
 ```yaml
+onlyBuiltDependencies:
+  - dsh-infinite
 allowBuilds:
   dsh-infinite: true
 ```
 
-再跑同一条 `add`。这是允许本仓库在你的机器上编译，不在 agent 沙箱里。
+再跑同一条 `add`。
 
 锁定某一刀，免得后人改了你脚下的界：
 

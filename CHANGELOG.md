@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1 — 2026-08-17
+
+- Git 安装不再跑 `prepare`。编译产物随仓库发布，避开 pnpm `onlyBuiltDependencies` 拦截。
+
 ## 0.3.0 — 2026-08-16
 
 Review-hardened release. Command and world-rule behavior changed; treat this as the first Web-stable line.
