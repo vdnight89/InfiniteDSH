@@ -58,7 +58,7 @@ function resolveUnder(root: string, name: string): string | null {
 }
 
 export function registerCoverServer(ctx: InfiniteContext, config: Required<PluginConfig>): void {
-  const web = ctx.webServer
+  const web = (typeof ctx.get === 'function' ? ctx.get('webServer') : ctx.webServer) as InfiniteContext['webServer'] | undefined
   if (!web?.register) return
   const pictures = coversRoot(config)
   const manifest = JSON.stringify(buildCoverManifest())

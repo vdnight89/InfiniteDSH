@@ -6,6 +6,7 @@ import { registerPrompt } from './prompt.js';
 import { resolveConfig } from './types.js';
 export const name = 'dsh-infinite';
 export const inject = ['commands', 'systemPrompt', 'userQuestions'];
+/** Named exports only. Cordis unwraps `default` and would drop `inject`. */
 export function apply(ctx, raw) {
     const config = resolveConfig(raw);
     installUserPreset(config);
@@ -20,4 +21,3 @@ export function apply(ctx, raw) {
         onSessionEvent(ctx, config, session, event);
     }), 'infinite.session');
 }
-export { apply as default };

@@ -11,6 +11,7 @@ export const inject = ['commands', 'systemPrompt', 'userQuestions']
 
 export type { PluginConfig }
 
+/** Named exports only. Cordis unwraps `default` and would drop `inject`. */
 export function apply(ctx: InfiniteContext, raw?: PluginConfig): void {
   const config = resolveConfig(raw)
   installUserPreset(config)
@@ -24,5 +25,3 @@ export function apply(ctx: InfiniteContext, raw?: PluginConfig): void {
     onSessionEvent(ctx, config, session, event)
   }), 'infinite.session')
 }
-
-export { apply as default }

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.3 — 2026-08-17
+
+- Cordis 会把 `default` 当成整个插件，丢掉旁边的 `inject`。已去掉 default 导出，Web 启动不再报 `cannot get property "commands" without inject`。
+
 ## 0.3.2 — 2026-08-17
 
 - 根包去掉 `file:` 依赖，宿主打成单文件 `index.bundle.js`。Git 安装不再去 profile 目录里找 `packages/dsh-infinite-preset`。

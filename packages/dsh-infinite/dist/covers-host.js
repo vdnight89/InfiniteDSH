@@ -50,7 +50,7 @@ function resolveUnder(root, name) {
     return existsSync(full) && statSync(full).isFile() ? full : null;
 }
 export function registerCoverServer(ctx, config) {
-    const web = ctx.webServer;
+    const web = (typeof ctx.get === 'function' ? ctx.get('webServer') : ctx.webServer);
     if (!web?.register)
         return;
     const pictures = coversRoot(config);

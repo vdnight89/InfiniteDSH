@@ -97,6 +97,8 @@ export interface InfiniteContext {
     register(route: WebRoute): () => void
     tapIndex?(transform: (html: string) => string): () => void
   }
+  get?(name: string): unknown
+  get?(name: string): unknown
   effect(fn: () => (() => void) | void, label?: string): void
   on(event: string, handler: (...args: unknown[]) => void): () => void
 }

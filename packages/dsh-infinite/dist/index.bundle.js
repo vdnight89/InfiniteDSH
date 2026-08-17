@@ -1285,7 +1285,7 @@ function resolveUnder(root, name2) {
   return existsSync(full) && statSync3(full).isFile() ? full : null;
 }
 function registerCoverServer(ctx, config) {
-  const web = ctx.webServer;
+  const web = typeof ctx.get === "function" ? ctx.get("webServer") : ctx.webServer;
   if (!web?.register)
     return;
   const pictures = coversRoot(config);
@@ -1533,7 +1533,6 @@ function apply(ctx, raw) {
 }
 export {
   apply,
-  apply as default,
   inject,
   name
 };

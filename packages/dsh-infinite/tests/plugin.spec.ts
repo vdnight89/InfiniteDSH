@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it } from 'vitest'
-import { apply } from '../src/index.ts'
+import { apply, inject, name as pluginName } from '../src/index.ts'
 import { handleBind, handleCast, handleExport, handleNew } from '../src/commands.ts'
 import { installUserPreset } from '../src/install-preset.ts'
 import { onSessionEvent } from '../src/lifecycle.ts'
@@ -103,6 +103,14 @@ describe('dsh-infinite plugin', () => {
     routes[0]?.handler({ url: '/infinite/manifest.json' }, res)
     expect(res.code).toBe(200)
     expect(res.body).toContain('修仙')
+  })
+
+  it('exports inject as a named sibling of apply, not as default', async () => {
+    expect(pluginName).toBe('dsh-infinite')
+    expect(inject).toEqual(['commands', 'systemPrompt', 'userQuestions'])
+    const mod = await import('../src/index.ts')
+    expect(mod.default).toBeUndefined()
+    expect(mod.apply).toBe(apply)
   })
 
   it('ships a root dsh.bundle so github/npm add can load the plugin', () => {
