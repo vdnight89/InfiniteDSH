@@ -16,6 +16,7 @@ Review-hardened release. Command and world-rule behavior changed; treat this as 
 - Genre covers that shared AIRP filenames are original paintings, not copies.
 - Root package is now the installable bundle `dsh-infinite` (`dsh.bundle` + `prepare`).  
   `dsh plugin --profile web add github:vdnight89/InfiniteDSH` works in one line.
+- 中文名定为 **诸天万界**。README 换成热血介绍，并加上万界头图。
 
 ## 0.2.0 — 2026-08-16
 

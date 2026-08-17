@@ -4,7 +4,7 @@
   "private": false,
   "type": "module",
   "license": "MIT",
-  "description": "DeepSeek Harness literary plugin: one session is one book",
+  "description": "诸天万界 for DeepSeek Harness: one session is one book",
   "keywords": [
     "dsh",
     "dsh-plugin",

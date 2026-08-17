@@ -14,5 +14,9 @@ The「深海实验室」template (鲸鱼娘, 梁组, 梁圣, 牢梁, 梁子) is 
 fan fiction. It is not affiliated with, endorsed by, or a depiction of
 any real company or person.
 
-Cover JPEGs under packages/dsh-infinite-preset/covers/ are original
-generations for this plugin. They are not 灵叙 / Narra illustration assets.
+Cover JPEGs under packages/dsh-infinite-preset/covers/ and the README
+banner docs/banner.jpg are original generations for this plugin. They are
+not 灵叙 / Narra illustration assets.
+
+The Chinese product name is 诸天万界. The repository and bundle remain
+InfiniteDSH / dsh-infinite.

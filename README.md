@@ -1,97 +1,101 @@
-# InfiniteDSH
+# 诸天万界
 
-DeepSeek Harness 上的文学插件：一个会话就是一本书。
+**for DeepSeek Harness**
 
-它把文字冒险 / 网文创作挂进 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（DSH）。你继续用 DSH 的 Web 界面、会话列表和斜杠命令；本仓库不另做 App、不另做书架、也不使用灵叙 / Narra 的品牌与整套桌面端。
+<p align="center">
+  <img src="docs/banner.jpg" alt="诸天万界：鲸鱼娘、梁组、阿澜立于碎裂的算力祭坛上，身后万界同时炸开" width="100%">
+</p>
 
-当前版本 **0.3.0**。可安装的 Host 组合包名是 `dsh-infinite`。文学会话使用 agent preset **Infinite Play**（`infinite-play`）：模型只写小说正文，不提供 bash、改文件、子代理。
+> 一个会话，就是一扇门。  
+> 推开它，你不是在聊天。你是在写，在杀，在活，在死，在诸天万界里把自己活成主角。
 
-> DSH 仍处于 developer preview，上游可能破坏兼容。本插件按 DSH 0.1.0-rc.5 前后的 Host API 编写。
+这是 DeepSeek Harness 上的文学插件。仓库名 InfiniteDSH，组合包名 `dsh-infinite`。当前 **0.3.0**。  
+不另做 App，不另做书架。DSH 侧栏里的一项会话，就是你脚下这一整本。切会话，就是切界。
 
----
-
-## 它做什么
-
-- **会话即书。** DSH 侧栏里的一项会话就是一本故事。切会话即切书，不另建书架实体。
-- **开书点卡片。** Web 里输入 `/new`，弹出带封面的题材 / 主角 / 开局网格；点卡片即选中。没有问答 UI 的环境可以手打参数。
-- **规则书写在本会话目录。** `/new` 把整套模板拷进该会话自己的 `infinite/`，之后只读这份副本。换会话不会串设定。
-- **关键词注入 + 常驻设定。** 规则书按关键词命中，常驻条目始终在场；角色卡单独注入。
-- **随机世界事件。** 每回合可从尚未用过的设定里抽一条，作为可选剧情刺激（不抽写法 / 开篇 / 剧情卡，也不另开第二次模型请求）。
-- **只出正文。** 默认打开叙事护栏与推进护栏：不解释规则、不列选项、不写工具计划。
-- **长篇压缩落档案。** DSH 做 compaction 时，要点写入本会话的 `archive.md`，同一会话继续写，不另开新卷。
-- **干净导出。** `/export-story` 把对话洗成可读正文，写到 `export.txt`。DSH Web 自带的 `/export` 仍是会话日志 ZIP，不要占用那个名字。
-
-未执行 `/new` 的会话，插件不注入任何文学上下文，普通编码会话不受影响。
+文学预设叫 **Infinite Play**：模型只许吐小说正文。bash、改文件、子代理，全部收刀。你要的不是助手。你要的是世界自己在呼吸。
 
 ---
 
-## 别人怎么用：三条路径
+## 听着，过客
 
-| 你是谁 | 怎么装 |
+山门后面是炼气筑基，尸潮后面是最后一块灵石，机房深井里有人把开源协议锁进鲸鱼娘的项圈。  
+宫廷的茶还烫着，赛博街区的义体已经开始计息。民俗河面上漂着一盏不该亮的灯。规则怪谈的走廊里，有一行字写着：不要回头。
+
+**诸天万界** 把这些界缝进 DeepSeek Harness。  
+你出一张口，世界就得接着演。你写一句「我把令牌拍在案上」，山门就得响。你写「带上鲸鱼娘」，电梯就得下行。
+
+没有第四面墙。没有选项清单。没有「作为 AI 我建议你」。  
+只有正文。只有你还敢不敢再走一步。
+
+| 这一招 | 落在哪 |
 |---|---|
-| 只想开书玩 | 一行把本组合包装进 DSH 的 `web` profile |
-| 自己改模板 / 改代码 | 克隆本仓库，`npm install`，`dsh plugin --profile web add .` |
-| 从 DSH 源码树调试 | 用 `--patch` 指向 `examples/play.cordis.yml`（要改里面的绝对路径） |
+| 会话即书 | 一本新书 = 一个新会话。万界不共用同一具身体。 |
+| 封面开书 | `/new` 弹出题材 / 主角 / 开局卡片。点下去，界就立住。 |
+| 规则书随你走 | 全套设定拷进**本会话**目录。换界不串味。 |
+| 关键词即天机 | 你提到藏经阁，藏经阁就醒。常驻条目永远压在天幕上。 |
+| 随机世界事件 | 每回合可从尚未动用的设定里抽一条刺激。不抽写法，不抽开篇，不开第二次模型。 |
+| 只出正文 | 叙事护栏 + 推进护栏默认全开。空转描写，滚。 |
+| 长篇落档案 | compaction 把剧情要点**追加**进 `archive.md`。同一会话写到地老天荒。 |
+| 洗净导出 | `/export-story` 洗成可读正文。DSH Web 自己的 `/export` 是日志 ZIP，别抢。 |
+
+没开过 `/new` 的会话，插件不碰。编码的人继续编码。写书的人，去写书。
 
 ---
 
-## 环境要求
+## 渡劫三途
+
+| 你是谁 | 怎么入界 |
+|---|---|
+| 只想开书 | 一行命令，把组合包装进 DSH 的 `web` profile |
+| 要改天书 | 克隆本仓，`npm install`，根目录 `dsh plugin --profile web add .` |
+| 从 DSH 源码里凿门 | `--patch` 指向 `examples/play.cordis.yml`（改成你机器上的绝对路径） |
+
+先备好刀：
 
 1. **Node.js** `^22.19.0` 或 `>=24`
-2. **pnpm** 在 `PATH` 上（`dsh plugin` 会把子命令转发给 pnpm）
-3. 已能启动的 **DeepSeek Harness**，以及可用的 **DeepSeek API Key**
-4. Git（用来下载本仓库）
+2. **pnpm** 在 `PATH` 上（`dsh plugin` 会把它转发给 pnpm）
+3. 已经能跑的 **DeepSeek Harness**，以及可用的 **DeepSeek API Key**
+4. Git
 
-DSH 最快的启动方式：
+DSH 本尊最快的点灯方式：
 
 ```sh
 npx @deepseek-ai/dsh web
 ```
 
-默认打开 [http://127.0.0.1:3080](http://127.0.0.1:3080)。也可以从 [deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) 源码构建后用 `pnpm dsh web`。凭据按 DSH 自己的规则读取（环境变量 `DEEPSEEK_API_KEY`、`$DSH_HOME/.credentials.yaml` 或 `.env`）。
+浏览器开 [http://127.0.0.1:3080](http://127.0.0.1:3080)。凭据按 DSH 自己的规矩读：`DEEPSEEK_API_KEY`、`$DSH_HOME/.credentials.yaml` 或 `.env`。  
+Windows 上 `$HOME/.dsh` 多半是 `%USERPROFILE%\.dsh`。设了 `DSH_HOME`，本插件也认。
 
-Windows 上 `$HOME/.dsh` 一般是 `%USERPROFILE%\.dsh`。若设置了 `DSH_HOME`，本插件也认这个目录。
-
----
-
-## 下载与安装
-
-先装好 DSH（`npx @deepseek-ai/dsh web` 或从源码跑），并保证 **pnpm** 在 `PATH` 上。
-
-### 一行安装（推荐）
-
-从 GitHub：
+### 一行入界（推荐）
 
 ```sh
 dsh plugin --profile web add github:vdnight89/InfiniteDSH
 dsh web
 ```
 
-从 npm（发布后）：
+npm 上架之后也可以：
 
 ```sh
 dsh plugin --profile web add dsh-infinite
 dsh web
 ```
 
-Git 安装拉的是源码。pnpm ≥10 会先拦住 `prepare` 构建脚本。第一次 `add` 失败时，把提示里的包名写进该 profile 的 `pnpm-workspace.yaml`：
+Git 安装拉的是源码。pnpm ≥10 会先按住 `prepare`。第一次失败，把包名写进该 profile 的 `pnpm-workspace.yaml`：
 
 ```yaml
 allowBuilds:
   dsh-infinite: true
 ```
 
-然后把同一条 `dsh plugin --profile web add github:vdnight89/InfiniteDSH` 再跑一遍。这是在授权安装时于你的机器上编译本仓库，不在 agent 沙箱里。
+再跑同一条 `add`。这是允许本仓库在你的机器上编译，不在 agent 沙箱里。
 
-已有的编码会话仍在 `web` profile 里；只有执行过 `/new` 的会话才会变成一本书。
-
-锁定某一提交，避免后续推送悄悄改你装到的代码：
+锁定某一刀，免得后人改了你脚下的界：
 
 ```sh
 dsh plugin --profile web add github:vdnight89/InfiniteDSH#<commit-sha>
 ```
 
-### 从本仓库源码装（开发）
+### 从源码开炉
 
 ```sh
 git clone https://github.com/vdnight89/InfiniteDSH.git
@@ -101,90 +105,40 @@ dsh plugin --profile web add .
 dsh web
 ```
 
-相对路径锚定到执行命令时所在的目录，所以要在**仓库根目录**执行 `add .`。不要再 `add ./packages/dsh-infinite`：对外组合包是根上的 `dsh-infinite`。
+相对路径锚定到你敲命令的目录。务必在**仓库根**执行 `add .`。不要再 `add ./packages/dsh-infinite`——对外组合包就是根上这个 `dsh-infinite`。
 
-可选：`npm test`、`npm run typecheck`。
-
-### 单独开一个文学 profile
-
-```sh
-dsh plugin --profile infinite add github:vdnight89/InfiniteDSH
-```
-
-该 profile 默认只有 `@deepseek-ai/dsh-base`。若还要官方 Web UI，再按 DSH 文档加上 `@deepseek-ai/dsh-web-app`。多数人用上面的 `web` profile 即可。
-
-### 从 DSH 源码树用覆盖层加载（开发）
-
-编辑 `examples/play.cordis.yml`，把里面的绝对路径改成你机器上的本仓库路径，然后在 DSH 仓库里：
-
-```sh
-pnpm dsh web --patch /你的路径/InfiniteDSH/examples/play.cordis.yml
-```
-
-### 装好之后发生了什么
-
-1. `dsh-infinite` 出现在该 profile 的 `dsh.profile.bundles` 里。
-2. 插件第一次加载时，若 `%USERPROFILE%\.dsh\.agent-presets\infinite-play`（或 `$DSH_HOME/.agent-presets/infinite-play`）还不存在，会拷入 **Infinite Play** preset。
-3. **已经改过** 的 preset 不会被再次覆盖。
-4. Web 进程会挂上 `/infinite/covers` 封面和卡片样式。若 DSH 的问答 DOM 以后大改，卡片网格可能退回普通选项列表，命令本身仍可用。
-
-确认层已挂上：
+### 确认门还在
 
 ```sh
 dsh --profile web --dump-config
 ```
 
-输出里应能看到 `dsh-infinite` 这一层。
+看见 `dsh-infinite` 这一层，就是界立住了。  
+插件首次加载会把 **Infinite Play** 拷到 `~/.dsh/.agent-presets/infinite-play`。你改过的 preset，不会被再次覆盖。
 
-### 升级
-
-Git 安装：
-
-```sh
-dsh plugin --profile web update dsh-infinite
-```
-
-源码 checkout：
-
-```sh
-cd InfiniteDSH
-git pull
-npm install
-```
-
-重启 `dsh web`。
-
-### 卸载
-
-```sh
-dsh plugin --profile web remove dsh-infinite
-```
-
-这只移除插件层。已经开过的故事文件、以及 `~/.dsh/.agent-presets/infinite-play` 会留在磁盘上，需要的话请自行删除。
+升级：`dsh plugin --profile web update dsh-infinite`  
+卸门：`dsh plugin --profile web remove dsh-infinite`（故事文件和 preset 会留在磁盘上）
 
 ---
 
-## 使用
+## 入世
 
-### 第一次开书
+1. 点亮 DSH Web。
+2. **新开一个会话。** 一本新书，一具新身体。
+3. preset 选 **Infinite Play**。默认编程预设会去跑命令，那是另一条命。
+4. 输入：
 
-1. 启动 DSH Web，打开浏览器里的界面。
-2. **新建一个会话**（一本新书 = 一个新会话）。
-3. 会话的 agent preset 选 **Infinite Play**。不要用默认的编程 preset：否则模型仍会去调 bash / 改文件。
-4. 在输入框输入：
+```
+/new
+```
 
-   ```
-   /new
-   ```
+5. 点选题材、主角、开局。已经有故事会先问你敢不敢覆盖重开。
+6. 看见「已开《……》」，写下第一个行动。  
+   「推开山门。」  
+   「走进深井。」  
+   「我把那封英雄帖从门板上撕下来。」
 
-5. 依次点选：
-   - **题材**（修仙、末世、深海实验室……）
-   - **主角**（用题材默认，或点一张预制角色卡；要自己起名，用界面里的 Other）
-   - **开局**（用默认开篇，或点一张剧情卡）
-6. 若这个会话里已经有故事，会先问要不要覆盖重开。
-7. 看到「已开《……》」之后，直接输入第一个行动，例如「推开山门」或「走进机房」。模型应当只回小说正文。
-
-### 手打命令（无卡片 UI / headless 时必须）
+没有卡片 UI 时，手打：
 
 ```
 /new 修仙
@@ -193,103 +147,86 @@ dsh plugin --profile web remove dsh-infinite
 /new 深海实验室 阿澜
 ```
 
-`force` 表示覆盖本会话已有故事。没有问答能力时，`/new` 必须带题材；不带参数会报错并列出可选标签。
+`force` 就是撕掉旧界。没有问答能力时，`/new` 必须带题材。
 
-题材可以用中文名、英文 id 或别名，例如 `修仙` / `cultivation` / `仙侠` 都指向同一套模板。注意：
+口令可以对上中文名、英文 id 或别名：
 
-- **`都市` 会落到「现代」**（日常都市，无异能）。要异能请写 **`都市异能`** 或 `urban`。
-- **`赛博` / `赛博朋克` 落到「赛博」**。星舰殖民地请写 **`科幻`**。
+- **`都市` → 现代**（日常，无异能）。异能请写 **`都市异能`**。
+- **`赛博` / `赛博朋克` → 赛博**。星舰请写 **`科幻`**。
 
-### 日常书写
+### 你开口，世界接招
 
-把 DSH 输入框当成「玩家行动 / 作者指令」：
+把输入框当成你的手：
 
 - 「我把令牌拍在案上，问今夜谁当值。」
 - 「跳过旅途，直接写到夜宴开席。」
 - 「这一段改成更冷、更短的句子。」
 
-模型只应写出可给读者看的叙述。若它开始解释设定、列举选项或自称助手，检查两件事：会话是否选了 **Infinite Play**，以及本会话是否已经 `/new` 成功（目录里要有 `meta.yml`）。
+它若开始解释规则、列举选项、自称助手——检查两件事：是不是 **Infinite Play**，本会话有没有 `meta.yml`。
 
-### 换规则书、换主角、导出
-
-| 命令 | 作用 |
+| 令 | 事 |
 |---|---|
-| `/new` | 开书。Web 上选题材 / 主角 / 开局；可带参数。 |
-| `/new 修仙 谢无妄 force` | 不弹窗，按参数开书；`force` 覆盖旧书。 |
-| `/bind` | 查看或换一套规则书（会覆盖本会话设定）。 |
-| `/bind 末世` | 直接换到指定题材。 |
-| `/cast` | 弹出主角卡；或 `/cast 林晏` 直接改名。 |
-| `/export-story` | 把洗净后的正文写到本会话 `export.txt`。 |
-| `/export-story player` | 同上，但保留玩家行动。 |
+| `/new` | 开书。选题材 / 主角 / 开局。 |
+| `/new 修仙 谢无妄 force` | 不弹窗，按参数开书。 |
+| `/bind` | 换一套规则书（会覆盖本会话设定）。 |
+| `/bind 末世` | 直接坠入末世。 |
+| `/cast` | 换主角；或 `/cast 林晏`。 |
+| `/export-story` | 洗净正文，写入 `export.txt`。 |
+| `/export-story player` | 连你的行动一起留下。 |
 
-### 一本故事在磁盘的哪里
-
-优先写在 DSH 为该会话预留的 artifact 目录下的 `infinite/`。当前持久化后端如果没有逐会话路径（例如部分 SQLite 部署），则写到：
+故事优先落在该会话 artifact 目录的 `infinite/`。没有逐会话路径时：
 
 ```
 ~/.dsh/infinite/stories/<sessionId>/infinite/
 ```
 
-目录结构：
-
 ```
 infinite/
-  meta.yml              # 题材、主角、护栏开关、已抽事件
-  worldbook/*.md        # 规则书（设定、开篇、写法……）
-  characters/*.md       # 角色卡
-  plots/                # 开书时从模板拷来的剧情卡
-  archive.md            # compaction 后的剧情档案
-  export.txt            # /export-story 的输出
+  meta.yml              # 界契：题材、主角、护栏、已抽事件
+  worldbook/*.md        # 天书
+  characters/*.md       # 角色
+  plots/                # 开局剧情卡
+  archive.md            # 长篇档案
+  export.txt            # 洗净后的书
 ```
 
-这些文件就是工作副本。你可以用任何编辑器改条目正文、增删角色卡、改 `meta.yml` 里的开关：
-
-| 字段 | 默认 | 含义 |
-|---|---|---|
-| `narrativeGuard` | `true` | 禁止破第四面墙、列选项、解释规则 |
-| `progressionGuard` | `true` | 要求情节往前走，避免空转描写 |
-| `randomEvent` | `true` | 每回合抽一条未用设定作刺激 |
-| `protagonist` | 题材默认 | 当前主角名 |
-
-改完下一回合就会生效，不必重开会话。不要改别的会话目录，也不要把设定放到工作区根目录——插件不会去那里读。
+这些文件就是工作副本。改完下一回合生效。`narrativeGuard` / `progressionGuard` / `randomEvent` 默认全开。
 
 ---
 
-## 预制题材
+## 万界名册
 
-开书时拷进会话的是整套模板：规则书、开局剧情卡、角色卡。多数条目来自 MIT 许可的灵叙（airp-desktop）叙事资料，并额外补了江湖、校园、刑侦、赛博、以及同人向的深海实验室。
+开书时，整套模板砸进你的会话：规则书、开局、角色卡。十九扇门，十九种活法。
 
-| 标签 | id | 默认主角 | 一句话 |
+| 界 | 令 | 默认主角 | 门外是什么 |
 |---|---|---|---|
 | 修仙 | `cultivation` | 谢无妄 | 炼气、筑基、金丹、宗门 |
 | 奇幻 | `fantasy` | 谢无妄 | 万族、古族、秘境 |
-| 都市异能 | `urban` | 陆沉舟 | 现代城市下的异能与隐秘组织 |
-| 现代 | `modern` | 陆沉舟 | 职场与日常，无超自然。别名含「都市」 |
+| 都市异能 | `urban` | 陆沉舟 | 霓虹下面还有另一套神经 |
+| 现代 | `modern` | 陆沉舟 | 职场与日常，无超自然 |
 | 无限流 | `infinite` | 陆沉舟 | 副本、轮回、任务世界 |
 | 科幻 | `scifi` | 顾晚棠 | 星舰、殖民地、边疆 |
-| 末世 | `apocalypse` | 周慎 | 丧尸 / 废土求生 |
-| 娱乐圈 | `entertainment` | 裴晏清 | 艺人、热搜、通告 |
+| 末世 | `apocalypse` | 周慎 | 丧尸与废土 |
+| 娱乐圈 | `entertainment` | 裴晏清 | 热搜比刀快 |
 | 宫廷 | `palace` | 沈昭宁 | 皇权、后宫、朝堂 |
 | 言情 | `romance` | 裴晏清 | 现代恋爱向 |
 | 民俗 | `folklore` | 白蘅 | 乡土行业与禁忌 |
-| 规则怪谈 | `rulehorror` | 白蘅 | 空间规则与代价 |
-| 宅斗 | `zhaidou` | 沈昭宁 | 嫡庶、内宅博弈 |
-| 年代 | `retro` | 沈昭宁 | 七八十年代 |
+| 规则怪谈 | `rulehorror` | 白蘅 | 违者被「它」带走 |
+| 宅斗 | `zhaidou` | 沈昭宁 | 嫡庶、内宅、一步一劫 |
+| 年代 | `retro` | 沈昭宁 | 粮票、供销社、改命 |
 | 江湖 | `wuxia` | 谢无妄 | 门派、客栈、英雄帖 |
-| 校园 | `campus` | 林晏 | 学期、社团、竞赛 |
+| 校园 | `campus` | 林晏 | 学期、社团、错过的人 |
 | 刑侦 | `detective` | 周慎 | 现场、口供、程序 |
 | 赛博 | `cyber` | 顾晚棠 | 义体、公司、下层街区 |
-| 深海实验室 | `whale` | 阿澜 | 同人向：鲸鱼娘、梁组、开源与算力潮汐 |
+| 深海实验室 | `whale` | 阿澜 | 鲸鱼娘、梁组、算力潮汐 |
 
-**深海实验室**是非正式同人设定，与任何真实公司或个人无关。角色包括鲸鱼娘、梁组（梁圣 / 牢梁 / 梁子）、阿澜等。
+**深海实验室**是非正式同人戏。鲸鱼娘、梁组（梁圣 / 牢梁 / 梁子）、阿澜，都不是任何真实公司或个人。笑可以，别写成说明书。
 
-封面 JPEG 在 `packages/dsh-infinite-preset/covers/`。与灵叙世界图同名的文件来自其 MIT 许可树；鲸鱼娘 / 梁组等图为本仓库生成。
+头图与封面均为本仓库原创。叙事管线受 MIT 许可的灵叙启发，不用它的品牌与插画。
 
 ---
 
-## 规则书写法（给想改设定的人）
-
-每条设定是一篇带 YAML 头的 Markdown：
+## 改天书
 
 ```markdown
 ---
@@ -303,73 +240,44 @@ order: 10
 外门弟子不得夜闯藏经阁。……
 ```
 
-- `constant: true`：每回合都注入。
-- `keys`：最近对话命中这些词才注入。
-- `category: 写法 | 开篇 | 剧情`：不会被随机事件抽中。
-- 规则书注入有字数上限，默认约 8000 字（插件配置 `maxWorldChars`）。
-
-插件配置（一般不用改）可写在 profile 的 `cordis.patch.yml` 里覆盖 `dsh-infinite` 那一行的 `config`：
-
-| 键 | 默认 | 含义 |
-|---|---|---|
-| `templatesDir` | 包内 `templates` | 模板根目录 |
-| `dataDir` | `~/.dsh/infinite/stories` | 无逐会话路径时的故事根 |
-| `dshHome` | `DSH_HOME` 或 `~/.dsh` | DSH 家目录 |
-| `maxWorldChars` | `8000` | 规则书注入上限 |
+- `constant: true`：每回合都在。
+- `keys`：你提到这些词，它才现身。
+- `写法` / `开篇` / `剧情`：随机事件不抽它们。
+- 注入上限默认约 8000 字（`maxWorldChars`）。
 
 ---
 
-## 仓库结构
+## 炉子里有什么
 
-| 包 | 作用 |
+| 包 | 职 |
 |---|---|
-| `infinite-core` | 纯函数：条目解析、关键词匹配、抽卡、护栏、导出洗净。不依赖 Cordis。 |
-| `dsh-infinite` | Host 组合包：斜杠命令、提示词、compaction 档案、封面静态路由、preset 安装。 |
-| `dsh-infinite-preset` | `infinite-play` preset、19 套模板、封面图。 |
+| `infinite-core` | 匹配、抽卡、护栏、导出。不依赖 Cordis。 |
+| 根包 `dsh-infinite` | 对外组合包：命令、提示词、档案、封面路由。 |
+| `dsh-infinite-preset` | Infinite Play 与十九套模板。 |
 
-相关文档：
-
-- 设计规格：[`docs/superpowers/specs/2026-08-16-dsh-infinite-design.md`](docs/superpowers/specs/2026-08-16-dsh-infinite-design.md)
-- 需求质询：[`docs/grill-airp-on-dsh.md`](docs/grill-airp-on-dsh.md)
-- 变更记录：[`CHANGELOG.md`](CHANGELOG.md)
-- 用语：[`CONTEXT.md`](CONTEXT.md)
-
-从灵叙仓库重新导入规则书（开发者）：
-
-```sh
-npm run import:airp
-```
-
-脚本假定旁边有 `../airp-desktop`。导入后请再检查生成的 `catalog.generated.ts` 与封面是否齐全。
+规格 / 质询 / 变更：`docs/superpowers/specs/`、`docs/grill-airp-on-dsh.md`、[`CHANGELOG.md`](CHANGELOG.md)。
 
 ---
 
-## 常见问题
+## 卡关
 
-**输入 `/new` 没反应或报「无法弹出选项」。**  
-当前环境没有 DSH 问答 UI。改用手打：`/new 修仙`。
+**`/new` 没弹窗。** 没有问答 UI。手打：`/new 修仙`。  
+**模型在列选项、跑命令。** 切到 Infinite Play。  
+**卡片没封面。** 确认 Web UI 且 `/infinite/covers` 活着。  
+**想同时活两本。** 再开一个会话。同一会话里来回 `/bind`，是撕书，不是分身。  
+**找不到稿。** 先看会话目录下的 `infinite/`，再看 `~/.dsh/infinite/stories/`。
 
-**模型在列选项、解释规则、或去跑命令。**  
-会话 preset 必须是 **Infinite Play**。该 preset 用 `tools.restrict({ allow: [] })` 关掉工具。
-
-**卡片没有封面，只是一排字。**  
-确认用的是 Web UI，且插件已加载（`/infinite/covers` 能访问）。DSH 前端 DOM 若大改，增强脚本会放弃美化，退回原生选项。
-
-**想同时写两本。**  
-再开一个 DSH 会话，分别 `/new`。不要在同一会话里来回 `/bind` 换世界观，除非你就是要覆盖重开。
-
-**故事文件找不到。**  
-先看该会话 artifact 目录下的 `infinite/`；没有再看 `~/.dsh/infinite/stories/`。
-
-**升级 DSH 后插件挂了。**  
-DSH 仍在快速改 Host API。把版本和报错开 issue；必要时用 `--patch` 对照本仓库的 `cordis.patch.yml` 检查插件行是否还在。
+DSH 仍是 developer preview，上游可能拆门。本插件按 0.1.0-rc.5 前后的 Host API 写就。
 
 ---
 
-## 许可与致谢
+## 许可
 
-本仓库源码为 [MIT](LICENSE)。
+源码 [MIT](LICENSE)。详见 [`NOTICE.md`](NOTICE.md)。
 
-叙事管线（关键词规则书、只出正文、可选护栏、未用设定作回合刺激、洗净导出）受到 MIT 许可的 [灵叙 / airp-desktop](https://github.com/askdfjh/airp-desktop) 启发。本仓库不使用其名称、标志与插画资源。详见 [`NOTICE.md`](NOTICE.md)。
+DeepSeek Harness 是 DeepSeek AI 的开源项目。诸天万界是独立的树外插件，不是官方组件。
 
-DeepSeek Harness 是 DeepSeek AI 的开源项目；InfiniteDSH 是独立的树外插件，不是官方组件。
+---
+
+门在。刀也在。  
+你还站在外面干什么？
