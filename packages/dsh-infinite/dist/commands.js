@@ -1,10 +1,9 @@
-import { KEEP_DEFAULT_OPENING, KEEP_DEFAULT_PROTAGONIST, TOPIC_CHOICES, bookNameForTemplate, defaultProtagonist, exportTranscript, isKeepDefaultChoice, safeBookFileName, suggestExportTitles, parseCommandArgs, resolveTemplateId, templateIdFromLabel, topicChoice, } from 'infinite-core';
+import { KEEP_DEFAULT_OPENING, KEEP_DEFAULT_PROTAGONIST, TOPIC_CHOICES, bookNameForTemplate, defaultProtagonist, bindManuscript, exportTranscript, isKeepDefaultChoice, manuscriptHasBody, safeBookFileName, suggestExportTitles, parseCommandArgs, resolveTemplateId, templateIdFromLabel, topicChoice, } from 'infinite-core';
 import { askUser, pickAnswer } from './ask.js';
-import { ASK_HEADER, BIND_QUESTION, CANCELLED, COMMANDS_COPY, EMBARK, FIRST_STEP_TEXT, isEmbarkChoice, OPENING_QUESTION, OVERWRITE_NO, OVERWRITE_QUESTION, OVERWRITE_YES, PROTAGONIST_QUESTION, REPICK_OPENING, REPICK_PROTAGONIST, TOPIC_DETAIL, TITLE_DETAIL, TITLE_QUESTION, TOPIC_QUESTION, boundTo, castDone, castNeedName, defaultBodyHint, embarkDetail, exportDone, exportNoProse, exportPolishing, needForceText, noWorldYet, openedEmbarked, openedWaiting, pickWorldHint, sessionTitle, unknownWorld, } from './copy.js';
+import { ASK_HEADER, BIND_QUESTION, CANCELLED, COMMANDS_COPY, EMBARK, FIRST_STEP_TEXT, isEmbarkChoice, OPENING_QUESTION, OVERWRITE_NO, OVERWRITE_QUESTION, OVERWRITE_YES, PROTAGONIST_QUESTION, REPICK_OPENING, REPICK_PROTAGONIST, TOPIC_DETAIL, TITLE_DETAIL, TITLE_QUESTION, TOPIC_QUESTION, boundTo, castDone, castNeedName, defaultBodyHint, embarkDetail, exportDone, exportNoProse, needForceText, noWorldYet, openedEmbarked, openedWaiting, pickWorldHint, sessionTitle, unknownWorld, } from './copy.js';
 import { infiniteRoot, resolveSessionDir, templatesDir } from './paths.js';
 import { applyOpening, applyProtagonistIdentity, hasStory, listTemplateCharacters, listTemplatePlots, loadCharacters, loadMeta, saveExport, saveMeta, saveNamedExport, seedStory, } from './story-files.js';
 import { collectExportSource, sessionMessages } from './transcript.js';
-import { polishPrompt } from './polish.js';
 import { revealFile } from './reveal.js';
 import { wakeSoon } from './wake.js';
 import { readdirSync } from 'node:fs';
@@ -310,20 +309,14 @@ export async function handleExport(ctx, config, inv) {
             title = picked;
     }
     const destDir = session.header?.cwd || process.cwd();
-    saveMeta(root, {
-        ...meta,
-        exportPending: true,
-        exportTitle: title,
-        exportCwd: destDir,
-    });
-    const woke = wakeSoon(inv.agent, polishPrompt(title, world, meta.protagonist, prose));
-    if (!woke) {
-        const fallback = exportTranscript(title, meta.protagonist, messages, includePlayer, world);
-        saveExport(root, fallback);
-        const dest = saveNamedExport(destDir, safeBookFileName(title), fallback);
-        return { kind: 'success', text: exportDone(fallback.length, title, dest, revealFile(dest)) };
-    }
-    return { kind: 'success', text: exportPolishing(title) };
+    let book = exportTranscript(title, meta.protagonist, messages, includePlayer, world);
+    if (!manuscriptHasBody(book))
+        book = bindManuscript(title, meta.protagonist, world, prose);
+    if (!manuscriptHasBody(book))
+        return { kind: 'error', text: exportNoProse() };
+    saveExport(root, book);
+    const dest = saveNamedExport(destDir, safeBookFileName(title), book);
+    return { kind: 'success', text: exportDone(book.length, title, dest, revealFile(dest)) };
 }
 export function registerCommands(ctx, config) {
     for (const [name, copy] of Object.entries(COMMANDS_COPY)) {

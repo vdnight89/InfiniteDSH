@@ -29,6 +29,8 @@ export {
   isPlanningParagraph,
   isOpeningInstruction,
   exportTranscript,
+  manuscriptHasBody,
+  bindManuscript,
   formatArchive,
   chapterHeading,
   chineseChapter,

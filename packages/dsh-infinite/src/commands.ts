@@ -4,8 +4,10 @@ import {
   TOPIC_CHOICES,
   bookNameForTemplate,
   defaultProtagonist,
+  bindManuscript,
   exportTranscript,
   isKeepDefaultChoice,
+  manuscriptHasBody,
   safeBookFileName,
   suggestExportTitles,
   parseCommandArgs,
@@ -41,7 +43,6 @@ import {
   embarkDetail,
   exportDone,
   exportNoProse,
-  exportPolishing,
   needForceText,
   noWorldYet,
   openedEmbarked,
@@ -65,7 +66,6 @@ import {
   seedStory,
 } from './story-files.js'
 import { collectExportSource, sessionMessages } from './transcript.js'
-import { polishPrompt } from './polish.js'
 import { revealFile } from './reveal.js'
 import { wakeSoon } from './wake.js'
 import type {
@@ -402,20 +402,12 @@ export async function handleExport(
     if (picked) title = picked
   }
   const destDir = session.header?.cwd || process.cwd()
-  saveMeta(root, {
-    ...meta,
-    exportPending: true,
-    exportTitle: title,
-    exportCwd: destDir,
-  })
-  const woke = wakeSoon(inv.agent, polishPrompt(title, world, meta.protagonist, prose))
-  if (!woke) {
-    const fallback = exportTranscript(title, meta.protagonist, messages, includePlayer, world)
-    saveExport(root, fallback)
-    const dest = saveNamedExport(destDir, safeBookFileName(title), fallback)
-    return { kind: 'success', text: exportDone(fallback.length, title, dest, revealFile(dest)) }
-  }
-  return { kind: 'success', text: exportPolishing(title) }
+  let book = exportTranscript(title, meta.protagonist, messages, includePlayer, world)
+  if (!manuscriptHasBody(book)) book = bindManuscript(title, meta.protagonist, world, prose)
+  if (!manuscriptHasBody(book)) return { kind: 'error', text: exportNoProse() }
+  saveExport(root, book)
+  const dest = saveNamedExport(destDir, safeBookFileName(title), book)
+  return { kind: 'success', text: exportDone(book.length, title, dest, revealFile(dest)) }
 }
 
 export function registerCommands(ctx: InfiniteContext, config: Required<PluginConfig>): void {

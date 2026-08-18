@@ -49,7 +49,7 @@ export declare const COMMANDS_COPY: {
         readonly hint: "[名字]";
     };
     readonly 'export-story': {
-        readonly description: "请叙事者从头润色，誊成精排 Markdown 书稿";
+        readonly description: "把已写出的正文誊成精排 Markdown 书稿";
         readonly hint: "[player]";
     };
 };

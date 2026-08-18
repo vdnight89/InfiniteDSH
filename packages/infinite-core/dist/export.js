@@ -184,6 +184,32 @@ export function exportTranscript(title, protagonist, messages, includePlayer, wo
     }
     return `${lines.join('\n').replace(/\n{3,}/g, '\n\n').trim()}\n`;
 }
+export function countCjk(text) {
+    return text.match(/[\u4e00-\u9fff]/g)?.length ?? 0;
+}
+export function manuscriptHasBody(text) {
+    return /##\s*第/.test(text) && countCjk(text) >= 24 && !text.includes('此稿尚无可以誊录');
+}
+/** Bind already-extracted prose into the same typeset Markdown shell. */
+export function bindManuscript(title, protagonist, world, source) {
+    const body = extractStoryBody(source) || source.trim();
+    if (countCjk(body) < 24)
+        return '';
+    return [
+        `# ${title}`,
+        '',
+        `> ${world ? `诸天万界 · ${world}` : '诸天万界'}`,
+        ...(protagonist ? [`> 天命之人：${protagonist}`] : []),
+        `> 誊录于 ${formatExportDate(new Date())}`,
+        '',
+        '---',
+        '',
+        `## ${chapterHeading(1, body)}`,
+        '',
+        body,
+        '',
+    ].join('\n');
+}
 export function chapterHeading(index, body) {
     const name = clipChapterTitle(body);
     return name ? `第${chineseChapter(index)}章　${name}` : `第${chineseChapter(index)}章`;

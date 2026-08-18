@@ -41,7 +41,7 @@ export function registerPrompt(ctx, config) {
             if (!session || !root)
                 return '';
             const meta = loadMeta(root);
-            if (!meta)
+            if (!meta || meta.exportPending)
                 return '';
             const world = buildWorldContext(loadWorldbook(root), recentText(session), bookNameForTemplate(meta.templateId), { maxChars: config.maxWorldChars });
             return world.text;
@@ -56,7 +56,7 @@ export function registerPrompt(ctx, config) {
             if (!session || !root)
                 return '';
             const meta = loadMeta(root);
-            if (!meta)
+            if (!meta || meta.exportPending)
                 return '';
             return buildCharacterContext(loadCharacters(root), recentText(session), meta.protagonist);
         },
@@ -69,7 +69,7 @@ export function registerPrompt(ctx, config) {
             if (!root)
                 return '';
             const meta = loadMeta(root);
-            if (!meta?.randomEvent || !meta.pendingEventId)
+            if (meta?.exportPending || !meta?.randomEvent || !meta.pendingEventId)
                 return '';
             const entry = loadWorldbook(root).find((e) => e.id === meta.pendingEventId);
             return entry ? formatRandomEvent(entry) : '';
@@ -81,6 +81,8 @@ export function registerPrompt(ctx, config) {
         text: (assemble) => {
             const root = storyRoot(ctx, assemble, config);
             if (!root)
+                return '';
+            if (loadMeta(root)?.exportPending)
                 return '';
             const archive = loadArchive(root).trim();
             if (!archive)

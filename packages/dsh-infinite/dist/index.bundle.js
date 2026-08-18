@@ -394,6 +394,31 @@ function exportTranscript(title, protagonist, messages, includePlayer, world = "
   return `${lines.join("\n").replace(/\n{3,}/g, "\n\n").trim()}
 `;
 }
+function countCjk(text) {
+  return text.match(/[\u4e00-\u9fff]/g)?.length ?? 0;
+}
+function manuscriptHasBody(text) {
+  return /##\s*第/.test(text) && countCjk(text) >= 24 && !text.includes("\u6B64\u7A3F\u5C1A\u65E0\u53EF\u4EE5\u8A8A\u5F55");
+}
+function bindManuscript(title, protagonist, world, source) {
+  const body = extractStoryBody(source) || source.trim();
+  if (countCjk(body) < 24)
+    return "";
+  return [
+    `# ${title}`,
+    "",
+    `> ${world ? `\u8BF8\u5929\u4E07\u754C \xB7 ${world}` : "\u8BF8\u5929\u4E07\u754C"}`,
+    ...protagonist ? [`> \u5929\u547D\u4E4B\u4EBA\uFF1A${protagonist}`] : [],
+    `> \u8A8A\u5F55\u4E8E ${formatExportDate(/* @__PURE__ */ new Date())}`,
+    "",
+    "---",
+    "",
+    `## ${chapterHeading(1, body)}`,
+    "",
+    body,
+    ""
+  ].join("\n");
+}
 function chapterHeading(index, body) {
   const name2 = clipChapterTitle(body);
   return name2 ? `\u7B2C${chineseChapter(index)}\u7AE0\u3000${name2}` : `\u7B2C${chineseChapter(index)}\u7AE0`;
@@ -885,9 +910,6 @@ function exportDone(chars, title, path, revealed) {
   const open = revealed ? "\u5DF2\u6253\u5F00\u6240\u5728\u6587\u4EF6\u5939\u3002" : "\u53F3\u4FA7\u6587\u4EF6\u6811\u5373\u53EF\u6253\u5F00\u3002";
   return `\u5DF2\u8A8A\u51FA ${chars} \u5B57\u4E66\u7A3F\u300A${title}\u300B\uFF1A${path}\u3002${open}`;
 }
-function exportPolishing(title) {
-  return `\u6B63\u5728\u4ECE\u5934\u6DA6\u8272\u300A${title}\u300B\u3002\u5199\u5B8C\u4F1A\u843D\u5165\u5F53\u524D\u5DE5\u4F5C\u533A\uFF0C\u4E0D\u5FC5\u518D\u624B\u62F7\u3002`;
-}
 function exportNoProse() {
   return "\u6B64\u754C\u5C1A\u65E0\u53EF\u8A8A\u7684\u5C0F\u8BF4\u6B63\u6587\u3002\u6A21\u578B\u82E5\u53EA\u5199\u4E86\u6784\u601D\uFF0C\u8BF7\u5148\u5199\u51FA\u6545\u4E8B\u518D\u8A8A\u3002";
 }
@@ -917,7 +939,7 @@ var COMMANDS_COPY = {
     hint: "[\u540D\u5B57]"
   },
   "export-story": {
-    description: "\u8BF7\u53D9\u4E8B\u8005\u4ECE\u5934\u6DA6\u8272\uFF0C\u8A8A\u6210\u7CBE\u6392 Markdown \u4E66\u7A3F",
+    description: "\u628A\u5DF2\u5199\u51FA\u7684\u6B63\u6587\u8A8A\u6210\u7CBE\u6392 Markdown \u4E66\u7A3F",
     hint: "[player]"
   }
 };
@@ -1322,48 +1344,6 @@ function summaryFromCompaction(data) {
   return blocksToText(data.summary);
 }
 
-// packages/dsh-infinite/dist/polish.js
-function polishPrompt(title, world, protagonist, source) {
-  return [
-    `\u3010\u91CD\u8A8A\u6210\u4E66\u3011\u8FD9\u4E00\u56DE\u5408\u53EA\u8F93\u51FA\u5B8C\u6574 Markdown \u4E66\u7A3F\uFF0C\u4E0D\u8981\u3010\u6B67\u8DEF\u3011\uFF0C\u4E0D\u8981\u6784\u601D\uFF0C\u4E0D\u8981\u82F1\u6587\uFF0C\u4E0D\u8981\u89E3\u91CA\u3002`,
-    `\u4E66\u540D\u300A${title}\u300B\u3002\u8BF8\u5929\u4E07\u754C \xB7 ${world}\u3002\u5929\u547D\u4E4B\u4EBA\uFF1A${protagonist}\u3002`,
-    `\u683C\u5F0F\u5FC5\u987B\u662F\uFF1A`,
-    `# ${title}`,
-    `> \u8BF8\u5929\u4E07\u754C \xB7 ${world}`,
-    `> \u5929\u547D\u4E4B\u4EBA\uFF1A${protagonist}`,
-    `> \u8A8A\u5F55\u4E8E \uFF08\u4ECA\u5929\u7684\u4E2D\u6587\u65E5\u671F\uFF09`,
-    ``,
-    `---`,
-    ``,
-    `## \u7B2C\u4E00\u7AE0\u3000\uFF08\u4ECE\u6B63\u6587\u62BD\u7684\u77ED\u9898\uFF09`,
-    `\uFF08\u6DA6\u8272\u540E\u7684\u6BB5\u843D\uFF09`,
-    ``,
-    `\u540E\u9762\u6309\u60C5\u8282\u81EA\u7136\u5206\u7AE0\u3002\u4E22\u6389\u7D20\u6750\u91CC\u7684\u82F1\u6587\u3001\u63D0\u7EB2\u3001\u62A4\u680F\u3001\u5BF9\u81EA\u5DF1\u8BF4\u8BDD\u3002\u6309\u65F6\u95F4\u987A\u5E8F\u91CD\u5199\uFF0C\u8865\u4E0A\u65AD\u88C2\uFF0C\u4E0D\u8981\u53E6\u8D77\u4E00\u672C\u65E0\u5173\u7684\u4E66\u3002\u7B2C\u4E00\u4E2A\u5B57\u5C31\u662F #\u3002`,
-    ``,
-    `\u3010\u7D20\u6750\u3011`,
-    source.slice(0, 12e3)
-  ].join("\n");
-}
-function finalizeManuscript(raw, title, world, protagonist) {
-  const body = cleanManuscript(raw);
-  if (!body)
-    return "";
-  if (/^#\s+\S/m.test(body) && /[\u4e00-\u9fff]{24,}/.test(body))
-    return `${body.trim()}
-`;
-  return [
-    `# ${title}`,
-    "",
-    `> \u8BF8\u5929\u4E07\u754C \xB7 ${world}`,
-    `> \u5929\u547D\u4E4B\u4EBA\uFF1A${protagonist}`,
-    "",
-    "---",
-    "",
-    body,
-    ""
-  ].join("\n");
-}
-
 // packages/dsh-infinite/dist/reveal.js
 import { spawn } from "node:child_process";
 import { dirname as dirname2 } from "node:path";
@@ -1729,20 +1709,14 @@ async function handleExport(ctx, config, inv) {
       title = picked;
   }
   const destDir = session.header?.cwd || process.cwd();
-  saveMeta(root, {
-    ...meta,
-    exportPending: true,
-    exportTitle: title,
-    exportCwd: destDir
-  });
-  const woke = wakeSoon(inv.agent, polishPrompt(title, world, meta.protagonist, prose));
-  if (!woke) {
-    const fallback = exportTranscript(title, meta.protagonist, messages, includePlayer, world);
-    saveExport(root, fallback);
-    const dest = saveNamedExport(destDir, safeBookFileName(title), fallback);
-    return { kind: "success", text: exportDone(fallback.length, title, dest, revealFile(dest)) };
-  }
-  return { kind: "success", text: exportPolishing(title) };
+  let book = exportTranscript(title, meta.protagonist, messages, includePlayer, world);
+  if (!manuscriptHasBody(book))
+    book = bindManuscript(title, meta.protagonist, world, prose);
+  if (!manuscriptHasBody(book))
+    return { kind: "error", text: exportNoProse() };
+  saveExport(root, book);
+  const dest = saveNamedExport(destDir, safeBookFileName(title), book);
+  return { kind: "success", text: exportDone(book.length, title, dest, revealFile(dest)) };
 }
 function registerCommands(ctx, config) {
   for (const [name2, copy] of Object.entries(COMMANDS_COPY)) {
@@ -1953,6 +1927,27 @@ async function offerForks(ctx, session) {
   }
 }
 
+// packages/dsh-infinite/dist/polish.js
+function finalizeManuscript(raw, title, world, protagonist) {
+  const body = cleanManuscript(raw);
+  if (!body)
+    return "";
+  if (/^#\s+\S/m.test(body) && /[\u4e00-\u9fff]{24,}/.test(body))
+    return `${body.trim()}
+`;
+  return [
+    `# ${title}`,
+    "",
+    `> \u8BF8\u5929\u4E07\u754C \xB7 ${world}`,
+    `> \u5929\u547D\u4E4B\u4EBA\uFF1A${protagonist}`,
+    "",
+    "---",
+    "",
+    body,
+    ""
+  ].join("\n");
+}
+
 // packages/dsh-infinite/dist/lifecycle.js
 function onSessionEvent(ctx, config, session, event) {
   const root = infiniteRoot(resolveSessionDir(ctx, session, config));
@@ -1991,9 +1986,15 @@ function onSessionEvent(ctx, config, session, event) {
 function finishPolishExport(root, session, meta) {
   const title = meta.exportTitle || meta.protagonist || "\u8BF8\u5929\u4E07\u754C\u4E66\u7A3F";
   const world = bookNameForTemplate(meta.templateId);
-  const book = finalizeManuscript(lastAssistantRaw(session), title, world, meta.protagonist);
+  let book = finalizeManuscript(lastAssistantRaw(session), title, world, meta.protagonist);
+  if (!manuscriptHasBody(book)) {
+    book = exportTranscript(title, meta.protagonist, sessionMessages(session), false, world);
+  }
+  if (!manuscriptHasBody(book)) {
+    book = bindManuscript(title, meta.protagonist, world, collectExportSource(session));
+  }
   const destDir = meta.exportCwd || session.header?.cwd || process.cwd();
-  if (book) {
+  if (manuscriptHasBody(book)) {
     const dest = saveNamedExport(destDir, safeBookFileName(title), book);
     saveExport(root, book);
     revealFile(dest);
@@ -2055,7 +2056,7 @@ function registerPrompt(ctx, config) {
       if (!session || !root)
         return "";
       const meta = loadMeta(root);
-      if (!meta)
+      if (!meta || meta.exportPending)
         return "";
       const world = buildWorldContext(loadWorldbook(root), recentText(session), bookNameForTemplate(meta.templateId), { maxChars: config.maxWorldChars });
       return world.text;
@@ -2070,7 +2071,7 @@ function registerPrompt(ctx, config) {
       if (!session || !root)
         return "";
       const meta = loadMeta(root);
-      if (!meta)
+      if (!meta || meta.exportPending)
         return "";
       return buildCharacterContext(loadCharacters(root), recentText(session), meta.protagonist);
     }
@@ -2083,7 +2084,7 @@ function registerPrompt(ctx, config) {
       if (!root)
         return "";
       const meta = loadMeta(root);
-      if (!meta?.randomEvent || !meta.pendingEventId)
+      if (meta?.exportPending || !meta?.randomEvent || !meta.pendingEventId)
         return "";
       const entry = loadWorldbook(root).find((e) => e.id === meta.pendingEventId);
       return entry ? formatRandomEvent(entry) : "";
@@ -2095,6 +2096,8 @@ function registerPrompt(ctx, config) {
     text: (assemble) => {
       const root = storyRoot(ctx, assemble, config);
       if (!root)
+        return "";
+      if (loadMeta(root)?.exportPending)
         return "";
       const archive = loadArchive(root).trim();
       if (!archive)

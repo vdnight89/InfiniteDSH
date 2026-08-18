@@ -1,11 +1,11 @@
-import { bookNameForTemplate, formatArchive, pickRandomEventEntry, safeBookFileName } from 'infinite-core'
+import { bindManuscript, bookNameForTemplate, exportTranscript, formatArchive, manuscriptHasBody, pickRandomEventEntry, safeBookFileName } from 'infinite-core'
 import { exportDone } from './copy.js'
 import { offerForks } from './forks-host.js'
 import { infiniteRoot, resolveSessionDir } from './paths.js'
 import { finalizeManuscript } from './polish.js'
 import { revealFile } from './reveal.js'
 import { loadArchive, loadMeta, loadWorldbook, saveArchive, saveExport, saveMeta, saveNamedExport } from './story-files.js'
-import { lastAssistantRaw, recentText, summaryFromCompaction } from './transcript.js'
+import { collectExportSource, lastAssistantRaw, recentText, sessionMessages, summaryFromCompaction } from './transcript.js'
 import type { DuckEvent, DuckSession, InfiniteContext, PluginConfig } from './types.js'
 
 export function onSessionEvent(
@@ -63,9 +63,15 @@ function finishPolishExport(
 ): void {
   const title = meta.exportTitle || meta.protagonist || '诸天万界书稿'
   const world = bookNameForTemplate(meta.templateId)
-  const book = finalizeManuscript(lastAssistantRaw(session), title, world, meta.protagonist)
+  let book = finalizeManuscript(lastAssistantRaw(session), title, world, meta.protagonist)
+  if (!manuscriptHasBody(book)) {
+    book = exportTranscript(title, meta.protagonist, sessionMessages(session), false, world)
+  }
+  if (!manuscriptHasBody(book)) {
+    book = bindManuscript(title, meta.protagonist, world, collectExportSource(session))
+  }
   const destDir = meta.exportCwd || session.header?.cwd || process.cwd()
-  if (book) {
+  if (manuscriptHasBody(book)) {
     const dest = saveNamedExport(destDir, safeBookFileName(title), book)
     saveExport(root, book)
     revealFile(dest)

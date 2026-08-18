@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { chapterHeading, chineseChapter, cleanProse, exportTranscript, extractStoryBody, formatArchive, isOpeningInstruction, isPlanningDump } from '../src/export.ts'
+import { bindManuscript, chapterHeading, chineseChapter, cleanProse, exportTranscript, extractStoryBody, formatArchive, isOpeningInstruction, isPlanningDump, manuscriptHasBody } from '../src/export.ts'
 import { parseForkOptions } from '../src/forks.ts'
 import { safeBookFileName, suggestExportTitles } from '../src/titles.ts'
 
@@ -118,6 +118,14 @@ describe('exportTranscript', () => {
     expect(txt).toContain('*你：推门*')
     expect(txt).toContain('门轴吱呀。')
     expect(txt).toContain('## 第一章')
+  })
+
+  it('binds extracted prose when the transcript path is empty', () => {
+    const book = bindManuscript('掌中剑', '谢无妄', '奇幻', '门轴在掌下发出枯骨般的响。谢无妄把门后那根从未上过油的木闩一点一点推上。')
+    expect(manuscriptHasBody(book)).toBe(true)
+    expect(book).toContain('# 掌中剑')
+    expect(book).toContain('天命之人：谢无妄')
+    expect(book).toContain('门轴在掌下发出枯骨般的响')
   })
 
   it('numbers later chapters in Chinese', () => {

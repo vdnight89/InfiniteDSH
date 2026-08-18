@@ -17,6 +17,10 @@ export declare function isOpeningInstruction(text: string): boolean;
  * @param includePlayer - when true, keep player actions as italic bridges
  */
 export declare function exportTranscript(title: string, protagonist: string, messages: readonly TranscriptMessage[], includePlayer: boolean, world?: string): string;
+export declare function countCjk(text: string): number;
+export declare function manuscriptHasBody(text: string): boolean;
+/** Bind already-extracted prose into the same typeset Markdown shell. */
+export declare function bindManuscript(title: string, protagonist: string, world: string, source: string): string;
 export declare function chapterHeading(index: number, body: string): string;
 export declare function chineseChapter(index: number): string;
 export declare function formatArchive(summary: string, at: string, previous?: string): string;

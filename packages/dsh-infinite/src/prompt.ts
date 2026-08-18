@@ -48,7 +48,7 @@ export function registerPrompt(ctx: InfiniteContext, config: Required<PluginConf
       const root = storyRoot(ctx, assemble, config)
       if (!session || !root) return ''
       const meta = loadMeta(root)
-      if (!meta) return ''
+      if (!meta || meta.exportPending) return ''
       const world = buildWorldContext(
         loadWorldbook(root),
         recentText(session),
@@ -67,7 +67,7 @@ export function registerPrompt(ctx: InfiniteContext, config: Required<PluginConf
       const root = storyRoot(ctx, assemble, config)
       if (!session || !root) return ''
       const meta = loadMeta(root)
-      if (!meta) return ''
+      if (!meta || meta.exportPending) return ''
       return buildCharacterContext(loadCharacters(root), recentText(session), meta.protagonist)
     },
   })
@@ -79,7 +79,7 @@ export function registerPrompt(ctx: InfiniteContext, config: Required<PluginConf
       const root = storyRoot(ctx, assemble, config)
       if (!root) return ''
       const meta = loadMeta(root)
-      if (!meta?.randomEvent || !meta.pendingEventId) return ''
+      if (meta?.exportPending || !meta?.randomEvent || !meta.pendingEventId) return ''
       const entry = loadWorldbook(root).find((e) => e.id === meta.pendingEventId)
       return entry ? formatRandomEvent(entry) : ''
     },
@@ -91,6 +91,7 @@ export function registerPrompt(ctx: InfiniteContext, config: Required<PluginConf
     text: (assemble) => {
       const root = storyRoot(ctx, assemble, config)
       if (!root) return ''
+      if (loadMeta(root)?.exportPending) return ''
       const archive = loadArchive(root).trim()
       if (!archive) return ''
       return `【剧情档案】以下为压缩后的剧情要点，是续写一致性的依据（正文中不要复述档案条目）：\n${archive}`

@@ -217,13 +217,8 @@ describe('dsh-infinite plugin', () => {
       signal: new AbortController().signal,
     })
     expect(exported.kind).toBe('success')
-    expect(exported.text).toMatch(/润色/)
-    expect(followups[0]).toMatch(/重誊成书/)
-    sess.events = [
-      ...events,
-      { type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '# 现代·江澄\n\n> 诸天万界 · 现代\n\n电梯门开了。江澄站在灯下，走廊深处有人咳嗽，他没有回头，只把袖口里的钥匙按进掌心。夜色从井道里涌上来。' }] } } },
-    ]
-    onSessionEvent(ctx, config, sess, { type: 'turn/end' })
+    expect(exported.text).toMatch(/已誊出/)
+    expect(followups).toEqual([])
     const book = readdirSync(dest).find((name) => name.endsWith('.md'))
     expect(book).toBeTruthy()
     const txt = readFileSync(join(dest, book!), 'utf8')
@@ -231,6 +226,7 @@ describe('dsh-infinite plugin', () => {
     expect(txt).toContain('电梯门开了。')
     expect(txt).not.toContain('【正文】')
     expect(txt).not.toContain('走进去')
+    expect(txt).not.toContain('runshell')
   })
 
   it('draws a random event on turn/start and writes archive on compaction', async () => {

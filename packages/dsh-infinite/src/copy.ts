@@ -110,7 +110,7 @@ export const COMMANDS_COPY = {
     hint: '[名字]',
   },
   'export-story': {
-    description: '请叙事者从头润色，誊成精排 Markdown 书稿',
+    description: '把已写出的正文誊成精排 Markdown 书稿',
     hint: '[player]',
   },
 } as const

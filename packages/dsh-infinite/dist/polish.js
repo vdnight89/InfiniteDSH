@@ -7,7 +7,7 @@ export function polishPrompt(title, world, protagonist, source) {
         `# ${title}`,
         `> 诸天万界 · ${world}`,
         `> 天命之人：${protagonist}`,
-        `> 誊录于 （今天的中文日期）`,
+        `> 誊录于 ${new Date().getFullYear()}年${new Date().getMonth() + 1}月${new Date().getDate()}日`,
         ``,
         `---`,
         ``,
