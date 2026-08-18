@@ -40,6 +40,7 @@
 | Git 安装带 dist | 根包无 `prepare`、无 `file:` 依赖。宿主打成 `index.bundle.js`。 |
 | 只 named export | **不要** `export default`。Cordis `unwrapExports` 会拿走 default、丢掉旁边的 `inject`，Web 直接炸。 |
 | `cordis.patch.yml` 不要 `[]` | 空数组会把 Web 的皮肤 list 弄坏。只要 `insert` 我们这一条。 |
+| 项目名诸天万界DSH | 预设列表、README 标题、GitHub About 用这个。书里题记、persona 仍写「诸天万界」。仓库 URL 保持 `vdnight89/InfiniteDSH`，改名会弄断所有 `dsh plugin add`。 |
 
 ---
 
@@ -58,11 +59,12 @@ InfiniteDSH/                          根包名 dsh-infinite（对外安装的�
       infinite-play/                  拷到 ~/.dsh/.agent-presets/infinite-play
       templates/<id>/                 开书种子
       covers/*.jpg                    界图
+  docs/awesome-pr.md                  货架 YAML 原文与对外短句（对外计划以本文为准）
   scripts/bundle-host.mjs             把 host + core 打成单文件
   scripts/import-airp-presets.mjs     从 AIRP 再导入模板（改完要重建 catalog）
 ```
 
-工作区：`infinite-core`、`@infinite-dsh/host`、`dsh-infinite-preset`。版本锁步，现在都是 **0.4.10**。
+工作区：`infinite-core`、`@infinite-dsh/host`、`dsh-infinite-preset`。版本锁步，现在都是 **0.4.13**。
 
 ---
 
@@ -83,7 +85,7 @@ InfiniteDSH/                          根包名 dsh-infinite（对外安装的�
 - `@deepseek-ai/dsh-persona`（叙事者）
 - `./restrict.js` → `tools.restrict({ allow: [] })`
 
-restrict 只对挂了这个 preset 的 agent 生效。用户在 UI 里切走诸天万界，刀斧会回来。
+restrict 只对挂了这个 preset 的 agent 生效。用户在 UI 里切走诸天万界DSH，刀斧会回来。`infinite-play/package.json` 必须有 `"type": "module"`，否则 `dsh web` 为 `restrict.js` 报 `MODULE_TYPELESS_PACKAGE_JSON`。不要去改 `~/.dsh/package.json`。
 
 ---
 
@@ -282,11 +284,11 @@ dsh plugin --profile web add github:vdnight89/InfiniteDSH
 dsh plugin --profile web update dsh-infinite   # pnpm 会把 Git 依赖钉死，不 update 永远旧版
 ```
 
-钉版本：`github:vdnight89/InfiniteDSH#v0.4.10`
+钉版本：`github:vdnight89/InfiniteDSH#v0.4.13`
 
 `dsh plugin add` 要 pnpm。根包不要恢复 `prepare`（pnpm `onlyBuiltDependencies` 会拦）。不要把 `dsh-infinite` 写进 patch 的 list 当数组空元素。
 
-测：`npm test`（vitest，现 76 测）。测文件：
+测：`npm test`（vitest，现 78 测）。测文件：
 
 - `packages/infinite-core/tests/*.spec.ts`
 - `packages/dsh-infinite/tests/plugin.spec.ts`
@@ -294,9 +296,119 @@ dsh plugin --profile web update dsh-infinite   # pnpm 会把 Git 依赖钉死，
 
 发布节奏（主人要求闭环时）：改代码 → 测 → 打 bundle → 锁步 bump → CHANGELOG / README 版本钉 → commit `fix/feat: 0.x.y …` → tag `v0.x.y` → push → `gh release create --latest`。`gh` 若未 login，可用 git credential 填 `GH_TOKEN`（不要把 token 写进仓库或回复）。
 
-GitHub About 描述已是诸天万界那句。Topics 优先级（货架扫前面的）：
+---
 
-`dsh-plugin` `dsh` `deepseek-harness` `cordis` `deepseek` `cordis-plugin` `ai-agents` `plugins` … 然后才是 `interactive-fiction` 等题材。不要堆 `awesome` / `mcp` / `desktop`。API 返回的 topic 数组是字母序，和页面展示顺序不是一回事。
+## 对外：About、货架与宣传
+
+细稿与投递原文在 [`docs/awesome-pr.md`](docs/awesome-pr.md)。这里写状态和下一步，别让下一任再从零摸货架。
+
+### GitHub About（已改，热血短句）
+
+仓库页右侧那一行，**不是**说明书。当前定稿：
+
+```
+诸天万界DSH——一会话，一扇门，一界命数。DeepSeek Harness 上的文字修罗场。不助手，不提纲，只写正文。点封面启程；誊出来的，是你活过的天书。
+```
+
+改法：
+
+```
+gh repo edit vdnight89/InfiniteDSH --description "……"
+```
+
+`package.json` 的 `description` 必须同步，npm / 货架扫包时吃这一句。
+
+**两套文案，不要混用：**
+
+| 场合 | 口吻 |
+|---|---|
+| GitHub About、README 开篇、社区帖、X / 即刻 | 热血、中二、抓眼球（上面那句） |
+| awesome / dsh-market / 货架 YAML | 只写功能、以句号结尾、禁止营销词。写「修罗场」「活过的天书」会被打回 |
+
+货架事实描述（已写进 PR 1616）：
+
+```
+Literary DSH plugin: one session is one book, with cover-card /new, a prose-only 诸天万界DSH preset, keyword worldbook injection, and /export-story Markdown export.
+```
+
+```
+诸天万界DSH：一个会话就是一本书，封面开书，点启程写第一段，规则书按关键词注入，/export-story 誊成 Markdown。
+```
+
+### Topics（货架检索，按优先级）
+
+前面几枚必须先撞上 DSH 货架，题材往后：
+
+`dsh-plugin` → `dsh` → `deepseek-harness` → `cordis` → `deepseek` → `cordis-plugin` → `ai-agents` → `plugins` → `interactive-fiction` `text-adventure` `ai-writing` `worldbook` `novel` `chinese` → `typescript` `ai`
+
+不要堆 `awesome` / `mcp` / `desktop`。API 返回的 topic 数组是字母序，和页面展示顺序不是一回事。`dsh-find-plugin` 默认搜 `topic:dsh-plugin`。
+
+改 Topics：`gh repo edit vdnight89/InfiniteDSH --add-topic …`，或清空后按上面顺序一条条加。
+
+### 货架投递进度
+
+| 渠道 | 作用 | 状态 | 下一刀 |
+|---|---|---|---|
+| GitHub topic `dsh-plugin` 等 | `dsh-find-plugin`、多数市场自动扫 | **已挂** | 保持；改描述别丢掉这个 topic |
+| [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) | 正门。合并后 [awesome-dsh-plugin.com](https://awesome-dsh-plugin.com/) 和站内 **dsh-market** 自动带上 | **PR 已开** https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/1616 分类 `skill`。Fork：`vdnight89/awesome-dsh-plugin` 分支 `add-infinitedsh` | **盯合并**。CI 不过就按评论改 YAML，别手改 README |
+| [0xsline/awesome-deepseek-harness](https://github.com/0xsline/awesome-deepseek-harness) | 人工精选，不扫 topic | **未投** | 1616 合上后再开。分类 Domain & Specialist Skills（或 Fun & Lifestyle）。`README.md` + `README.zh-CN.md` 各加一行，PR 标题 `docs: add InfiniteDSH` |
+| [dsh.so/submit](https://www.dsh.so/submit/) | 验证向目录，填仓库 URL | **未投** | 填 `https://github.com/vdnight89/InfiniteDSH` |
+| [deepseekplugins.com](https://deepseekplugins.com/) | 独立目录 | **未投** | 看站内 `/submit` |
+| [dshplugin.store](https://dshplugin.store/) / [dshmarketplace.dev](https://dshmarketplace.dev/) / [dshplugin.me](https://dshplugin.me/) | 多数扫 topic | **不用单独投** | 1616 合上后描述会更好看 |
+| [Anil-matcha/awesome-dsh-plugin](https://github.com/Anil-matcha/awesome-dsh-plugin) | 镜像/精选 | **未投** | 优先级低于 0xsline |
+
+不要去投只收 `dsh.client` 皮肤的货架。我们是 Host `dsh.bundle`。
+
+### 怎么改 awesome 条目（格式已变）
+
+**不要手改他们的 README。** 一个插件一个 YAML：
+
+`data/plugins/vdnight89__InfiniteDSH.yml`
+
+```yaml
+url: https://github.com/vdnight89/InfiniteDSH
+name: vdnight89/InfiniteDSH
+category: skill
+description:
+  en: 'Literary DSH plugin: one session is one book, with cover-card /new, a prose-only 诸天万界DSH preset, keyword worldbook injection, and /export-story Markdown export.'
+  zh: 诸天万界DSH：一个会话就是一本书，封面开书，点启程写第一段，规则书按关键词注入，/export-story 誊成 Markdown。
+```
+
+含 `: ` 的英文必须加引号。然后：
+
+```
+npm ci
+node scripts/generate-readme.mjs
+```
+
+把 YAML 和两份生成的 README 一起提交。CI 查：`dsh.bundle`、仓库满 1 天、至少 10 个 commit、描述属实。我们已达标。
+
+可选：`data/screenshots.json` 按仓库 URL 挂 1–8 张图，dsh-market 详情页会展示。建议开书 / 歧路 / 誊书三张。现成头图：`docs/banner.jpg`。
+
+### 货架之外的宣传计划
+
+先货架，再社区。不要十个镜像列表同时空壳 PR。
+
+1. **盯 1616 合并。** 这是最大杠杆。
+2. **开 0xsline 那一行 + 填 dsh.so。**
+3. **社区帖**（About 那句可当正文，货架描述不要用）：
+   - Reddit [r/DeepSeek](https://www.reddit.com/r/DeepSeek/)：Show 帖，一张封面开书图 + 一行安装命令 + “one session = one book”
+   - 即刻 / 小红书 / V2EX：中文更吃诸天万界口吻；3 张图或短视频
+   - X / 微博：`#DeepSeek` `#DSH` `#诸天万界`
+   - DeepSeek 官方 Discord / 反馈群：有插件频道再丢，没有别硬找
+4. **以后：** npm 上架 `dsh-infinite`（awesome 维护者推荐，安装能短成 `dsh plugin add dsh-infinite`，要另开 npm 账号）；Release 补截图。
+
+社区帖短句：
+
+> 一会话，一扇门，一界命数。诸天万界DSH：DeepSeek Harness 上的文字修罗场。点封面启程，只写正文。誊出来的 Markdown，是你活过的天书。
+>
+> `dsh plugin --profile web add github:vdnight89/InfiniteDSH`
+
+### 先别做的
+
+- 改仓库名为中文或 `诸天万界DSH`。会弄断所有 `github:vdnight89/InfiniteDSH`。
+- 在 awesome 描述里写修罗场 / 活过的天书。
+- 同时给十个镜像列表开空壳 PR。
 
 ---
 
@@ -320,6 +432,7 @@ GitHub About 描述已是诸天万界那句。Topics 优先级（货架扫前面
 | 封面 HTTP | `covers-host.ts` |
 | 插件入口 | `index.ts` |
 | 润色提示与定稿 | `polish.ts` |
+| About / 货架投递稿 | `docs/awesome-pr.md` |
 
 `Duck*` 类型在 `dsh-infinite/src/types.ts`，是对 DSH 的窄面，不要直接依赖 `@deepseek-ai/*`（Git 安装的 bundle 里也打不进主机那些包当 runtime 依赖）。
 
@@ -335,6 +448,7 @@ GitHub About 描述已是诸天万界那句。Topics 优先级（货架扫前面
 6. **导出质量上限是模型有没有写出可见 `text` 块。** 只有 reasoning、没有 text，仍然誊不出。
 7. **润色仍可能跑偏。** 草稿已在磁盘上。`turn/end` 若看到工具 XML 会保留草稿并提示可再 `/export-story`。
 8. **不要提交用户书稿。** `掌中剑.md`、`无尽流浪.md`、`暗夜独行.md` 留在工作区即可。
+9. **宣传未做完。** 1616 未合；0xsline / dsh.so / 社区帖还没动。计划见上文「对外」。
 
 ---
 
