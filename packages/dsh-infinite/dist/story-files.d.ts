@@ -5,7 +5,7 @@ export declare const WORLD_DIR = "worldbook";
 export declare const CHAR_DIR = "characters";
 export declare const PLOT_DIR = "plots";
 export declare const ARCHIVE_FILE = "archive.md";
-export declare const EXPORT_FILE = "export.txt";
+export declare const EXPORT_FILE = "export.md";
 export declare function metaPath(root: string): string;
 export declare function hasStory(root: string): boolean;
 export declare function loadMeta(root: string): StoryMeta | null;

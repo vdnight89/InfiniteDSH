@@ -7,7 +7,7 @@ export const WORLD_DIR = 'worldbook';
 export const CHAR_DIR = 'characters';
 export const PLOT_DIR = 'plots';
 export const ARCHIVE_FILE = 'archive.md';
-export const EXPORT_FILE = 'export.txt';
+export const EXPORT_FILE = 'export.md';
 export function metaPath(root) {
     return join(root, META_FILE);
 }

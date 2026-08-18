@@ -1,6 +1,6 @@
 {
   "name": "dsh-infinite-preset",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "type": "module",
   "description": "infinite-play agent preset and story templates",
   "exports": {

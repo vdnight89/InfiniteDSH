@@ -237,33 +237,79 @@ function isOpeningInstruction(text) {
   const t = text.trim();
   return t.startsWith("\u3010\u5F00\u5C40\u3011") || t.startsWith("[\u5F00\u5C40]") || t === "\u542F\u7A0B\u3002" || t === "\u542F\u7A0B";
 }
-function exportTranscript(title, protagonist, messages, includePlayer) {
-  const lines = [title];
-  if (protagonist)
-    lines.push(`\u4E3B\u89D2\uFF1A${protagonist}`);
-  lines.push(`\u5BFC\u51FA\u65F6\u95F4\uFF1A${(/* @__PURE__ */ new Date()).toISOString()}`);
-  lines.push("");
+function exportTranscript(title, protagonist, messages, includePlayer, world = "") {
+  const chapters = [];
+  let bridges = [];
   for (const message of messages) {
     if (message.role === "system")
       continue;
     if (isOpeningInstruction(message.text))
       continue;
     if (message.role === "user") {
-      if (!includePlayer)
-        continue;
       const body2 = message.text.trim();
-      if (!body2)
-        continue;
-      lines.push(`\uFF08\u4F60\uFF09${body2}`, "");
+      if (includePlayer && body2 && !isOpeningInstruction(body2))
+        bridges.push(body2);
       continue;
     }
     const body = cleanProse(message.text);
     if (!body)
       continue;
-    lines.push(body, "");
+    chapters.push({
+      heading: chapterHeading(chapters.length + 1, body),
+      body,
+      bridges
+    });
+    bridges = [];
+  }
+  const lines = [`# ${title}`, ""];
+  const series = world ? `\u8BF8\u5929\u4E07\u754C \xB7 ${world}` : "\u8BF8\u5929\u4E07\u754C";
+  lines.push(`> ${series}`);
+  if (protagonist)
+    lines.push(`> \u5929\u547D\u4E4B\u4EBA\uFF1A${protagonist}`);
+  lines.push(`> \u8A8A\u5F55\u4E8E ${formatExportDate(/* @__PURE__ */ new Date())}`, "", "---", "");
+  for (const chapter of chapters) {
+    for (const action of chapter.bridges) {
+      lines.push(`*\u4F60\uFF1A${action}*`, "");
+    }
+    lines.push(`## ${chapter.heading}`, "", chapter.body, "");
+  }
+  if (bridges.length > 0 && includePlayer) {
+    for (const action of bridges)
+      lines.push(`*\u4F60\uFF1A${action}*`, "");
   }
   return `${lines.join("\n").replace(/\n{3,}/g, "\n\n").trim()}
 `;
+}
+function chapterHeading(index, body) {
+  const name2 = clipChapterTitle(body);
+  return name2 ? `\u7B2C${chineseChapter(index)}\u7AE0\u3000${name2}` : `\u7B2C${chineseChapter(index)}\u7AE0`;
+}
+function chineseChapter(index) {
+  if (index <= 0)
+    return String(index);
+  if (index < 10)
+    return "\u4E00\u4E8C\u4E09\u56DB\u4E94\u516D\u4E03\u516B\u4E5D"[index - 1] ?? String(index);
+  if (index === 10)
+    return "\u5341";
+  if (index < 20)
+    return `\u5341${"\u4E00\u4E8C\u4E09\u56DB\u4E94\u516D\u4E03\u516B\u4E5D"[index - 11]}`;
+  if (index < 100) {
+    const tens = Math.floor(index / 10);
+    const ones = index % 10;
+    const head = `${"\u4E00\u4E8C\u4E09\u56DB\u4E94\u516D\u4E03\u516B\u4E5D"[tens - 1]}\u5341`;
+    return ones === 0 ? head : `${head}${"\u4E00\u4E8C\u4E09\u56DB\u4E94\u516D\u4E03\u516B\u4E5D"[ones - 1]}`;
+  }
+  return String(index);
+}
+function clipChapterTitle(body) {
+  const sentence = body.split(/[。！？\n]/).map((part) => part.trim()).find((part) => part.length >= 2) ?? "";
+  const cut = sentence.replace(/^[“"]|[”"]$/g, "").replace(/[，、；：].*$/, "").trim();
+  if (cut.length < 2)
+    return "";
+  return cut.slice(0, 12);
+}
+function formatExportDate(at) {
+  return `${at.getFullYear()}\u5E74${at.getMonth() + 1}\u6708${at.getDate()}\u65E5`;
 }
 function formatArchive(summary, at, previous = "") {
   const body = summary.trim();
@@ -316,7 +362,7 @@ function suggestExportTitles(world, protagonist, prose) {
 }
 function safeBookFileName(title) {
   const cleaned = title.replace(/[<>:"/\\|?*\u0000-\u001f]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 40);
-  return `${cleaned || "\u8BF8\u5929\u4E07\u754C\u4E66\u7A3F"}.txt`;
+  return `${cleaned || "\u8BF8\u5929\u4E07\u754C\u4E66\u7A3F"}.md`;
 }
 function clipTitle(raw) {
   const cut = raw.replace(/[。！？…]+$/g, "").trim();
@@ -750,7 +796,7 @@ var COMMANDS_COPY = {
     hint: "[\u540D\u5B57]"
   },
   "export-story": {
-    description: "\u8A8A\u51FA\u6B64\u754C\u4E66\u7A3F\uFF08\u4E0D\u662F\u4E0A\u9762\u90A3\u4E2A\u4F1A\u8BDD\u65E5\u5FD7\u538B\u7F29\u5305\uFF09",
+    description: "\u8A8A\u51FA\u7CBE\u6392 Markdown \u4E66\u7A3F\u5230\u5F53\u524D\u5DE5\u4F5C\u533A",
     hint: "[player]"
   }
 };
@@ -838,7 +884,7 @@ var WORLD_DIR = "worldbook";
 var CHAR_DIR = "characters";
 var PLOT_DIR = "plots";
 var ARCHIVE_FILE = "archive.md";
-var EXPORT_FILE = "export.txt";
+var EXPORT_FILE = "export.md";
 function metaPath(root) {
   return join2(root, META_FILE);
 }
@@ -1495,7 +1541,7 @@ async function handleExport(ctx, config, inv) {
     if (picked)
       title = picked;
   }
-  const text = exportTranscript(title, meta.protagonist, messages, includePlayer);
+  const text = exportTranscript(title, meta.protagonist, messages, includePlayer, world);
   saveExport(root, text);
   const destDir = session.header?.cwd || process.cwd();
   const dest = saveNamedExport(destDir, safeBookFileName(title), text);

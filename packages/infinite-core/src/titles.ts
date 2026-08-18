@@ -13,7 +13,7 @@ export function suggestExportTitles(world: string, protagonist: string, prose: s
 /** Windows-safe file stem plus .txt. */
 export function safeBookFileName(title: string): string {
   const cleaned = title.replace(/[<>:"/\\|?*\u0000-\u001f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 40)
-  return `${cleaned || '诸天万界书稿'}.txt`
+  return `${cleaned || '诸天万界书稿'}.md`
 }
 
 function clipTitle(raw: string): string {

@@ -422,7 +422,7 @@ export async function handleExport(
     const picked = pickAnswer(answers, 'title')
     if (picked) title = picked
   }
-  const text = exportTranscript(title, meta.protagonist, messages, includePlayer)
+  const text = exportTranscript(title, meta.protagonist, messages, includePlayer, world)
   saveExport(root, text)
   const destDir = session.header?.cwd || process.cwd()
   const dest = saveNamedExport(destDir, safeBookFileName(title), text)

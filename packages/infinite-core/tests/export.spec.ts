@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cleanProse, exportTranscript, formatArchive, isOpeningInstruction } from '../src/export.ts'
+import { chapterHeading, chineseChapter, cleanProse, exportTranscript, formatArchive, isOpeningInstruction } from '../src/export.ts'
 import { parseForkOptions } from '../src/forks.ts'
 import { safeBookFileName, suggestExportTitles } from '../src/titles.ts'
 
@@ -29,9 +29,11 @@ describe('exportTranscript', () => {
       { role: 'assistant', text: '【正文】晨雾里有人扫地。' },
       { role: 'user', text: '上前询问' },
       { role: 'system', text: 'ignore' },
-    ], false)
-    expect(txt).toContain('青囊')
-    expect(txt).toContain('主角：陈行舟')
+    ], false, '民俗')
+    expect(txt).toContain('# 青囊')
+    expect(txt).toContain('诸天万界 · 民俗')
+    expect(txt).toContain('天命之人：陈行舟')
+    expect(txt).toContain('## 第一章　晨雾里有人扫地')
     expect(txt).toContain('晨雾里有人扫地。')
     expect(txt).not.toContain('请开始')
     expect(txt).not.toContain('上前询问')
@@ -43,8 +45,16 @@ describe('exportTranscript', () => {
       { role: 'user', text: '推门' },
       { role: 'assistant', text: '门轴吱呀。' },
     ], true)
-    expect(txt).toContain('（你）推门')
+    expect(txt).toContain('*你：推门*')
     expect(txt).toContain('门轴吱呀。')
+    expect(txt).toContain('## 第一章')
+  })
+
+  it('numbers later chapters in Chinese', () => {
+    expect(chineseChapter(1)).toBe('一')
+    expect(chineseChapter(12)).toBe('十二')
+    expect(chineseChapter(20)).toBe('二十')
+    expect(chapterHeading(2, '夜闯藏经阁。钟声提前。')).toBe('第二章　夜闯藏经阁')
   })
 })
 
@@ -72,8 +82,8 @@ describe('suggestExportTitles', () => {
   })
 
   it('builds a safe windows file name', () => {
-    expect(safeBookFileName('奇幻·谢无妄')).toBe('奇幻·谢无妄.txt')
-    expect(safeBookFileName('a<b>:"c')).toBe('a b c.txt')
+    expect(safeBookFileName('奇幻·谢无妄')).toBe('奇幻·谢无妄.md')
+    expect(safeBookFileName('a<b>:"c')).toBe('a b c.md')
   })
 })
 

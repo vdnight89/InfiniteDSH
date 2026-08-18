@@ -210,13 +210,15 @@ describe('dsh-infinite plugin', () => {
     })
     expect(exported.kind).toBe('success')
     const root = infiniteRoot(resolveSessionDir(ctx, session('s2'), config))
-    const txt = readFileSync(join(root, 'export.txt'), 'utf8')
+    const txt = readFileSync(join(root, 'export.md'), 'utf8')
+    expect(txt).toContain('# ')
+    expect(txt).toContain('## 第一章')
     expect(txt).toContain('电梯门开了。')
     expect(txt).not.toContain('【正文】')
     expect(txt).not.toContain('走进去')
     expect(txt).toContain('江澄')
     expect(exported.text).toMatch(/现代·江澄/)
-    expect(readdirSync(dest).some((name) => name.endsWith('.txt'))).toBe(true)
+    expect(readdirSync(dest).some((name) => name.endsWith('.md'))).toBe(true)
   })
 
   it('draws a random event on turn/start and writes archive on compaction', async () => {

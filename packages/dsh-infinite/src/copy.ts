@@ -102,7 +102,7 @@ export const COMMANDS_COPY = {
     hint: '[名字]',
   },
   'export-story': {
-    description: '誊出此界书稿（不是上面那个会话日志压缩包）',
+    description: '誊出精排 Markdown 书稿到当前工作区',
     hint: '[player]',
   },
 } as const

@@ -329,7 +329,7 @@ export async function handleExport(ctx, config, inv) {
         if (picked)
             title = picked;
     }
-    const text = exportTranscript(title, meta.protagonist, messages, includePlayer);
+    const text = exportTranscript(title, meta.protagonist, messages, includePlayer, world);
     saveExport(root, text);
     const destDir = session.header?.cwd || process.cwd();
     const dest = saveNamedExport(destDir, safeBookFileName(title), text);
