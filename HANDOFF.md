@@ -307,7 +307,7 @@ dsh plugin --profile web update dsh-infinite   # pnpm 会把 Git 依赖钉死，
 仓库页右侧那一行，**不是**说明书。当前定稿：
 
 ```
-诸天万界DSH——一会话，一扇门，一界命数。DeepSeek Harness 上的文字修罗场。不助手，不提纲，只写正文。点封面启程；誊出来的，是你活过的天书。
+一会话，一扇门，一界命数。诸天万界DSH：DeepSeek Harness 上的文字修罗场。十九扇门点封面启程，不助手不提纲只写正文；誊出来的，是你活过的天书。
 ```
 
 改法：
@@ -328,11 +328,11 @@ gh repo edit vdnight89/InfiniteDSH --description "……"
 货架事实描述（已写进 PR 1616）：
 
 ```
-Literary DSH plugin: one session is one book, with cover-card /new, a prose-only 诸天万界DSH preset, keyword worldbook injection, and /export-story Markdown export.
+Literary DSH plugin: one session is one book. Cover-card /new opens one of 19 realms, a prose-only 诸天万界DSH preset keeps the model writing fiction, keyword worldbook entries ground each turn, and /export-story typesets the session into a Markdown novel.
 ```
 
 ```
-诸天万界DSH：一个会话就是一本书，封面开书，点启程写第一段，规则书按关键词注入，/export-story 誊成 Markdown。
+诸天万界DSH：一个会话就是一本书。封面开书，十九界任选，文学预设只写正文，规则书按关键词注入，/export-story 把整场会话誊成 Markdown 小说。
 ```
 
 ### Topics（货架检索，按优先级）
@@ -350,7 +350,7 @@ Literary DSH plugin: one session is one book, with cover-card /new, a prose-only
 | 渠道 | 作用 | 状态 | 下一刀 |
 |---|---|---|---|
 | GitHub topic `dsh-plugin` 等 | `dsh-find-plugin`、多数市场自动扫 | **已挂** | 保持；改描述别丢掉这个 topic |
-| [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) | 正门。合并后 [awesome-dsh-plugin.com](https://awesome-dsh-plugin.com/) 和站内 **dsh-market** 自动带上 | **PR 已开** https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/1616 分类 `skill`。Fork：`vdnight89/awesome-dsh-plugin` 分支 `add-infinitedsh` | **盯合并**。CI 不过就按评论改 YAML，别手改 README |
+| [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) | 正门。合并后 [awesome-dsh-plugin.com](https://awesome-dsh-plugin.com/) 和站内 **dsh-market** 自动带上 | **PR 已开** https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/1616 分类 `skill`。CI 全绿。描述已原地更新（更具体的新版），`data/screenshots.json` 已挂 4 张截图（指向本仓 main 分支 docs/ 下的 png）。Fork：`vdnight89/awesome-dsh-plugin` 分支 `add-infinitedsh` | **盯合并**。要再改就往 fork 分支推新提交，不用撤回 |
 | [0xsline/awesome-deepseek-harness](https://github.com/0xsline/awesome-deepseek-harness) | 人工精选，不扫 topic | **未投** | 1616 合上后再开。分类 Domain & Specialist Skills（或 Fun & Lifestyle）。`README.md` + `README.zh-CN.md` 各加一行，PR 标题 `docs: add InfiniteDSH` |
 | [dsh.so/submit](https://www.dsh.so/submit/) | 验证向目录，填仓库 URL | **未投** | 填 `https://github.com/vdnight89/InfiniteDSH` |
 | [deepseekplugins.com](https://deepseekplugins.com/) | 独立目录 | **未投** | 看站内 `/submit` |
@@ -400,7 +400,7 @@ node scripts/generate-readme.mjs
 
 社区帖短句：
 
-> 一会话，一扇门，一界命数。诸天万界DSH：DeepSeek Harness 上的文字修罗场。点封面启程，只写正文。誊出来的 Markdown，是你活过的天书。
+> 一会话，一扇门，一界命数。诸天万界DSH：DeepSeek Harness 上的文字修罗场。十九扇门点封面启程，只写正文。誊出来的 Markdown，是你活过的天书。
 >
 > `dsh plugin --profile web add github:vdnight89/InfiniteDSH`
 
@@ -449,6 +449,7 @@ node scripts/generate-readme.mjs
 7. **润色仍可能跑偏。** 草稿已在磁盘上。`turn/end` 若看到工具 XML 会保留草稿并提示可再 `/export-story`。
 8. **不要提交用户书稿。** `掌中剑.md`、`无尽流浪.md`、`暗夜独行.md` 留在工作区即可。
 9. **宣传未做完。** 1616 未合；0xsline / dsh.so / 社区帖还没动。计划见上文「对外」。
+10. **0.4.13 全代码审计已做。** 结论与方案在 [`docs/audit-0.4.13.md`](docs/audit-0.4.13.md)，DSH 规范清单在 [`docs/dsh-plugin-spec-checklist.md`](docs/dsh-plugin-spec-checklist.md)。两个 P1 未修：`polish.ts` 润色只贴草稿前 12000 字（长书静默丢后半本）；`lifecycle.ts` 的 `void offerForks(...)` 未接 rejection。`.gitignore` 已加书稿条目。
 
 ---
 

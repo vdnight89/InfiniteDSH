@@ -4,29 +4,39 @@
 安装：`dsh plugin --profile web add github:vdnight89/InfiniteDSH`  
 预设名：**诸天万界DSH**。货架扫 topic **`dsh-plugin`**。
 
+## GitHub About（热血短句，已改）
+
+```
+一会话，一扇门，一界命数。诸天万界DSH：DeepSeek Harness 上的文字修罗场。十九扇门点封面启程，不助手不提纲只写正文；誊出来的，是你活过的天书。
+```
+
+`package.json` 的 `description` 必须与这句同步（npm / 货架扫包吃这一句）。
+
 ## 已经投了
 
 | 渠道 | 状态 |
 |---|---|
 | GitHub topic `dsh-plugin` + `dsh` + `deepseek-harness` + `cordis` | 已挂。`dsh-find-plugin` 等货架默认搜这个 |
-| [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) | PR 已开：https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/1616 。合并后 [awesome-dsh-plugin.com](https://awesome-dsh-plugin.com/) 和站内 **dsh-market** 会自动带上 |
-| GitHub About | 已改成诸天万界DSH 热血短句 |
+| [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) | PR 已开：https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/1616 。CI 全绿（Submission gate + check），等维护者合并。描述已原地更新（见下「货架条目」），并挂了 4 张截图进 `data/screenshots.json`。合并后 [awesome-dsh-plugin.com](https://awesome-dsh-plugin.com/) 和站内 **dsh-market** 会自动带上 |
+| GitHub About | 已改成上句 |
 
-awesome 的提交格式已变：不要手改 README。在 `data/plugins/vdnight89__InfiniteDSH.yml` 加一条，再跑 `node scripts/generate-readme.mjs`。分类用 `skill`。描述只写功能、以句号结尾，禁止营销词。
+awesome 的提交格式：不要手改 README。在 `data/plugins/vdnight89__InfiniteDSH.yml` 加一条，再跑 `npm ci && node scripts/generate-readme.mjs`，把 YAML 和两份生成的 README 一起提交。分类用 `skill`。描述只写功能、以句号结尾，禁止营销词。已发出的 PR 不用撤回：往 fork 分支 `add-infinitedsh` 推新提交即原地更新。
+
+`data/screenshots.json` 是 `{ "<仓库URL>": ["<raw 图 URL>", …] }`，挂了我们仓库 main 分支 `docs/` 下的 4 张截图（选界 / 天命之人 / 三键 / 正文+歧路）。
 
 ## 还能投的货架（按优先级）
 
 1. **[0xsline/awesome-deepseek-harness](https://github.com/0xsline/awesome-deepseek-harness)**  
    人工精选，不自动扫 topic。分类建议 **Domain & Specialist Skills**（写作）或 **Fun & Lifestyle**。  
-   在 `README.md` 与 `README.zh-CN.md` 各加一行，PR 标题 `docs: add InfiniteDSH`。
+   在 `README.md` 与 `README.zh-CN.md` 各加一行，PR 标题 `docs: add InfiniteDSH`。1616 合上后再开。
 
    英文：
    ```
-   - [vdnight89/InfiniteDSH](https://github.com/vdnight89/InfiniteDSH) — 诸天万界DSH: one DSH session is one literary book, with cover-card openings and Markdown export.
+   - [vdnight89/InfiniteDSH](https://github.com/vdnight89/InfiniteDSH) — 诸天万界DSH: one DSH session is one book; a cover-card picker opens 19 realms, a prose-only preset locks the model to fiction, keyword worldbook lore grounds each turn, and /export-story typesets the session into a Markdown novel.
    ```
    中文：
    ```
-   - [vdnight89/InfiniteDSH](https://github.com/vdnight89/InfiniteDSH) — 诸天万界DSH：一个会话就是一本书，封面开书，点启程写第一段，/export-story 誊成 Markdown。
+   - [vdnight89/InfiniteDSH](https://github.com/vdnight89/InfiniteDSH) — 诸天万界DSH：一个会话就是一本书。封面开书十九界，只写正文，规则书按关键词注入，/export-story 誊成 Markdown 小说。
    ```
 
 2. **[dsh.so/submit](https://www.dsh.so/submit/)**  
@@ -52,25 +62,25 @@ awesome 的提交格式已变：不要手改 README。在 `data/plugins/vdnight8
 | X / 微博 | 挂 `#DeepSeek` `#DSH` `#诸天万界`，链仓库 | About 那句可当推文 |
 | DeepSeek 官方 Discord / 反馈群 | 插件频道丢安装命令 | 有就发，没有别硬找 |
 | npm 上架 `dsh-infinite` | `dsh plugin add dsh-infinite` 比 Git 一行更短 | awesome 维护者推荐；要另开 npm 账号 |
-| GitHub Release 附图 | 已有 banner；可再补开书/歧路/誊书三张 | awesome 的 `data/screenshots.json` 可挂 1–8 张给 dsh-market 详情页 |
+| GitHub Release 附图 | 已有 banner；开书/歧路/誊书截图已进 `docs/` | awesome 的 `data/screenshots.json` 已挂 4 张 |
 | 给 dsh-find-plugin 喂词 | 用户问「文字冒险 / 写小说 / interactive fiction」能搜到 | 靠 topic + awesome 双语描述 |
 
 ## 建议的对外短句（社区帖用，货架描述不要用）
 
-> 一会话，一扇门，一界命数。诸天万界DSH：DeepSeek Harness 上的文字修罗场。点封面启程，只写正文。誊出来的 Markdown，是你活过的天书。
+> 一会话，一扇门，一界命数。诸天万界DSH：DeepSeek Harness 上的文字修罗场。十九扇门点封面启程，只写正文。誊出来的 Markdown，是你活过的天书。
 >
 > ```
 > dsh plugin --profile web add github:vdnight89/InfiniteDSH
 > ```
 
-## 货架条目（事实描述，投递用）
+## 货架条目（事实描述，投递用；含 `: ` 的英文必须加引号）
 
 ```
-Literary DSH plugin: one session is one book, with cover-card /new, a prose-only 诸天万界DSH preset, keyword worldbook injection, and /export-story Markdown export.
+Literary DSH plugin: one session is one book. Cover-card /new opens one of 19 realms, a prose-only 诸天万界DSH preset keeps the model writing fiction, keyword worldbook entries ground each turn, and /export-story typesets the session into a Markdown novel.
 ```
 
 ```
-诸天万界DSH：一个会话就是一本书，封面开书，点启程写第一段，规则书按关键词注入，/export-story 誊成 Markdown。
+诸天万界DSH：一个会话就是一本书。封面开书，十九界任选，文学预设只写正文，规则书按关键词注入，/export-story 把整场会话誊成 Markdown 小说。
 ```
 
 ## 先别做的

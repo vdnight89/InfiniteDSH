@@ -6,3 +6,10 @@ Thumbs.db
 *.log
 .idea/
 .vscode/
+
+# 用户书稿（/export-story 誊书落在工作区根，勿提交）
+*.草稿.md
+/掌中剑.md
+/无尽流浪.md
+/暗夜独行.md
+/云中剑雨.md
