@@ -385,18 +385,15 @@ node scripts/generate-readme.mjs
 
 可选：`data/screenshots.json` 按仓库 URL 挂 1–8 张图，dsh-market 详情页会展示。建议开书 / 歧路 / 誊书三张。现成头图：`docs/banner.jpg`。
 
-### 货架之外的宣传计划
+### 增长计划
 
-先货架，再社区。不要十个镜像列表同时空壳 PR。
+全盘作战计划（产品 / 货架 / 内容营销 / 社区飞轮 / 度量）在 [`docs/growth-plan.md`](docs/growth-plan.md)。基线 2026-08-20：**1 star**；生态扫描：awesome 目录 1300+ 条目、无文学分类——题材蓝海。当前前三刀：
 
-1. **盯 1616 合并。** 这是最大杠杆。
-2. **开 0xsline 那一行 + 填 dsh.so。**
-3. **社区帖**（About 那句可当正文，货架描述不要用）：
-   - Reddit [r/DeepSeek](https://www.reddit.com/r/DeepSeek/)：Show 帖，一张封面开书图 + 一行安装命令 + “one session = one book”
-   - 即刻 / 小红书 / V2EX：中文更吃诸天万界口吻；3 张图或短视频
-   - X / 微博：`#DeepSeek` `#DSH` `#诸天万界`
-   - DeepSeek 官方 Discord / 反馈群：有插件频道再丢，没有别硬找
-4. **以后：** npm 上架 `dsh-infinite`（awesome 维护者推荐，安装能短成 `dsh plugin add dsh-infinite`，要另开 npm 账号）；Release 补截图。
+1. **修 P1 ×2 出 0.4.14。** 引流底线是不丢书。
+2. **盯 1616 合并。** 合并当天发第一波内容（demo GIF + 小红书/Reddit 首帖）。
+3. **录 15s demo GIF 挂 README。** 这是所有帖子的核心素材。
+
+先货架，再社区。不要十个镜像列表同时空壳 PR。社区帖（About 那句可当正文，货架描述不要用）：Reddit [r/DeepSeek](https://www.reddit.com/r/DeepSeek/) 发 Show 帖（一张封面开书图 + 一行安装命令 + “one session = one book”）；即刻 / 小红书 / V2EX 吃诸天万界口吻；X / 微博挂 `#DeepSeek` `#DSH` `#诸天万界`；DeepSeek 官方 Discord / 反馈群有插件频道再丢。以后：npm 上架 `dsh-infinite`（安装能短成 `dsh plugin add dsh-infinite`，要另开 npm 账号）。
 
 社区帖短句：
 
