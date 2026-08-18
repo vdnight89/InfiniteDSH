@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { chapterHeading, chineseChapter, cleanProse, exportTranscript, formatArchive, isOpeningInstruction } from '../src/export.ts'
+import { chapterHeading, chineseChapter, cleanProse, exportTranscript, extractStoryBody, formatArchive, isOpeningInstruction, isPlanningDump } from '../src/export.ts'
 import { parseForkOptions } from '../src/forks.ts'
 import { safeBookFileName, suggestExportTitles } from '../src/titles.ts'
 
@@ -19,6 +19,33 @@ describe('cleanProse', () => {
 
   it('keeps a single blank line between paragraphs', () => {
     expect(cleanProse('第一段。\n\n第二段。')).toBe('第一段。\n\n第二段。')
+  })
+})
+
+describe('planning dump', () => {
+  const dump = `用户让我写小说正文。需要遵守叙事护栏、剧情推进。
+当前场景：主神广场。
+我要推进剧情。让我构思：
+机械臂女人回答三成怎么算。
+我写正文。不要输出章节名`
+
+  it('detects instruction echoes as not fiction', () => {
+    expect(isPlanningDump(dump)).toBe(true)
+    expect(extractStoryBody(dump)).toBe('')
+    expect(isPlanningDump('巷口的驴鸣突然断了。')).toBe(false)
+  })
+
+  it('keeps planning out of the manuscript', () => {
+    const txt = exportTranscript('无尽流浪', '陆沉舟', [
+      { role: 'assistant', text: dump },
+      { role: 'assistant', text: '广场上的光柱还在跳。陆沉舟问：“三成怎么算。”' },
+    ], false, '无限流')
+    expect(txt).toContain('# 无尽流浪')
+    expect(txt).toContain('广场上的光柱还在跳')
+    expect(txt).not.toContain('用户让我写')
+    expect(txt).not.toContain('让我构思')
+    expect(txt).toContain('第一章')
+    expect(txt).not.toContain('第二章　用户让我')
   })
 })
 

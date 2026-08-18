@@ -3,7 +3,7 @@ import {
   KEEP_DEFAULT_PROTAGONIST,
   TOPIC_CHOICES,
   bookNameForTemplate,
-  cleanProse,
+  extractStoryBody,
   defaultProtagonist,
   exportTranscript,
   isKeepDefaultChoice,
@@ -404,7 +404,7 @@ export async function handleExport(
   const messages = sessionMessages(session)
   const prose = messages
     .filter((message) => message.role === 'assistant')
-    .map((message) => cleanProse(message.text))
+    .map((message) => extractStoryBody(message.text))
     .join('\n')
   const suggestions = suggestExportTitles(world, meta.protagonist, prose)
   let title = suggestions[0] || sessionTitle(world, meta.protagonist)

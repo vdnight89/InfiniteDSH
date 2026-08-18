@@ -1,4 +1,4 @@
-import { cleanProse, type TranscriptMessage } from 'infinite-core'
+import { cleanProse, extractStoryBody, type TranscriptMessage } from 'infinite-core'
 import type { DuckEvent, DuckSession } from './types.js'
 
 function blocksToText(value: unknown): string {
@@ -59,12 +59,13 @@ export function recentText(session: DuckSession, last = 4): string {
   const msgs = sessionMessages(session).filter((m) => m.role !== 'system')
   return msgs
     .slice(-last)
-    .map((m) => (m.role === 'assistant' ? cleanProse(m.text) : m.text))
+    .map((m) => (m.role === 'assistant' ? extractStoryBody(m.text) : m.text))
+    .filter((text) => text.trim().length > 0)
     .join('\n')
 }
 
 export function hasAssistantProse(session: DuckSession): boolean {
-  return sessionMessages(session).some((m) => m.role === 'assistant' && cleanProse(m.text).length > 0)
+  return sessionMessages(session).some((m) => m.role === 'assistant' && extractStoryBody(m.text).length > 0)
 }
 
 export function lastAssistantRaw(session: DuckSession): string {

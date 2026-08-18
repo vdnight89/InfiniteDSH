@@ -30,7 +30,13 @@ export function installUserPreset(config: Required<PluginConfig>): string | null
       } catch {
         destPreset = ''
       }
-      if (!/诸天万界/.test(destPreset)) {
+      let destPersona = ''
+      try {
+        destPersona = readFileSync(join(dest, 'agent.cordis.yml'), 'utf8')
+      } catch {
+        destPersona = ''
+      }
+      if (!/诸天万界/.test(destPreset) || !/禁止把思考/.test(destPersona)) {
         writeFileSync(join(dest, 'preset.yml'), readFileSync(join(src, 'preset.yml')))
         writeFileSync(join(dest, 'agent.cordis.yml'), readFileSync(join(src, 'agent.cordis.yml')))
       }

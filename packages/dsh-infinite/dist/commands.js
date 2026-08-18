@@ -1,4 +1,4 @@
-import { KEEP_DEFAULT_OPENING, KEEP_DEFAULT_PROTAGONIST, TOPIC_CHOICES, bookNameForTemplate, cleanProse, defaultProtagonist, exportTranscript, isKeepDefaultChoice, safeBookFileName, suggestExportTitles, parseCommandArgs, resolveTemplateId, templateIdFromLabel, topicChoice, } from 'infinite-core';
+import { KEEP_DEFAULT_OPENING, KEEP_DEFAULT_PROTAGONIST, TOPIC_CHOICES, bookNameForTemplate, extractStoryBody, defaultProtagonist, exportTranscript, isKeepDefaultChoice, safeBookFileName, suggestExportTitles, parseCommandArgs, resolveTemplateId, templateIdFromLabel, topicChoice, } from 'infinite-core';
 import { askUser, pickAnswer } from './ask.js';
 import { ASK_HEADER, BIND_QUESTION, CANCELLED, COMMANDS_COPY, EMBARK, FIRST_STEP_TEXT, isEmbarkChoice, OPENING_QUESTION, OVERWRITE_NO, OVERWRITE_QUESTION, OVERWRITE_YES, PROTAGONIST_QUESTION, REPICK_OPENING, REPICK_PROTAGONIST, TOPIC_DETAIL, TITLE_DETAIL, TITLE_QUESTION, TOPIC_QUESTION, boundTo, castDone, castNeedName, defaultBodyHint, embarkDetail, exportDone, needForceText, noWorldYet, openedEmbarked, openedWaiting, pickWorldHint, sessionTitle, unknownWorld, } from './copy.js';
 import { infiniteRoot, resolveSessionDir, templatesDir } from './paths.js';
@@ -310,7 +310,7 @@ export async function handleExport(ctx, config, inv) {
     const messages = sessionMessages(session);
     const prose = messages
         .filter((message) => message.role === 'assistant')
-        .map((message) => cleanProse(message.text))
+        .map((message) => extractStoryBody(message.text))
         .join('\n');
     const suggestions = suggestExportTitles(world, meta.protagonist, prose);
     let title = suggestions[0] || sessionTitle(world, meta.protagonist);

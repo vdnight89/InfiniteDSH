@@ -1,4 +1,4 @@
-import { cleanProse } from 'infinite-core';
+import { cleanProse, extractStoryBody } from 'infinite-core';
 function blocksToText(value) {
     if (typeof value === 'string')
         return value;
@@ -63,11 +63,12 @@ export function recentText(session, last = 4) {
     const msgs = sessionMessages(session).filter((m) => m.role !== 'system');
     return msgs
         .slice(-last)
-        .map((m) => (m.role === 'assistant' ? cleanProse(m.text) : m.text))
+        .map((m) => (m.role === 'assistant' ? extractStoryBody(m.text) : m.text))
+        .filter((text) => text.trim().length > 0)
         .join('\n');
 }
 export function hasAssistantProse(session) {
-    return sessionMessages(session).some((m) => m.role === 'assistant' && cleanProse(m.text).length > 0);
+    return sessionMessages(session).some((m) => m.role === 'assistant' && extractStoryBody(m.text).length > 0);
 }
 export function lastAssistantRaw(session) {
     const msgs = sessionMessages(session);

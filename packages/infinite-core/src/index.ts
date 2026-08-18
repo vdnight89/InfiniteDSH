@@ -21,7 +21,16 @@ export {
   buildProgressionGuard,
   buildProseOnlyGuard,
 } from './guards.js'
-export { cleanProse, isOpeningInstruction, exportTranscript, formatArchive, chapterHeading, chineseChapter } from './export.js'
+export {
+  cleanProse,
+  extractStoryBody,
+  isPlanningDump,
+  isOpeningInstruction,
+  exportTranscript,
+  formatArchive,
+  chapterHeading,
+  chineseChapter,
+} from './export.js'
 export { parseForkOptions } from './forks.js'
 export { suggestExportTitles, safeBookFileName } from './titles.js'
 export {

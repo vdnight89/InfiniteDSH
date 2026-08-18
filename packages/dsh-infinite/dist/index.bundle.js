@@ -200,26 +200,28 @@ function formatRandomEvent(entry) {
 
 // packages/infinite-core/dist/guards.js
 function buildNarrativeGuard() {
-  return `\u3010\u53D9\u4E8B\u62A4\u680F\xB7\u5FC5\u987B\u4E25\u683C\u9075\u5B88\u3011
-1. \u4E16\u754C\u662F\u6D3B\u7684\uFF1A\u5267\u60C5\u5FC5\u987B\u6709\u5916\u90E8\u4E16\u754C\u53C2\u4E0E\u3002\u89C6\u5267\u60C5\u9700\u8981\u5F15\u5165\u6216\u5EF6\u7EED\u5176\u4ED6 NPC\u3001\u52BF\u529B\u4E0E\u73AF\u5883\u4E8B\u4EF6\uFF1B\u4E25\u7981\u5168\u7BC7\u53EA\u6709\u7537\u5973\u4E3B\u89D2\u4E24\u4E2A\u4EBA\u5BF9\u8BDD\u4E92\u52A8\uFF0C\u4E25\u7981\u5916\u90E8\u4E16\u754C\u6C38\u8FDC\u9759\u6B62\u3002
-2. \u89D2\u8272\u7BA1\u7406\uFF1A\u4F18\u5148\u590D\u7528\u5DF2\u51FA\u573A\u89D2\u8272\uFF1B\u6BCF\u6BB5\u6700\u591A\u5F15\u5165 1 \u4E2A\u65B0\u89D2\u8272\uFF1B\u540C\u65F6\u6D3B\u8DC3\u7684\u4E3B\u8981\u89D2\u8272\u4E0D\u8D85\u8FC7 3-4 \u4E2A\uFF1B\u65B0\u89D2\u8272\u5165\u573A\u65F6\u4E00\u6B21\u4EA4\u4EE3\u53EF\u8BB0\u5FC6\u7684\u8EAB\u4EFD\u6216\u7279\u5F81\u3002
-3. \u4E3B\u89D2\u4E3A\u4E2D\u5FC3\uFF1A\u7528\u6237\u626E\u6F14\u7684\u4E3B\u89D2\u662F\u53D9\u4E8B\u4E2D\u5FC3\u4E0E\u89C6\u89D2\u951A\u70B9\u3002`;
+  return `\u3010\u53D9\u4E8B\u62A4\u680F\xB7\u5FC3\u91CC\u9075\u5B88\uFF0C\u7981\u6B62\u5199\u8FDB\u6B63\u6587\u3011
+1. \u4E16\u754C\u662F\u6D3B\u7684\uFF1A\u8981\u6709 NPC\u3001\u52BF\u529B\u6216\u73AF\u5883\u4E8B\u4EF6\uFF1B\u4E0D\u8981\u6574\u6BB5\u53EA\u5269\u4E24\u4E2A\u4EBA\u8BF4\u8BDD\u3002
+2. \u89D2\u8272\u7BA1\u7406\uFF1A\u4F18\u5148\u590D\u7528\u5DF2\u51FA\u573A\u7684\u4EBA\uFF1B\u6BCF\u6BB5\u6700\u591A\u65B0\u6765 1 \u4E2A\uFF1B\u540C\u65F6\u62A2\u620F\u7684\u4E0D\u8D85\u8FC7\u4E09\u56DB\u4E2A\u3002
+3. \u4E3B\u89D2\u662F\u89C6\u89D2\u951A\u70B9\u3002`;
 }
 function buildProgressionGuard() {
-  return `\u3010\u5267\u60C5\u63A8\u8FDB\xB7\u5FC5\u987B\u4E25\u683C\u9075\u5B88\u3011
-1. \u6BCF\u6BB5\u56DE\u590D\u5FC5\u987B\u63A8\u8FDB\u81F3\u5C11\u4E00\u4E2A\u5267\u60C5\u8981\u7D20\uFF1A\u65B0\u4E8B\u4EF6\u3001\u65B0\u4FE1\u606F\u3001\u51B2\u7A81\u5347\u7EA7\u3001\u5173\u7CFB\u53D8\u5316\u3001\u573A\u666F\u8F6C\u79FB\u6216\u60C5\u611F\u8F6C\u6298\u3002
-2. \u4E25\u7981\u539F\u5730\u6253\u8F6C\uFF1A\u4E0D\u91CD\u590D\u5DF2\u5199\u8FC7\u7684\u573A\u666F\u4E0E\u5BF9\u8BDD\uFF1B\u4E0D\u5F97\u7528\u7A7A\u6CDB\u6536\u5C3E\u6577\u884D\u3002
-3. \u7ED3\u5C3E\u7559\u94A9\uFF1A\u7559\u4E0B\u4E00\u5904\u5177\u4F53\u53EF\u7EE7\u7EED\u7684\u884C\u52A8\u3001\u9009\u62E9\u6216\u60AC\u5FF5\u3002`;
+  return `\u3010\u5267\u60C5\u63A8\u8FDB\xB7\u5FC3\u91CC\u9075\u5B88\uFF0C\u7981\u6B62\u5199\u8FDB\u6B63\u6587\u3011
+1. \u6BCF\u6BB5\u63A8\u8FDB\u4E00\u4EF6\u4E8B\uFF1A\u65B0\u4E8B\u4EF6\u3001\u65B0\u4FE1\u606F\u3001\u51B2\u7A81\u3001\u5173\u7CFB\u3001\u6362\u573A\u6216\u60C5\u611F\u8F6C\u6298\u3002
+2. \u4E0D\u8981\u91CD\u590D\u5DF2\u7ECF\u5199\u8FC7\u7684\u573A\u9762\u3002
+3. \u6536\u5728\u4E00\u4E2A\u8FD8\u80FD\u5F80\u4E0B\u8D70\u7684\u94A9\u5B50\u4E0A\u3002`;
 }
 function buildProseOnlyGuard() {
-  return `\u3010\u8F93\u51FA\u8981\u6C42\u3011\u5148\u8F93\u51FA\u6545\u4E8B\u6B63\u6587\u672C\u8EAB\u3002\u4E0D\u8981\u8F93\u51FA\u7AE0\u8282\u540D\u3001\u573A\u666F\u4FE1\u606F\u7B49\u533A\u5757\u6807\u7B7E\uFF0C\u4E0D\u8981\u6DFB\u52A0\u683C\u5F0F\u8BF4\u660E\u6216\u524D\u540E\u7F00\uFF0C\u4E0D\u8981\u8F93\u51FA markdown \u6807\u9898\u3002
-\u6B63\u6587\u7ED3\u675F\u540E\u5FC5\u987B\u53E6\u8D77\u4E00\u5757\uFF1A
+  return `\u3010\u8F93\u51FA\u8981\u6C42\u3011\u4F60\u7684\u56DE\u590D\u4ECE\u7B2C\u4E00\u4E2A\u5B57\u8D77\u5C31\u662F\u5C0F\u8BF4\u53D9\u8FF0\u6216\u5BF9\u8BDD\u3002
+\u7981\u6B62\u5199\u51FA\uFF1A\u6784\u601D\u3001\u63D0\u7EB2\u3001\u89C4\u5219\u590D\u8FF0\u3001\u89D2\u8272\u6E05\u5355\u3001\u573A\u666F\u8BF4\u660E\u3001\u5BF9\u81EA\u5DF1\u8BF4\u8BDD\u3001\u82F1\u6587\u6307\u4EE4\u3001\u62A4\u680F\u539F\u6587\u3002
+\u4E0D\u8981\u8F93\u51FA\u7AE0\u8282\u540D\u3001\u533A\u5757\u6807\u7B7E\u3001markdown \u6807\u9898\u3001\u683C\u5F0F\u8BF4\u660E\u3002
+\u5199\u5B8C\u6B63\u6587\u540E\u53E6\u8D77\u4E00\u5757\uFF1A
 \u3010\u6B67\u8DEF\u3011
 1. \uFF08\u4E0D\u8D85\u8FC7\u5341\u516D\u5B57\u7684\u5177\u4F53\u884C\u52A8\uFF09
 2. \uFF08\u4E0D\u8D85\u8FC7\u5341\u516D\u5B57\u7684\u5177\u4F53\u884C\u52A8\uFF09
 3. \uFF08\u4E0D\u8D85\u8FC7\u5341\u516D\u5B57\u7684\u5177\u4F53\u884C\u52A8\uFF09
 \u4EA6\u53EF\u81EA\u5DF1\u5199\u4E00\u6761\u522B\u7684\u8DEF\u3002
-\u3010\u6B67\u8DEF\u3011\u4E0D\u662F\u6B63\u6587\uFF0C\u4E0D\u8981\u628A\u5B83\u5199\u6210\u89D2\u8272\u53F0\u8BCD\u3002`;
+\u3010\u6B67\u8DEF\u3011\u4E0D\u662F\u6B63\u6587\uFF0C\u4E0D\u8981\u5199\u6210\u89D2\u8272\u53F0\u8BCD\u3002`;
 }
 
 // packages/infinite-core/dist/export.js
@@ -232,6 +234,49 @@ function cleanProse(text) {
   const withoutFork = withoutFences.replace(FORK_BLOCK, "");
   const withoutMeta = withoutFork.split(/\r?\n/).filter((line) => !META_LINE.test(line) && !/^(?:亦可自己写一条)/.test(line.trim())).join("\n").replace(BODY_TAG, "");
   return withoutMeta.replace(/^\s*#{1,6}\s+.*$/gm, "").replace(/\n{3,}/g, "\n\n").trim();
+}
+var PLANNING_MARKERS = [
+  /We need answer/i,
+  /Need obey/i,
+  /output story body/i,
+  /fiction narrative/i,
+  /用户让我写/,
+  /需要遵守叙事护栏/,
+  /我要推进剧情/,
+  /让我构思/,
+  /我写正文/,
+  /当前场景：/,
+  /已出场角色：/,
+  /剧情要素：/,
+  /不要输出章节名/,
+  /同时活跃的主要角色/
+];
+function isPlanningDump(text) {
+  const t = text.trim();
+  if (!t)
+    return false;
+  if (/^(?:We need|Need obey|用户让我|我要推进|让我构思|我写正文)/i.test(t))
+    return true;
+  let hits = 0;
+  for (const marker of PLANNING_MARKERS) {
+    if (marker.test(t))
+      hits += 1;
+    if (hits >= 2)
+      return true;
+  }
+  return false;
+}
+function extractStoryBody(text) {
+  const cleaned = cleanProse(text);
+  if (!cleaned)
+    return "";
+  if (!isPlanningDump(cleaned))
+    return cleaned;
+  const split = cleaned.split(/(?:^|\n)我写正文[^\n]*/).pop() ?? "";
+  const maybe = cleanProse(split);
+  if (maybe && maybe !== cleaned && !isPlanningDump(maybe) && maybe.length > 40)
+    return maybe;
+  return "";
 }
 function isOpeningInstruction(text) {
   const t = text.trim();
@@ -251,7 +296,7 @@ function exportTranscript(title, protagonist, messages, includePlayer, world = "
         bridges.push(body2);
       continue;
     }
-    const body = cleanProse(message.text);
+    const body = extractStoryBody(message.text);
     if (!body)
       continue;
     chapters.push({
@@ -276,6 +321,9 @@ function exportTranscript(title, protagonist, messages, includePlayer, world = "
   if (bridges.length > 0 && includePlayer) {
     for (const action of bridges)
       lines.push(`*\u4F60\uFF1A${action}*`, "");
+  }
+  if (chapters.length === 0) {
+    lines.push("\uFF08\u6B64\u7A3F\u5C1A\u65E0\u53EF\u4EE5\u8A8A\u5F55\u7684\u6B63\u6587\u3002\u6A21\u578B\u82E5\u628A\u6784\u601D\u5199\u51FA\u6765\u4E86\uFF0C\u90A3\u4E9B\u5B57\u4E0D\u4F1A\u8FDB\u4E66\u3002\uFF09", "");
   }
   return `${lines.join("\n").replace(/\n{3,}/g, "\n\n").trim()}
 `;
@@ -1138,10 +1186,10 @@ function sessionMessages(session) {
 }
 function recentText(session, last = 4) {
   const msgs = sessionMessages(session).filter((m) => m.role !== "system");
-  return msgs.slice(-last).map((m) => m.role === "assistant" ? cleanProse(m.text) : m.text).join("\n");
+  return msgs.slice(-last).map((m) => m.role === "assistant" ? extractStoryBody(m.text) : m.text).filter((text) => text.trim().length > 0).join("\n");
 }
 function hasAssistantProse(session) {
-  return sessionMessages(session).some((m) => m.role === "assistant" && cleanProse(m.text).length > 0);
+  return sessionMessages(session).some((m) => m.role === "assistant" && extractStoryBody(m.text).length > 0);
 }
 function lastAssistantRaw(session) {
   const msgs = sessionMessages(session);
@@ -1523,7 +1571,7 @@ async function handleExport(ctx, config, inv) {
     return { kind: "error", text: noWorldYet() };
   const world = bookNameForTemplate(meta.templateId);
   const messages = sessionMessages(session);
-  const prose = messages.filter((message) => message.role === "assistant").map((message) => cleanProse(message.text)).join("\n");
+  const prose = messages.filter((message) => message.role === "assistant").map((message) => extractStoryBody(message.text)).join("\n");
   const suggestions = suggestExportTitles(world, meta.protagonist, prose);
   let title = suggestions[0] || sessionTitle(world, meta.protagonist);
   const answers = await askUser(ctx, inv, [{
@@ -1703,7 +1751,13 @@ function installUserPreset(config) {
       } catch {
         destPreset = "";
       }
-      if (!/诸天万界/.test(destPreset)) {
+      let destPersona = "";
+      try {
+        destPersona = readFileSync3(join4(dest, "agent.cordis.yml"), "utf8");
+      } catch {
+        destPersona = "";
+      }
+      if (!/诸天万界/.test(destPreset) || !/禁止把思考/.test(destPersona)) {
         writeFileSync2(join4(dest, "preset.yml"), readFileSync3(join4(src, "preset.yml")));
         writeFileSync2(join4(dest, "agent.cordis.yml"), readFileSync3(join4(src, "agent.cordis.yml")));
       }
@@ -1813,7 +1867,7 @@ function registerPrompt(ctx, config) {
       if (meta?.progressionGuard)
         parts.push(buildProgressionGuard());
       if (assemble.agent && !hasAssistantProse(assemble.agent.session)) {
-        parts.push("\u6B64\u754C\u5C1A\u65E0\u6B63\u6587\u3002\u6839\u636E\u5929\u4E66\u5F00\u7BC7\u79CD\u5B50\uFF0C\u76F4\u63A5\u5199\u4E0B\u7B2C\u4E00\u6BB5\u53D9\u8FF0\uFF0C\u4E0D\u8981\u590D\u8FF0\u8BBE\u5B9A\u6761\u76EE\u3002\u5199\u5B8C\u540E\u63A5\u3010\u6B67\u8DEF\u3011\u4E09\u62E9\u4E0E\u300C\u4EA6\u53EF\u81EA\u5DF1\u5199\u300D\u3002");
+        parts.push("\u6B64\u754C\u5C1A\u65E0\u6B63\u6587\u3002\u6839\u636E\u5929\u4E66\u5F00\u7BC7\u79CD\u5B50\u76F4\u63A5\u5F00\u5199\uFF0C\u4E0D\u8981\u590D\u8FF0\u8BBE\u5B9A\uFF0C\u4E0D\u8981\u5148\u5217\u63D0\u7EB2\u3002\u5199\u5B8C\u540E\u63A5\u3010\u6B67\u8DEF\u3011\u4E09\u62E9\u3002");
       }
       return parts.join("\n\n");
     }

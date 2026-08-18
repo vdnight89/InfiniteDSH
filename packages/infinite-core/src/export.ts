@@ -20,6 +20,47 @@ export function cleanProse(text: string): string {
     .trim()
 }
 
+const PLANNING_MARKERS: readonly RegExp[] = [
+  /We need answer/i,
+  /Need obey/i,
+  /output story body/i,
+  /fiction narrative/i,
+  /用户让我写/,
+  /需要遵守叙事护栏/,
+  /我要推进剧情/,
+  /让我构思/,
+  /我写正文/,
+  /当前场景：/,
+  /已出场角色：/,
+  /剧情要素：/,
+  /不要输出章节名/,
+  /同时活跃的主要角色/,
+]
+
+/** True when the blob is a writing plan or instruction echo, not fiction. */
+export function isPlanningDump(text: string): boolean {
+  const t = text.trim()
+  if (!t) return false
+  if (/^(?:We need|Need obey|用户让我|我要推进|让我构思|我写正文)/i.test(t)) return true
+  let hits = 0
+  for (const marker of PLANNING_MARKERS) {
+    if (marker.test(t)) hits += 1
+    if (hits >= 2) return true
+  }
+  return false
+}
+
+/** Keep only the story; drop planning dumps and instruction echoes. */
+export function extractStoryBody(text: string): string {
+  const cleaned = cleanProse(text)
+  if (!cleaned) return ''
+  if (!isPlanningDump(cleaned)) return cleaned
+  const split = cleaned.split(/(?:^|\n)我写正文[^\n]*/).pop() ?? ''
+  const maybe = cleanProse(split)
+  if (maybe && maybe !== cleaned && !isPlanningDump(maybe) && maybe.length > 40) return maybe
+  return ''
+}
+
 export function isOpeningInstruction(text: string): boolean {
   const t = text.trim()
   return t.startsWith('【开局】') || t.startsWith('[开局]') || t === '启程。' || t === '启程'
@@ -46,7 +87,7 @@ export function exportTranscript(
       if (includePlayer && body && !isOpeningInstruction(body)) bridges.push(body)
       continue
     }
-    const body = cleanProse(message.text)
+    const body = extractStoryBody(message.text)
     if (!body) continue
     chapters.push({
       heading: chapterHeading(chapters.length + 1, body),
@@ -70,6 +111,9 @@ export function exportTranscript(
   }
   if (bridges.length > 0 && includePlayer) {
     for (const action of bridges) lines.push(`*你：${action}*`, '')
+  }
+  if (chapters.length === 0) {
+    lines.push('（此稿尚无可以誊录的正文。模型若把构思写出来了，那些字不会进书。）', '')
   }
   return `${lines.join('\n').replace(/\n{3,}/g, '\n\n').trim()}\n`
 }
