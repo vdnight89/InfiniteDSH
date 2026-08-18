@@ -63,10 +63,16 @@ dsh web
 ## 入界实录
 
 <p align="center">
-  <img src="docs/截图1.png" alt="踏入哪一界：点选一界，天书落入本会话" width="45%">
-  <img src="docs/截图2.png" alt="谁为天命之人：点选或自写名字" width="45%">
-  <img src="docs/截图2.1.png" alt="三键：启程 / 另择开局 / 更换天命之人" width="45%">
-  <img src="docs/截图2.2.png" alt="正文落笔，文末弹出【歧路】三择" width="45%">
+  <img src="docs/截图0.png" alt="第〇步：新会话，在预设下拉里选择 诸天万界DSH" width="46%">
+  <img src="docs/截图1.png" alt="踏入哪一界：点选一界，天书落入本会话" width="46%">
+</p>
+<p align="center">
+  <img src="docs/截图2.png" alt="谁为天命之人：点选或自写名字" width="46%">
+  <img src="docs/截图2.1.png" alt="三键：启程 / 另择开局 / 更换天命之人" width="46%">
+</p>
+<p align="center">
+  <img src="docs/截图2.2.png" alt="正文落笔，文末弹出【歧路】三择" width="46%">
+  <img src="docs/截图3.png" alt="/export-story 誊书成稿" width="46%">
 </p>
 
 ---
