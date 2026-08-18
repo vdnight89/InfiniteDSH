@@ -165,6 +165,13 @@ export function saveExport(root: string, text: string): string {
   return path
 }
 
+export function saveNamedExport(dir: string, fileName: string, text: string): string {
+  mkdirSync(dir, { recursive: true })
+  const path = join(dir, fileName)
+  writeFileSync(path, text, 'utf8')
+  return path
+}
+
 function copyTree(from: string, to: string): void {
   mkdirSync(to, { recursive: true })
   for (const name of readdirSync(from)) {

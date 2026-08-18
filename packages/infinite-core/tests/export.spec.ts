@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { cleanProse, exportTranscript, formatArchive, isOpeningInstruction } from '../src/export.ts'
 import { parseForkOptions } from '../src/forks.ts'
+import { safeBookFileName, suggestExportTitles } from '../src/titles.ts'
 
 describe('cleanProse', () => {
   it('strips the 歧路 block from exported prose', () => {
@@ -60,6 +61,19 @@ describe('parseForkOptions', () => {
 
   it('returns empty when there is no 歧路 block', () => {
     expect(parseForkOptions('只有正文。')).toEqual([])
+  })
+})
+
+describe('suggestExportTitles', () => {
+  it('leads with world and protagonist, then a quote clip', () => {
+    const titles = suggestExportTitles('奇幻', '谢无妄', '巷口忽然静了。“谁的人头，谁的价。”猎人把碗推过来。')
+    expect(titles[0]).toBe('奇幻·谢无妄')
+    expect(titles).toContain('谁的人头，谁的价')
+  })
+
+  it('builds a safe windows file name', () => {
+    expect(safeBookFileName('奇幻·谢无妄')).toBe('奇幻·谢无妄.txt')
+    expect(safeBookFileName('a<b>:"c')).toBe('a b c.txt')
   })
 })
 

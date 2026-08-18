@@ -25,12 +25,13 @@ export declare function boundTo(world: string): string;
 export declare function noWorldYet(): string;
 export declare function castNeedName(): string;
 export declare function castDone(name: string, count: number): string;
-export declare function exportDone(chars: number, path: string): string;
+export declare function exportDone(chars: number, title: string, path: string, revealed: boolean): string;
 export declare function sessionTitle(world: string, protagonist: string): string;
 export declare const FIRST_STEP_TEXT = "\u542F\u7A0B\u3002";
 export declare const FORK_QUESTION = "\u8D70\u54EA\u4E00\u6761\u6B67\u8DEF\uFF1F";
-export declare const FORK_DETAIL = "\u70B9\u4E00\u6761\u7EE7\u7EED\u3002\u4E5F\u53EF\u5728\u4E0B\u65B9\u81EA\u5DF1\u5199\u4E00\u6761\u522B\u7684\u8DEF\u3002";
-export declare const WRITE_OWN = "\u81EA\u5DF1\u5199\u4E00\u6761\u522B\u7684\u8DEF";
+export declare const FORK_DETAIL = "\u70B9\u4E0A\u9762\u4E09\u6761\u4E4B\u4E00\u3002\u8981\u81EA\u5DF1\u8D70\uFF0C\u5199\u5728\u4E0B\u65B9\u300C\u8F93\u5165\u4F60\u7684\u7B54\u6848\u300D\u3002";
+export declare const TITLE_QUESTION = "\u6B64\u7A3F\u5982\u4F55\u9898\u540D\uFF1F";
+export declare const TITLE_DETAIL = "\u70B9\u4E00\u4E2A\u62DF\u9898\uFF0C\u6216\u5728\u4E0B\u65B9\u81EA\u5DF1\u5199\u3002";
 export declare function isEmbarkChoice(picked: string): boolean;
 export declare const COMMANDS_COPY: {
     readonly new: {

@@ -23,6 +23,7 @@ export {
 } from './guards.js'
 export { cleanProse, isOpeningInstruction, exportTranscript, formatArchive } from './export.js'
 export { parseForkOptions } from './forks.js'
+export { suggestExportTitles, safeBookFileName } from './titles.js'
 export {
   TEMPLATE_IDS,
   TOPIC_CHOICES,

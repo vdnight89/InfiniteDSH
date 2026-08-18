@@ -1,6 +1,6 @@
 import { parseForkOptions } from 'infinite-core';
 import { askUser, pickAnswer } from './ask.js';
-import { ASK_HEADER, FORK_DETAIL, FORK_QUESTION, WRITE_OWN } from './copy.js';
+import { ASK_HEADER, FORK_DETAIL, FORK_QUESTION } from './copy.js';
 import { lastAssistantRaw } from './transcript.js';
 import { liveAgent, wakeSoon } from './wake.js';
 const inFlight = new Set();
@@ -22,18 +22,15 @@ export async function offerForks(ctx, session) {
                 header: ASK_HEADER,
                 question: FORK_QUESTION,
                 detail: FORK_DETAIL,
-                options: [
-                    ...options.map((label, index) => ({
-                        label,
-                        description: `歧路 ${index + 1}`,
-                    })),
-                    { label: WRITE_OWN, description: '不走列出的路，写下你的行动。' },
-                ],
+                options: options.map((label, index) => ({
+                    label,
+                    description: `歧路 ${index + 1}`,
+                })),
             }]);
         if (!answers)
             return;
         const picked = pickAnswer(answers, 'fork');
-        if (!picked || picked === WRITE_OWN)
+        if (!picked)
             return;
         wakeSoon(agent, picked);
     }

@@ -302,6 +302,33 @@ function parseForkOptions(text) {
   return out;
 }
 
+// packages/infinite-core/dist/titles.js
+function suggestExportTitles(world, protagonist, prose) {
+  const titles = [];
+  const pair = [world, protagonist].filter(Boolean).join("\xB7");
+  if (pair)
+    titles.push(pair);
+  const quote = prose.match(/[“"]([^”"]{2,16})[”"]/);
+  pushUnique(titles, clipTitle(quote?.[1] ?? ""));
+  const sentence = prose.split(/[。！？\n]/).map((part) => part.trim()).find((part) => part.length >= 6) ?? "";
+  pushUnique(titles, clipTitle(sentence.replace(/^[“"]|[”"]$/g, "")));
+  return titles.slice(0, 3);
+}
+function safeBookFileName(title) {
+  const cleaned = title.replace(/[<>:"/\\|?*\u0000-\u001f]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 40);
+  return `${cleaned || "\u8BF8\u5929\u4E07\u754C\u4E66\u7A3F"}.txt`;
+}
+function clipTitle(raw) {
+  const cut = raw.replace(/[。！？…]+$/g, "").trim();
+  if (cut.length < 4)
+    return "";
+  return cut.slice(0, 16);
+}
+function pushUnique(titles, next) {
+  if (next && !titles.includes(next))
+    titles.push(next);
+}
+
 // packages/infinite-core/dist/catalog.generated.js
 var TEMPLATE_CATALOG = [
   {
@@ -693,16 +720,18 @@ function castNeedName() {
 function castDone(name2, count) {
   return `\u5929\u547D\u4E4B\u4EBA\u73B0\u4E3A ${name2}\uFF08${count} \u5F20\u89D2\u8272\u5361\uFF09\u3002`;
 }
-function exportDone(chars, path) {
-  return `\u5DF2\u8A8A\u51FA ${chars} \u5B57\u4E66\u7A3F\uFF1A${path}`;
+function exportDone(chars, title, path, revealed) {
+  const open = revealed ? "\u5DF2\u6253\u5F00\u6240\u5728\u6587\u4EF6\u5939\u3002" : "\u53F3\u4FA7\u6587\u4EF6\u6811\u5373\u53EF\u6253\u5F00\u3002";
+  return `\u5DF2\u8A8A\u51FA ${chars} \u5B57\u4E66\u7A3F\u300A${title}\u300B\uFF1A${path}\u3002${open}`;
 }
 function sessionTitle(world, protagonist) {
   return `${world}\xB7${protagonist}`;
 }
 var FIRST_STEP_TEXT = "\u542F\u7A0B\u3002";
 var FORK_QUESTION = "\u8D70\u54EA\u4E00\u6761\u6B67\u8DEF\uFF1F";
-var FORK_DETAIL = "\u70B9\u4E00\u6761\u7EE7\u7EED\u3002\u4E5F\u53EF\u5728\u4E0B\u65B9\u81EA\u5DF1\u5199\u4E00\u6761\u522B\u7684\u8DEF\u3002";
-var WRITE_OWN = "\u81EA\u5DF1\u5199\u4E00\u6761\u522B\u7684\u8DEF";
+var FORK_DETAIL = "\u70B9\u4E0A\u9762\u4E09\u6761\u4E4B\u4E00\u3002\u8981\u81EA\u5DF1\u8D70\uFF0C\u5199\u5728\u4E0B\u65B9\u300C\u8F93\u5165\u4F60\u7684\u7B54\u6848\u300D\u3002";
+var TITLE_QUESTION = "\u6B64\u7A3F\u5982\u4F55\u9898\u540D\uFF1F";
+var TITLE_DETAIL = "\u70B9\u4E00\u4E2A\u62DF\u9898\uFF0C\u6216\u5728\u4E0B\u65B9\u81EA\u5DF1\u5199\u3002";
 function isEmbarkChoice(picked) {
   const t = picked.trim();
   return t === EMBARK || t === FIRST_STEP_TEXT || t.startsWith(EMBARK);
@@ -938,6 +967,12 @@ function saveExport(root, text) {
   writeFileSync(path, text, "utf8");
   return path;
 }
+function saveNamedExport(dir, fileName, text) {
+  mkdirSync(dir, { recursive: true });
+  const path = join2(dir, fileName);
+  writeFileSync(path, text, "utf8");
+  return path;
+}
 function copyTree(from, to) {
   mkdirSync(to, { recursive: true });
   for (const name2 of readdirSync(from)) {
@@ -1076,6 +1111,28 @@ function summaryFromCompaction(data) {
   if (typeof data.summary === "string")
     return data.summary;
   return blocksToText(data.summary);
+}
+
+// packages/dsh-infinite/dist/reveal.js
+import { spawn } from "node:child_process";
+import { dirname as dirname2 } from "node:path";
+function revealFile(filePath) {
+  if (process.env.VITEST)
+    return false;
+  try {
+    if (process.platform === "win32") {
+      spawn("explorer.exe", [`/select,${filePath}`], { detached: true, stdio: "ignore" }).unref();
+      return true;
+    }
+    if (process.platform === "darwin") {
+      spawn("open", ["-R", filePath], { detached: true, stdio: "ignore" }).unref();
+      return true;
+    }
+    spawn("xdg-open", [dirname2(filePath)], { detached: true, stdio: "ignore" }).unref();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // packages/dsh-infinite/dist/wake.js
@@ -1411,16 +1468,39 @@ async function handleCast(ctx, config, inv) {
   const cards = loadCharacters(root);
   return { kind: "success", text: castDone(applied, cards.length) };
 }
-function handleExport(ctx, config, inv) {
+async function handleExport(ctx, config, inv) {
   const includePlayer = /\bplayer\b/i.test(inv.rawInput);
-  const root = infiniteRoot(resolveSessionDir(ctx, sessionOf(inv), config));
+  const session = sessionOf(inv);
+  const root = infiniteRoot(resolveSessionDir(ctx, session, config));
   const meta = loadMeta(root);
   if (!meta)
     return { kind: "error", text: noWorldYet() };
-  const title = bookNameForTemplate(meta.templateId);
-  const text = exportTranscript(title, meta.protagonist, sessionMessages(sessionOf(inv)), includePlayer);
-  const path = saveExport(root, text);
-  return { kind: "success", text: exportDone(text.length, path) };
+  const world = bookNameForTemplate(meta.templateId);
+  const messages = sessionMessages(session);
+  const prose = messages.filter((message) => message.role === "assistant").map((message) => cleanProse(message.text)).join("\n");
+  const suggestions = suggestExportTitles(world, meta.protagonist, prose);
+  let title = suggestions[0] || sessionTitle(world, meta.protagonist);
+  const answers = await askUser(ctx, inv, [{
+    id: "title",
+    header: ASK_HEADER,
+    question: TITLE_QUESTION,
+    detail: TITLE_DETAIL,
+    options: suggestions.map((label, index) => ({
+      label,
+      description: index === 0 ? "\u62DF\u9898\uFF08\u63A8\u8350\uFF09" : "\u53E6\u62DF"
+    }))
+  }]);
+  if (answers) {
+    const picked = pickAnswer(answers, "title");
+    if (picked)
+      title = picked;
+  }
+  const text = exportTranscript(title, meta.protagonist, messages, includePlayer);
+  saveExport(root, text);
+  const destDir = session.header?.cwd || process.cwd();
+  const dest = saveNamedExport(destDir, safeBookFileName(title), text);
+  const revealed = revealFile(dest);
+  return { kind: "success", text: exportDone(text.length, title, dest, revealed) };
 }
 function registerCommands(ctx, config) {
   for (const [name2, copy] of Object.entries(COMMANDS_COPY)) {
@@ -1438,8 +1518,8 @@ function registerCommands(ctx, config) {
 import { existsSync, readFileSync as readFileSync2, statSync as statSync3 } from "node:fs";
 import { extname, join as join3, normalize as normalize2, sep } from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
-import { dirname as dirname2 } from "node:path";
-var STATIC_DIR = join3(dirname2(fileURLToPath2(import.meta.url)), "..", "static");
+import { dirname as dirname3 } from "node:path";
+var STATIC_DIR = join3(dirname3(fileURLToPath2(import.meta.url)), "..", "static");
 var MIME = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
@@ -1449,7 +1529,7 @@ var MIME = {
   ".json": "application/json; charset=utf-8"
 };
 function coversRoot(config) {
-  return join3(dirname2(templatesDir(config)), "covers");
+  return join3(dirname3(templatesDir(config)), "covers");
 }
 function safeCoverName(name2) {
   if (!/^[A-Za-z0-9._-]+$/.test(name2))
@@ -1548,7 +1628,7 @@ function registerCoverServer(ctx, config) {
 
 // packages/dsh-infinite/dist/install-preset.js
 import { mkdirSync as mkdirSync2, readdirSync as readdirSync3, readFileSync as readFileSync3, statSync as statSync4, writeFileSync as writeFileSync2 } from "node:fs";
-import { dirname as dirname3, join as join4 } from "node:path";
+import { dirname as dirname4, join as join4 } from "node:path";
 function copyTree2(from, to) {
   mkdirSync2(to, { recursive: true });
   for (const name2 of readdirSync3(from)) {
@@ -1585,7 +1665,7 @@ function installUserPreset(config) {
     }
   } catch {
   }
-  mkdirSync2(dirname3(dest), { recursive: true });
+  mkdirSync2(dirname4(dest), { recursive: true });
   copyTree2(src, dest);
   return dest;
 }
@@ -1609,18 +1689,15 @@ async function offerForks(ctx, session) {
       header: ASK_HEADER,
       question: FORK_QUESTION,
       detail: FORK_DETAIL,
-      options: [
-        ...options.map((label, index) => ({
-          label,
-          description: `\u6B67\u8DEF ${index + 1}`
-        })),
-        { label: WRITE_OWN, description: "\u4E0D\u8D70\u5217\u51FA\u7684\u8DEF\uFF0C\u5199\u4E0B\u4F60\u7684\u884C\u52A8\u3002" }
-      ]
+      options: options.map((label, index) => ({
+        label,
+        description: `\u6B67\u8DEF ${index + 1}`
+      }))
     }]);
     if (!answers)
       return;
     const picked = pickAnswer(answers, "fork");
-    if (!picked || picked === WRITE_OWN)
+    if (!picked)
       return;
     wakeSoon(agent, picked);
   } finally {

@@ -1,9 +1,10 @@
-import { KEEP_DEFAULT_OPENING, KEEP_DEFAULT_PROTAGONIST, TOPIC_CHOICES, bookNameForTemplate, defaultProtagonist, exportTranscript, isKeepDefaultChoice, parseCommandArgs, resolveTemplateId, templateIdFromLabel, topicChoice, } from 'infinite-core';
+import { KEEP_DEFAULT_OPENING, KEEP_DEFAULT_PROTAGONIST, TOPIC_CHOICES, bookNameForTemplate, cleanProse, defaultProtagonist, exportTranscript, isKeepDefaultChoice, safeBookFileName, suggestExportTitles, parseCommandArgs, resolveTemplateId, templateIdFromLabel, topicChoice, } from 'infinite-core';
 import { askUser, pickAnswer } from './ask.js';
-import { ASK_HEADER, BIND_QUESTION, CANCELLED, COMMANDS_COPY, EMBARK, FIRST_STEP_TEXT, isEmbarkChoice, OPENING_QUESTION, OVERWRITE_NO, OVERWRITE_QUESTION, OVERWRITE_YES, PROTAGONIST_QUESTION, REPICK_OPENING, REPICK_PROTAGONIST, TOPIC_DETAIL, TOPIC_QUESTION, boundTo, castDone, castNeedName, defaultBodyHint, embarkDetail, exportDone, needForceText, noWorldYet, openedEmbarked, openedWaiting, pickWorldHint, sessionTitle, unknownWorld, } from './copy.js';
+import { ASK_HEADER, BIND_QUESTION, CANCELLED, COMMANDS_COPY, EMBARK, FIRST_STEP_TEXT, isEmbarkChoice, OPENING_QUESTION, OVERWRITE_NO, OVERWRITE_QUESTION, OVERWRITE_YES, PROTAGONIST_QUESTION, REPICK_OPENING, REPICK_PROTAGONIST, TOPIC_DETAIL, TITLE_DETAIL, TITLE_QUESTION, TOPIC_QUESTION, boundTo, castDone, castNeedName, defaultBodyHint, embarkDetail, exportDone, needForceText, noWorldYet, openedEmbarked, openedWaiting, pickWorldHint, sessionTitle, unknownWorld, } from './copy.js';
 import { infiniteRoot, resolveSessionDir, templatesDir } from './paths.js';
-import { appendStoryBind, applyOpening, applyProtagonistIdentity, hasStory, listTemplateCharacters, listTemplatePlots, loadCharacters, loadMeta, saveExport, saveMeta, seedStory, } from './story-files.js';
+import { appendStoryBind, applyOpening, applyProtagonistIdentity, hasStory, listTemplateCharacters, listTemplatePlots, loadCharacters, loadMeta, saveExport, saveMeta, saveNamedExport, seedStory, } from './story-files.js';
 import { sessionMessages } from './transcript.js';
+import { revealFile } from './reveal.js';
 import { wakeSoon } from './wake.js';
 import { readdirSync } from 'node:fs';
 function sessionOf(inv) {
@@ -298,16 +299,42 @@ export async function handleCast(ctx, config, inv) {
     const cards = loadCharacters(root);
     return { kind: 'success', text: castDone(applied, cards.length) };
 }
-export function handleExport(ctx, config, inv) {
+export async function handleExport(ctx, config, inv) {
     const includePlayer = /\bplayer\b/i.test(inv.rawInput);
-    const root = infiniteRoot(resolveSessionDir(ctx, sessionOf(inv), config));
+    const session = sessionOf(inv);
+    const root = infiniteRoot(resolveSessionDir(ctx, session, config));
     const meta = loadMeta(root);
     if (!meta)
         return { kind: 'error', text: noWorldYet() };
-    const title = bookNameForTemplate(meta.templateId);
-    const text = exportTranscript(title, meta.protagonist, sessionMessages(sessionOf(inv)), includePlayer);
-    const path = saveExport(root, text);
-    return { kind: 'success', text: exportDone(text.length, path) };
+    const world = bookNameForTemplate(meta.templateId);
+    const messages = sessionMessages(session);
+    const prose = messages
+        .filter((message) => message.role === 'assistant')
+        .map((message) => cleanProse(message.text))
+        .join('\n');
+    const suggestions = suggestExportTitles(world, meta.protagonist, prose);
+    let title = suggestions[0] || sessionTitle(world, meta.protagonist);
+    const answers = await askUser(ctx, inv, [{
+            id: 'title',
+            header: ASK_HEADER,
+            question: TITLE_QUESTION,
+            detail: TITLE_DETAIL,
+            options: suggestions.map((label, index) => ({
+                label,
+                description: index === 0 ? '拟题（推荐）' : '另拟',
+            })),
+        }]);
+    if (answers) {
+        const picked = pickAnswer(answers, 'title');
+        if (picked)
+            title = picked;
+    }
+    const text = exportTranscript(title, meta.protagonist, messages, includePlayer);
+    saveExport(root, text);
+    const destDir = session.header?.cwd || process.cwd();
+    const dest = saveNamedExport(destDir, safeBookFileName(title), text);
+    const revealed = revealFile(dest);
+    return { kind: 'success', text: exportDone(text.length, title, dest, revealed) };
 }
 export function registerCommands(ctx, config) {
     for (const [name, copy] of Object.entries(COMMANDS_COPY)) {

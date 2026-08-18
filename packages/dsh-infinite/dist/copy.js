@@ -47,16 +47,18 @@ export function castNeedName() {
 export function castDone(name, count) {
     return `天命之人现为 ${name}（${count} 张角色卡）。`;
 }
-export function exportDone(chars, path) {
-    return `已誊出 ${chars} 字书稿：${path}`;
+export function exportDone(chars, title, path, revealed) {
+    const open = revealed ? '已打开所在文件夹。' : '右侧文件树即可打开。';
+    return `已誊出 ${chars} 字书稿《${title}》：${path}。${open}`;
 }
 export function sessionTitle(world, protagonist) {
     return `${world}·${protagonist}`;
 }
 export const FIRST_STEP_TEXT = '启程。';
 export const FORK_QUESTION = '走哪一条歧路？';
-export const FORK_DETAIL = '点一条继续。也可在下方自己写一条别的路。';
-export const WRITE_OWN = '自己写一条别的路';
+export const FORK_DETAIL = '点上面三条之一。要自己走，写在下方「输入你的答案」。';
+export const TITLE_QUESTION = '此稿如何题名？';
+export const TITLE_DETAIL = '点一个拟题，或在下方自己写。';
 export function isEmbarkChoice(picked) {
     const t = picked.trim();
     return t === EMBARK || t === FIRST_STEP_TEXT || t.startsWith(EMBARK);

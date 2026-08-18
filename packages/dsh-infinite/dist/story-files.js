@@ -144,6 +144,12 @@ export function saveExport(root, text) {
     writeFileSync(path, text, 'utf8');
     return path;
 }
+export function saveNamedExport(dir, fileName, text) {
+    mkdirSync(dir, { recursive: true });
+    const path = join(dir, fileName);
+    writeFileSync(path, text, 'utf8');
+    return path;
+}
 function copyTree(from, to) {
     mkdirSync(to, { recursive: true });
     for (const name of readdirSync(from)) {

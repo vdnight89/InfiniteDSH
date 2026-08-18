@@ -197,11 +197,17 @@ describe('dsh-infinite plugin', () => {
     const cast = await handleCast(ctx, config, inv('s2', '江澄'))
     expect(cast.kind).toBe('success')
     expect(loadMeta(infiniteRoot(resolveSessionDir(ctx, session('s2'), config)))?.protagonist).toBe('江澄')
-    const exported = handleExport(ctx, config, inv('s2', '', [
-      { type: 'user/message', data: { message: { content: [{ type: 'text', text: '【开局】开始' }] } } },
-      { type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '【正文】电梯门开了。' }] } } },
-      { type: 'user/message', data: { message: { content: [{ type: 'text', text: '走进去' }] } } },
-    ]))
+    const dest = mkdtempSync(join(tmpdir(), 'infinite-export-'))
+    dirs.push(dest)
+    const exported = await handleExport(ctx, config, {
+      agent: { session: { ...session('s2', [
+        { type: 'user/message', data: { message: { content: [{ type: 'text', text: '【开局】开始' }] } } },
+        { type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '【正文】电梯门开了。' }] } } },
+        { type: 'user/message', data: { message: { content: [{ type: 'text', text: '走进去' }] } } },
+      ]), header: { cwd: dest } } },
+      rawInput: '',
+      signal: new AbortController().signal,
+    })
     expect(exported.kind).toBe('success')
     const root = infiniteRoot(resolveSessionDir(ctx, session('s2'), config))
     const txt = readFileSync(join(root, 'export.txt'), 'utf8')
@@ -209,6 +215,8 @@ describe('dsh-infinite plugin', () => {
     expect(txt).not.toContain('【正文】')
     expect(txt).not.toContain('走进去')
     expect(txt).toContain('江澄')
+    expect(exported.text).toMatch(/现代·江澄/)
+    expect(readdirSync(dest).some((name) => name.endsWith('.txt'))).toBe(true)
   })
 
   it('draws a random event on turn/start and writes archive on compaction', async () => {
@@ -537,7 +545,10 @@ describe('dsh-infinite plugin', () => {
         return undefined
       },
       userQuestions: {
-        async ask() {
+        async ask(request: { questions: Array<{ options?: Array<{ label: string }> }> }) {
+          const labels = request.questions[0]?.options?.map((item) => item.label) ?? []
+          expect(labels).toHaveLength(3)
+          expect(labels.join('')).not.toMatch(/自己写/)
           return { answers: [{ id: 'fork', selected: ['推门进去'] }] }
         },
       },

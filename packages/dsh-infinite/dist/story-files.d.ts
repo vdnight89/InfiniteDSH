@@ -25,6 +25,7 @@ export declare function appendStoryBind(session: {
     append?: (type: string, data?: Record<string, unknown>) => void;
 }, data: Record<string, unknown>): void;
 export declare function saveExport(root: string, text: string): string;
+export declare function saveNamedExport(dir: string, fileName: string, text: string): string;
 export declare function templatePath(config: Required<PluginConfig>, templateId: TemplateId): string;
 export declare function seedStory(root: string, templateId: TemplateId, config: Required<PluginConfig>, force: boolean): StoryMeta;
 export declare function writeProtagonistCard(root: string, name: string): void;
