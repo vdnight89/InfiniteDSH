@@ -11,9 +11,12 @@ export function buildProgressionGuard() {
 3. 结尾留钩：留下一处具体可继续的行动、选择或悬念。`;
 }
 export function buildProseOnlyGuard() {
-    return `【输出要求】直接输出故事正文本身。不要输出章节名、场景信息、对话推荐等任何区块标签，不要添加格式说明或前后缀。不要在正文里写作者备忘、创作提示或括号标注，也不要输出 markdown 标题。`;
-}
-import { catalogEntry } from './topics.js';
-export function bookNameForTemplate(templateId) {
-    return catalogEntry(templateId)?.label || templateId;
+    return `【输出要求】先输出故事正文本身。不要输出章节名、场景信息等区块标签，不要添加格式说明或前后缀，不要输出 markdown 标题。
+正文结束后必须另起一块：
+【歧路】
+1. （不超过十六字的具体行动）
+2. （不超过十六字的具体行动）
+3. （不超过十六字的具体行动）
+亦可自己写一条别的路。
+【歧路】不是正文，不要把它写成角色台词。`;
 }

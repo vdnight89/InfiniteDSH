@@ -1,15 +1,17 @@
 import type { TranscriptMessage } from './types.js'
 
-const META_LINE = /^\s*【(?:章节名|场景信息|对话推荐|开局|世界规则|叙事护栏|剧情推进|输出要求|随机世界事件|角色|当前场景)】.*$/
+const META_LINE = /^\s*【(?:章节名|场景信息|对话推荐|开局|世界规则|叙事护栏|剧情推进|输出要求|随机世界事件|角色|当前场景|歧路)】.*$/
 const BODY_TAG = /【正文】/g
 const FENCE_BLOCK = /```[\s\S]*?```/g
+const FORK_BLOCK = /【歧路】[\s\S]*$/
 
 /** Drop template labels and author notes from one assistant blob. */
 export function cleanProse(text: string): string {
   const withoutFences = text.replace(FENCE_BLOCK, '')
-  const withoutMeta = withoutFences
+  const withoutFork = withoutFences.replace(FORK_BLOCK, '')
+  const withoutMeta = withoutFork
     .split(/\r?\n/)
-    .filter((line) => !META_LINE.test(line))
+    .filter((line) => !META_LINE.test(line) && !/^(?:亦可自己写一条)/.test(line.trim()))
     .join('\n')
     .replace(BODY_TAG, '')
   return withoutMeta
@@ -20,7 +22,7 @@ export function cleanProse(text: string): string {
 
 export function isOpeningInstruction(text: string): boolean {
   const t = text.trim()
-  return t.startsWith('【开局】') || t.startsWith('[开局]')
+  return t.startsWith('【开局】') || t.startsWith('[开局]') || t === '启程。' || t === '启程'
 }
 
 /**

@@ -2,7 +2,14 @@ import { describe, expect, it } from 'vitest'
 import { defaultMeta, formatStoryMeta, parseLoreEntry, parseStoryMeta } from '../src/frontmatter.ts'
 import { TEMPLATE_CATALOG } from '../src/catalog.generated.ts'
 import { coverFileForLabel } from '../src/covers.ts'
-import { parseCommandArgs, resolveTemplateId, templateIdFromLabel } from '../src/topics.ts'
+import {
+  KEEP_DEFAULT_OPENING,
+  KEEP_DEFAULT_PROTAGONIST,
+  isKeepDefaultChoice,
+  parseCommandArgs,
+  resolveTemplateId,
+  templateIdFromLabel,
+} from '../src/topics.ts'
 
 describe('parseLoreEntry', () => {
   it('reads front matter lists and booleans', () => {
@@ -72,6 +79,16 @@ describe('topics', () => {
     expect(coverFileForLabel('修仙')).toBe('cultivation.jpg')
     expect(coverFileForLabel('梁组')).toBe('liang.jpg')
     expect(coverFileForLabel('鲸鱼娘（推荐）')).toBe('whale-girl.jpg')
+    expect(coverFileForLabel('林晏')).toBe('campus.jpg')
+    expect(coverFileForLabel('周慎')).toBe('apocalypse.jpg')
+  })
+
+  it('treats recommended default labels as keep-default', () => {
+    expect(KEEP_DEFAULT_PROTAGONIST).toBe('以此界默认之身')
+    expect(KEEP_DEFAULT_OPENING).toBe('走此界默认开局')
+    expect(isKeepDefaultChoice('以此界默认之身（推荐）', KEEP_DEFAULT_PROTAGONIST)).toBe(true)
+    expect(isKeepDefaultChoice('走此界默认开局', KEEP_DEFAULT_OPENING)).toBe(true)
+    expect(isKeepDefaultChoice('周慎', KEEP_DEFAULT_PROTAGONIST)).toBe(false)
   })
 
   it('ships the imported AIRP catalog', () => {

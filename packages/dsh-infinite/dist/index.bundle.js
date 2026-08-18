@@ -198,6 +198,91 @@ function formatRandomEvent(entry) {
 \u3010${entry.category}\xB7${entry.title}\u3011${entry.content}`;
 }
 
+// packages/infinite-core/dist/guards.js
+function buildNarrativeGuard() {
+  return `\u3010\u53D9\u4E8B\u62A4\u680F\xB7\u5FC5\u987B\u4E25\u683C\u9075\u5B88\u3011
+1. \u4E16\u754C\u662F\u6D3B\u7684\uFF1A\u5267\u60C5\u5FC5\u987B\u6709\u5916\u90E8\u4E16\u754C\u53C2\u4E0E\u3002\u89C6\u5267\u60C5\u9700\u8981\u5F15\u5165\u6216\u5EF6\u7EED\u5176\u4ED6 NPC\u3001\u52BF\u529B\u4E0E\u73AF\u5883\u4E8B\u4EF6\uFF1B\u4E25\u7981\u5168\u7BC7\u53EA\u6709\u7537\u5973\u4E3B\u89D2\u4E24\u4E2A\u4EBA\u5BF9\u8BDD\u4E92\u52A8\uFF0C\u4E25\u7981\u5916\u90E8\u4E16\u754C\u6C38\u8FDC\u9759\u6B62\u3002
+2. \u89D2\u8272\u7BA1\u7406\uFF1A\u4F18\u5148\u590D\u7528\u5DF2\u51FA\u573A\u89D2\u8272\uFF1B\u6BCF\u6BB5\u6700\u591A\u5F15\u5165 1 \u4E2A\u65B0\u89D2\u8272\uFF1B\u540C\u65F6\u6D3B\u8DC3\u7684\u4E3B\u8981\u89D2\u8272\u4E0D\u8D85\u8FC7 3-4 \u4E2A\uFF1B\u65B0\u89D2\u8272\u5165\u573A\u65F6\u4E00\u6B21\u4EA4\u4EE3\u53EF\u8BB0\u5FC6\u7684\u8EAB\u4EFD\u6216\u7279\u5F81\u3002
+3. \u4E3B\u89D2\u4E3A\u4E2D\u5FC3\uFF1A\u7528\u6237\u626E\u6F14\u7684\u4E3B\u89D2\u662F\u53D9\u4E8B\u4E2D\u5FC3\u4E0E\u89C6\u89D2\u951A\u70B9\u3002`;
+}
+function buildProgressionGuard() {
+  return `\u3010\u5267\u60C5\u63A8\u8FDB\xB7\u5FC5\u987B\u4E25\u683C\u9075\u5B88\u3011
+1. \u6BCF\u6BB5\u56DE\u590D\u5FC5\u987B\u63A8\u8FDB\u81F3\u5C11\u4E00\u4E2A\u5267\u60C5\u8981\u7D20\uFF1A\u65B0\u4E8B\u4EF6\u3001\u65B0\u4FE1\u606F\u3001\u51B2\u7A81\u5347\u7EA7\u3001\u5173\u7CFB\u53D8\u5316\u3001\u573A\u666F\u8F6C\u79FB\u6216\u60C5\u611F\u8F6C\u6298\u3002
+2. \u4E25\u7981\u539F\u5730\u6253\u8F6C\uFF1A\u4E0D\u91CD\u590D\u5DF2\u5199\u8FC7\u7684\u573A\u666F\u4E0E\u5BF9\u8BDD\uFF1B\u4E0D\u5F97\u7528\u7A7A\u6CDB\u6536\u5C3E\u6577\u884D\u3002
+3. \u7ED3\u5C3E\u7559\u94A9\uFF1A\u7559\u4E0B\u4E00\u5904\u5177\u4F53\u53EF\u7EE7\u7EED\u7684\u884C\u52A8\u3001\u9009\u62E9\u6216\u60AC\u5FF5\u3002`;
+}
+function buildProseOnlyGuard() {
+  return `\u3010\u8F93\u51FA\u8981\u6C42\u3011\u5148\u8F93\u51FA\u6545\u4E8B\u6B63\u6587\u672C\u8EAB\u3002\u4E0D\u8981\u8F93\u51FA\u7AE0\u8282\u540D\u3001\u573A\u666F\u4FE1\u606F\u7B49\u533A\u5757\u6807\u7B7E\uFF0C\u4E0D\u8981\u6DFB\u52A0\u683C\u5F0F\u8BF4\u660E\u6216\u524D\u540E\u7F00\uFF0C\u4E0D\u8981\u8F93\u51FA markdown \u6807\u9898\u3002
+\u6B63\u6587\u7ED3\u675F\u540E\u5FC5\u987B\u53E6\u8D77\u4E00\u5757\uFF1A
+\u3010\u6B67\u8DEF\u3011
+1. \uFF08\u4E0D\u8D85\u8FC7\u5341\u516D\u5B57\u7684\u5177\u4F53\u884C\u52A8\uFF09
+2. \uFF08\u4E0D\u8D85\u8FC7\u5341\u516D\u5B57\u7684\u5177\u4F53\u884C\u52A8\uFF09
+3. \uFF08\u4E0D\u8D85\u8FC7\u5341\u516D\u5B57\u7684\u5177\u4F53\u884C\u52A8\uFF09
+\u4EA6\u53EF\u81EA\u5DF1\u5199\u4E00\u6761\u522B\u7684\u8DEF\u3002
+\u3010\u6B67\u8DEF\u3011\u4E0D\u662F\u6B63\u6587\uFF0C\u4E0D\u8981\u628A\u5B83\u5199\u6210\u89D2\u8272\u53F0\u8BCD\u3002`;
+}
+
+// packages/infinite-core/dist/export.js
+var META_LINE = /^\s*【(?:章节名|场景信息|对话推荐|开局|世界规则|叙事护栏|剧情推进|输出要求|随机世界事件|角色|当前场景|歧路)】.*$/;
+var BODY_TAG = /【正文】/g;
+var FENCE_BLOCK = /```[\s\S]*?```/g;
+var FORK_BLOCK = /【歧路】[\s\S]*$/;
+function cleanProse(text) {
+  const withoutFences = text.replace(FENCE_BLOCK, "");
+  const withoutFork = withoutFences.replace(FORK_BLOCK, "");
+  const withoutMeta = withoutFork.split(/\r?\n/).filter((line) => !META_LINE.test(line) && !/^(?:亦可自己写一条)/.test(line.trim())).join("\n").replace(BODY_TAG, "");
+  return withoutMeta.replace(/^\s*#{1,6}\s+.*$/gm, "").replace(/\n{3,}/g, "\n\n").trim();
+}
+function isOpeningInstruction(text) {
+  const t = text.trim();
+  return t.startsWith("\u3010\u5F00\u5C40\u3011") || t.startsWith("[\u5F00\u5C40]") || t === "\u542F\u7A0B\u3002" || t === "\u542F\u7A0B";
+}
+function exportTranscript(title, protagonist, messages, includePlayer) {
+  const lines = [title];
+  if (protagonist)
+    lines.push(`\u4E3B\u89D2\uFF1A${protagonist}`);
+  lines.push(`\u5BFC\u51FA\u65F6\u95F4\uFF1A${(/* @__PURE__ */ new Date()).toISOString()}`);
+  lines.push("");
+  for (const message of messages) {
+    if (message.role === "system")
+      continue;
+    if (isOpeningInstruction(message.text))
+      continue;
+    if (message.role === "user") {
+      if (!includePlayer)
+        continue;
+      const body2 = message.text.trim();
+      if (!body2)
+        continue;
+      lines.push(`\uFF08\u4F60\uFF09${body2}`, "");
+      continue;
+    }
+    const body = cleanProse(message.text);
+    if (!body)
+      continue;
+    lines.push(body, "");
+  }
+  return `${lines.join("\n").replace(/\n{3,}/g, "\n\n").trim()}
+`;
+}
+function formatArchive(summary, at, previous = "") {
+  const body = summary.trim();
+  const prior = previous.trim();
+  if (!body)
+    return prior;
+  const section = `## ${at}
+
+${body}
+`;
+  if (!prior)
+    return `# \u5267\u60C5\u6863\u6848
+
+${section}`;
+  return `${prior}
+
+${section}`;
+}
+
 // packages/infinite-core/dist/catalog.generated.js
 var TEMPLATE_CATALOG = [
   {
@@ -441,6 +526,13 @@ function topicChoice(id) {
 function catalogEntry(id) {
   return TEMPLATE_CATALOG.find((item) => item.id === id);
 }
+function bookNameForTemplate(templateId) {
+  return catalogEntry(templateId)?.label || templateId;
+}
+function isKeepDefaultChoice(chosen, keep) {
+  const t = chosen.replace(/\s*(?:\((?:recommended|推荐)\)|（(?:recommended|推荐)）)\s*$/i, "").trim();
+  return !t || t === keep || t.startsWith(keep);
+}
 function resolveTemplateId(raw) {
   const key = (raw ?? "").trim();
   if (!key)
@@ -466,87 +558,8 @@ function parseCommandArgs(rawInput) {
   const rest = tokens.filter((t) => t.toLowerCase() !== "force");
   return { topic: rest[0] ?? "", force, rest };
 }
-var KEEP_DEFAULT_PROTAGONIST = "\u7528\u9898\u6750\u9ED8\u8BA4\u4E3B\u89D2";
-var KEEP_DEFAULT_OPENING = "\u7528\u9ED8\u8BA4\u5F00\u7BC7";
-
-// packages/infinite-core/dist/guards.js
-function buildNarrativeGuard() {
-  return `\u3010\u53D9\u4E8B\u62A4\u680F\xB7\u5FC5\u987B\u4E25\u683C\u9075\u5B88\u3011
-1. \u4E16\u754C\u662F\u6D3B\u7684\uFF1A\u5267\u60C5\u5FC5\u987B\u6709\u5916\u90E8\u4E16\u754C\u53C2\u4E0E\u3002\u89C6\u5267\u60C5\u9700\u8981\u5F15\u5165\u6216\u5EF6\u7EED\u5176\u4ED6 NPC\u3001\u52BF\u529B\u4E0E\u73AF\u5883\u4E8B\u4EF6\uFF1B\u4E25\u7981\u5168\u7BC7\u53EA\u6709\u7537\u5973\u4E3B\u89D2\u4E24\u4E2A\u4EBA\u5BF9\u8BDD\u4E92\u52A8\uFF0C\u4E25\u7981\u5916\u90E8\u4E16\u754C\u6C38\u8FDC\u9759\u6B62\u3002
-2. \u89D2\u8272\u7BA1\u7406\uFF1A\u4F18\u5148\u590D\u7528\u5DF2\u51FA\u573A\u89D2\u8272\uFF1B\u6BCF\u6BB5\u6700\u591A\u5F15\u5165 1 \u4E2A\u65B0\u89D2\u8272\uFF1B\u540C\u65F6\u6D3B\u8DC3\u7684\u4E3B\u8981\u89D2\u8272\u4E0D\u8D85\u8FC7 3-4 \u4E2A\uFF1B\u65B0\u89D2\u8272\u5165\u573A\u65F6\u4E00\u6B21\u4EA4\u4EE3\u53EF\u8BB0\u5FC6\u7684\u8EAB\u4EFD\u6216\u7279\u5F81\u3002
-3. \u4E3B\u89D2\u4E3A\u4E2D\u5FC3\uFF1A\u7528\u6237\u626E\u6F14\u7684\u4E3B\u89D2\u662F\u53D9\u4E8B\u4E2D\u5FC3\u4E0E\u89C6\u89D2\u951A\u70B9\u3002`;
-}
-function buildProgressionGuard() {
-  return `\u3010\u5267\u60C5\u63A8\u8FDB\xB7\u5FC5\u987B\u4E25\u683C\u9075\u5B88\u3011
-1. \u6BCF\u6BB5\u56DE\u590D\u5FC5\u987B\u63A8\u8FDB\u81F3\u5C11\u4E00\u4E2A\u5267\u60C5\u8981\u7D20\uFF1A\u65B0\u4E8B\u4EF6\u3001\u65B0\u4FE1\u606F\u3001\u51B2\u7A81\u5347\u7EA7\u3001\u5173\u7CFB\u53D8\u5316\u3001\u573A\u666F\u8F6C\u79FB\u6216\u60C5\u611F\u8F6C\u6298\u3002
-2. \u4E25\u7981\u539F\u5730\u6253\u8F6C\uFF1A\u4E0D\u91CD\u590D\u5DF2\u5199\u8FC7\u7684\u573A\u666F\u4E0E\u5BF9\u8BDD\uFF1B\u4E0D\u5F97\u7528\u7A7A\u6CDB\u6536\u5C3E\u6577\u884D\u3002
-3. \u7ED3\u5C3E\u7559\u94A9\uFF1A\u7559\u4E0B\u4E00\u5904\u5177\u4F53\u53EF\u7EE7\u7EED\u7684\u884C\u52A8\u3001\u9009\u62E9\u6216\u60AC\u5FF5\u3002`;
-}
-function buildProseOnlyGuard() {
-  return `\u3010\u8F93\u51FA\u8981\u6C42\u3011\u76F4\u63A5\u8F93\u51FA\u6545\u4E8B\u6B63\u6587\u672C\u8EAB\u3002\u4E0D\u8981\u8F93\u51FA\u7AE0\u8282\u540D\u3001\u573A\u666F\u4FE1\u606F\u3001\u5BF9\u8BDD\u63A8\u8350\u7B49\u4EFB\u4F55\u533A\u5757\u6807\u7B7E\uFF0C\u4E0D\u8981\u6DFB\u52A0\u683C\u5F0F\u8BF4\u660E\u6216\u524D\u540E\u7F00\u3002\u4E0D\u8981\u5728\u6B63\u6587\u91CC\u5199\u4F5C\u8005\u5907\u5FD8\u3001\u521B\u4F5C\u63D0\u793A\u6216\u62EC\u53F7\u6807\u6CE8\uFF0C\u4E5F\u4E0D\u8981\u8F93\u51FA markdown \u6807\u9898\u3002`;
-}
-function bookNameForTemplate(templateId) {
-  return catalogEntry(templateId)?.label || templateId;
-}
-
-// packages/infinite-core/dist/export.js
-var META_LINE = /^\s*【(?:章节名|场景信息|对话推荐|开局|世界规则|叙事护栏|剧情推进|输出要求|随机世界事件|角色|当前场景)】.*$/;
-var BODY_TAG = /【正文】/g;
-var FENCE_BLOCK = /```[\s\S]*?```/g;
-function cleanProse(text) {
-  const withoutFences = text.replace(FENCE_BLOCK, "");
-  const withoutMeta = withoutFences.split(/\r?\n/).filter((line) => !META_LINE.test(line)).join("\n").replace(BODY_TAG, "");
-  return withoutMeta.replace(/^\s*#{1,6}\s+.*$/gm, "").replace(/\n{3,}/g, "\n\n").trim();
-}
-function isOpeningInstruction(text) {
-  const t = text.trim();
-  return t.startsWith("\u3010\u5F00\u5C40\u3011") || t.startsWith("[\u5F00\u5C40]");
-}
-function exportTranscript(title, protagonist, messages, includePlayer) {
-  const lines = [title];
-  if (protagonist)
-    lines.push(`\u4E3B\u89D2\uFF1A${protagonist}`);
-  lines.push(`\u5BFC\u51FA\u65F6\u95F4\uFF1A${(/* @__PURE__ */ new Date()).toISOString()}`);
-  lines.push("");
-  for (const message of messages) {
-    if (message.role === "system")
-      continue;
-    if (isOpeningInstruction(message.text))
-      continue;
-    if (message.role === "user") {
-      if (!includePlayer)
-        continue;
-      const body2 = message.text.trim();
-      if (!body2)
-        continue;
-      lines.push(`\uFF08\u4F60\uFF09${body2}`, "");
-      continue;
-    }
-    const body = cleanProse(message.text);
-    if (!body)
-      continue;
-    lines.push(body, "");
-  }
-  return `${lines.join("\n").replace(/\n{3,}/g, "\n\n").trim()}
-`;
-}
-function formatArchive(summary, at, previous = "") {
-  const body = summary.trim();
-  const prior = previous.trim();
-  if (!body)
-    return prior;
-  const section = `## ${at}
-
-${body}
-`;
-  if (!prior)
-    return `# \u5267\u60C5\u6863\u6848
-
-${section}`;
-  return `${prior}
-
-${section}`;
-}
+var KEEP_DEFAULT_PROTAGONIST = "\u4EE5\u6B64\u754C\u9ED8\u8BA4\u4E4B\u8EAB";
+var KEEP_DEFAULT_OPENING = "\u8D70\u6B64\u754C\u9ED8\u8BA4\u5F00\u5C40";
 
 // packages/infinite-core/dist/covers.js
 var CHARACTER_COVERS = {
@@ -556,7 +569,15 @@ var CHARACTER_COVERS = {
   \u6881\u7EC4: "liang.jpg",
   \u6881\u5723: "liang.jpg",
   \u7262\u6881: "liang.jpg",
-  \u6881\u5B50: "liang.jpg"
+  \u6881\u5B50: "liang.jpg",
+  \u8C22\u65E0\u5984: "cultivation.jpg",
+  \u9646\u6C89\u821F: "modern.jpg",
+  \u987E\u665A\u68E0: "scifi.jpg",
+  \u5468\u614E: "apocalypse.jpg",
+  \u88F4\u664F\u6E05: "entertainment.jpg",
+  \u6C88\u662D\u5B81: "palace.jpg",
+  \u767D\u8605: "folklore.jpg",
+  \u6797\u664F: "campus.jpg"
 };
 function buildCoverManifest() {
   const out = { ...CHARACTER_COVERS };
@@ -605,6 +626,79 @@ async function askUser(ctx, inv, questions) {
     throw error;
   }
 }
+
+// packages/dsh-infinite/dist/copy.js
+var ASK_HEADER = "\u8BF8\u5929\u4E07\u754C";
+var TOPIC_QUESTION = "\u8E0F\u5165\u54EA\u4E00\u754C\uFF1F";
+var TOPIC_DETAIL = "\u70B9\u9009\u4E00\u754C\uFF0C\u5929\u4E66\u5C06\u843D\u5165\u672C\u4F1A\u8BDD\u3002\u4EA6\u53EF\u5199\u4E0B /new \u4FEE\u4ED9 \u76F4\u5165\u3002";
+var PROTAGONIST_QUESTION = "\u8C01\u4E3A\u5929\u547D\u4E4B\u4EBA\uFF1F";
+var OPENING_QUESTION = "\u4ECE\u6B64\u754C\u4F55\u5904\u843D\u8DB3\uFF1F";
+var OVERWRITE_QUESTION = "\u6B64\u4F1A\u8BDD\u5DF2\u6709\u4E00\u754C\uFF0C\u8981\u6495\u5F00\u91CD\u5165\u5417\uFF1F";
+var OVERWRITE_YES = "\u6495\u5F00\u91CD\u5165";
+var OVERWRITE_NO = "\u7559\u5728\u6B64\u754C";
+var EMBARK = "\u542F\u7A0B";
+var REPICK_OPENING = "\u53E6\u62E9\u5F00\u5C40";
+var REPICK_PROTAGONIST = "\u66F4\u6362\u5929\u547D\u4E4B\u4EBA";
+var BIND_QUESTION = "\u6539\u6295\u4ED6\u754C\uFF1F";
+var CANCELLED = "\u672A\u6539\u754C\uFF0C\u4ECD\u7ACB\u4E8E\u6B64\u3002";
+function defaultBodyHint(name2) {
+  return `\u70B9\u9009\u300C\u4EE5\u6B64\u754C\u9ED8\u8BA4\u4E4B\u8EAB\u300D\u5373 ${name2}\u3002\u8981\u81EA\u5DF1\u8D77\u540D\uFF0C\u5199\u5728\u4E0B\u65B9\u300C\u8F93\u5165\u4F60\u7684\u7B54\u6848\u300D\u3002`;
+}
+function embarkDetail(world, protagonist) {
+  return `\u6B64\u754C\uFF1A${world}\u3002\u5929\u547D\u4E4B\u4EBA\uFF1A${protagonist}\u3002\u70B9\u300C\u542F\u7A0B\u300D\u624D\u5199\u4E0B\u7B2C\u4E00\u6BB5\u3002`;
+}
+function openedWaiting(world, protagonist) {
+  return `\u754C\u95E8\u5DF2\u5F00\u300A${world}\u300B\u3002\u5929\u547D\u4E4B\u4EBA\uFF1A${protagonist}\u3002\u70B9\u300C\u542F\u7A0B\u300D\u8E0F\u5165\uFF0C\u6216\u53E6\u62E9\u5F00\u5C40\u3001\u66F4\u6362\u5929\u547D\u4E4B\u4EBA\u3002`;
+}
+function openedEmbarked(world, protagonist) {
+  return `\u5DF2\u8E0F\u5165\u300A${world}\u300B\u3002\u5929\u547D\u4E4B\u4EBA\uFF1A${protagonist}\u3002\u7B2C\u4E00\u6BB5\u6B63\u5728\u843D\u7B14\u3002`;
+}
+function needForceText() {
+  return "\u6B64\u4F1A\u8BDD\u5DF2\u6709\u4E00\u754C\uFF1B\u8981\u6495\u5F00\u91CD\u5165\uFF0C\u8BF7\u5728\u547D\u4EE4\u540E\u52A0\u4E0A force\u3002";
+}
+function unknownWorld(known) {
+  return `\u672A\u77E5\u4E4B\u754C\u3002\u53EF\u8BD5\uFF1A${known}`;
+}
+function pickWorldHint() {
+  return "\u5148\u9009\u5B9A\u4E00\u754C\uFF1A\u53EA\u8F93\u5165 /new \u5F39\u51FA\u754C\u56FE\uFF0C\u6216 /new \u4FEE\u4ED9\u3001/new \u672B\u4E16 \u76F4\u5165\u3002";
+}
+function boundTo(world) {
+  return `\u5DF2\u6539\u6295\u300A${world}\u300B\u3002`;
+}
+function noWorldYet() {
+  return "\u6B64\u4F1A\u8BDD\u5C1A\u65E0\u4E16\u754C\u3002\u5148 /new \u8FDB\u5165\u65B0\u4E16\u754C\u3002";
+}
+function castNeedName() {
+  return "\u7528\u6CD5\uFF1A/cast \u540D\u5B57\uFF0C\u6216\u53EA\u8F93\u5165 /cast \u4ECE\u540D\u5355\u91CC\u9009\u3002";
+}
+function castDone(name2, count) {
+  return `\u5929\u547D\u4E4B\u4EBA\u73B0\u4E3A ${name2}\uFF08${count} \u5F20\u89D2\u8272\u5361\uFF09\u3002`;
+}
+function exportDone(chars, path) {
+  return `\u5DF2\u8A8A\u51FA ${chars} \u5B57\u4E66\u7A3F\uFF1A${path}`;
+}
+function sessionTitle(world, protagonist) {
+  return `${world}\xB7${protagonist}`;
+}
+var FIRST_STEP_TEXT = "\u542F\u7A0B\u3002";
+var COMMANDS_COPY = {
+  new: {
+    description: "\u8FDB\u5165\u65B0\u4E16\u754C\uFF1A\u5F39\u51FA\u754C\u56FE\u9009\u9898\u6750\u4E0E\u5929\u547D\u4E4B\u4EBA",
+    hint: "\u4FEE\u4ED9 | \u672B\u4E16 | \u90FD\u5E02\u5F02\u80FD | \u73B0\u4EE3  [\u540D\u5B57]  [force]"
+  },
+  bind: {
+    description: "\u6539\u6295\u4ED6\u754C\uFF08\u4F1A\u8986\u76D6\u672C\u4F1A\u8BDD\u5929\u4E66\uFF09",
+    hint: "[\u754C\u540D] [force]"
+  },
+  cast: {
+    description: "\u66F4\u6362\u5929\u547D\u4E4B\u4EBA",
+    hint: "[\u540D\u5B57]"
+  },
+  "export-story": {
+    description: "\u8A8A\u51FA\u6B64\u754C\u4E66\u7A3F\uFF08\u4E0D\u662F\u4E0A\u9762\u90A3\u4E2A\u4F1A\u8BDD\u65E5\u5FD7\u538B\u7F29\u5305\uFF09",
+    hint: "[player]"
+  }
+};
 
 // packages/dsh-infinite/dist/paths.js
 import { createRequire } from "node:module";
@@ -965,9 +1059,9 @@ function knownTemplates(config) {
 function topicQuestion() {
   return {
     id: "topic",
-    header: "\u5F00\u4E66",
-    question: "\u9009\u4E00\u4E2A\u9898\u6750",
-    detail: "\u89C4\u5219\u4E66\u4F1A\u6309\u9898\u6750\u62F7\u8FDB\u672C\u4F1A\u8BDD\u76EE\u5F55\u3002\u4E5F\u53EF\u4EE5\u5728\u547D\u4EE4\u91CC\u5199\u6210 /new \u4FEE\u4ED9\u3002",
+    header: ASK_HEADER,
+    question: TOPIC_QUESTION,
+    detail: TOPIC_DETAIL,
     options: TOPIC_CHOICES.map((item) => ({
       label: item.label,
       description: item.description
@@ -977,7 +1071,7 @@ function topicQuestion() {
 function protagonistQuestion(templateId, config) {
   const fallback = defaultProtagonist(templateId);
   const cards = listTemplateCharacters(config, templateId);
-  const seen = /* @__PURE__ */ new Set([KEEP_DEFAULT_PROTAGONIST, fallback]);
+  const seen = /* @__PURE__ */ new Set([KEEP_DEFAULT_PROTAGONIST]);
   const options = [
     { label: `${KEEP_DEFAULT_PROTAGONIST}\uFF08\u63A8\u8350\uFF09`, description: fallback }
   ];
@@ -989,9 +1083,9 @@ function protagonistQuestion(templateId, config) {
   }
   return {
     id: "protagonist",
-    header: "\u5F00\u4E66",
-    question: "\u9009\u4E00\u4E2A\u4E3B\u89D2",
-    detail: `\u9009\u300C${KEEP_DEFAULT_PROTAGONIST}\u300D\u5373 ${fallback}\u3002\u8981\u81EA\u5DF1\u8D77\u540D\uFF0C\u7528\u754C\u9762\u91CC\u7684 Other\u3002`,
+    header: ASK_HEADER,
+    question: PROTAGONIST_QUESTION,
+    detail: defaultBodyHint(fallback),
     options
   };
 }
@@ -1001,11 +1095,11 @@ function openingQuestion(templateId, config) {
     return null;
   return {
     id: "opening",
-    header: "\u5F00\u4E66",
-    question: "\u9009\u4E00\u4E2A\u5F00\u5C40",
-    detail: "\u5F00\u5C40\u4F1A\u5199\u5165\u672C\u4F1A\u8BDD\u7684\u5F00\u7BC7\u79CD\u5B50\u3002\u4E5F\u53EF\u4EE5\u9009\u9ED8\u8BA4\u3002",
+    header: ASK_HEADER,
+    question: OPENING_QUESTION,
+    detail: "\u70B9\u9009\u4E00\u5904\u843D\u8DB3\u3002\u4E5F\u53EF\u8D70\u6B64\u754C\u9ED8\u8BA4\u5F00\u5C40\u3002",
     options: [
-      { label: `${KEEP_DEFAULT_OPENING}\uFF08\u63A8\u8350\uFF09`, description: "\u4F7F\u7528\u6A21\u677F\u81EA\u5E26\u7684\u5F00\u7BC7\u3002" },
+      { label: `${KEEP_DEFAULT_OPENING}\uFF08\u63A8\u8350\uFF09`, description: "\u4F7F\u7528\u6B64\u754C\u81EA\u5E26\u7684\u5F00\u7BC7\u3002" },
       ...plots.map((plot) => ({
         label: plot.title,
         description: plot.content.slice(0, 56)
@@ -1016,27 +1110,33 @@ function openingQuestion(templateId, config) {
 function overwriteQuestion() {
   return {
     id: "overwrite",
-    header: "\u5F00\u4E66",
-    question: "\u8FD9\u4E2A\u4F1A\u8BDD\u91CC\u5DF2\u7ECF\u6709\u4E00\u672C\u6545\u4E8B\uFF0C\u8981\u8986\u76D6\u91CD\u5F00\u5417\uFF1F",
+    header: ASK_HEADER,
+    question: OVERWRITE_QUESTION,
     options: [
-      { label: "\u8986\u76D6\u91CD\u5F00", description: "\u5220\u6389\u672C\u4F1A\u8BDD\u76EE\u5F55\u91CC\u7684\u65E7\u8BBE\u5B9A\uFF0C\u6309\u65B0\u9009\u9898\u91CD\u62F7\u3002" },
-      { label: "\u53D6\u6D88", description: "\u4FDD\u7559\u73B0\u6709\u6545\u4E8B\u3002" }
+      { label: OVERWRITE_YES, description: "\u6495\u6389\u672C\u4F1A\u8BDD\u65E7\u5929\u4E66\uFF0C\u6309\u65B0\u9009\u4E4B\u754C\u91CD\u62F7\u3002" },
+      { label: OVERWRITE_NO, description: "\u7559\u5728\u5F53\u524D\u8FD9\u4E00\u754C\u3002" }
+    ]
+  };
+}
+function embarkQuestion(world, protagonist) {
+  return {
+    id: "embark",
+    header: ASK_HEADER,
+    question: "\u754C\u95E8\u5DF2\u5F00\uFF0C\u5982\u4F55\u843D\u8DB3\uFF1F",
+    detail: embarkDetail(world, protagonist),
+    options: [
+      { label: EMBARK, description: "\u6309\u5F00\u7BC7\u5199\u4E0B\u7B2C\u4E00\u6BB5\uFF0C\u8E0F\u5165\u6B64\u754C\u3002" },
+      { label: REPICK_OPENING, description: "\u6362\u4E00\u4E2A\u5F00\u573A\uFF0C\u5C1A\u672A\u542F\u7A0B\u3002" },
+      { label: REPICK_PROTAGONIST, description: "\u6362\u4E00\u4E2A\u5929\u547D\u4E4B\u4EBA\uFF0C\u5C1A\u672A\u542F\u7A0B\u3002" }
     ]
   };
 }
 function applyProtagonist(root, templateId, chosen) {
-  const name2 = !chosen || chosen === KEEP_DEFAULT_PROTAGONIST ? defaultProtagonist(templateId) : chosen;
+  const name2 = isKeepDefaultChoice(chosen, KEEP_DEFAULT_PROTAGONIST) ? defaultProtagonist(templateId) : chosen;
   const meta = loadMeta(root);
   if (meta)
     saveMeta(root, { ...meta, protagonist: name2 });
   return applyProtagonistIdentity(root, name2);
-}
-function openedText(templateId, protagonist) {
-  return [
-    `\u5DF2\u5F00\u300A${bookNameForTemplate(templateId)}\u300B\u3002`,
-    `\u4E3B\u89D2\uFF1A${protagonist}\u3002`,
-    "\u4F1A\u8BDD\u8BF7\u5207\u5230 Infinite Play\u3002\u8F93\u5165\u7B2C\u4E00\u4E2A\u884C\u52A8\u5373\u53EF\u5F00\u5199\u3002"
-  ].join("");
 }
 function bindSnapshot(root, session) {
   const meta = loadMeta(root);
@@ -1053,13 +1153,75 @@ function bindSnapshot(root, session) {
     dir: "infinite"
   });
 }
+function pinSessionTitle(session, world, protagonist) {
+  try {
+    session.append?.("session/title", {
+      title: sessionTitle(world, protagonist),
+      messageSeqs: [],
+      source: { kind: "user" }
+    });
+  } catch {
+  }
+}
+function wakeEmbark(inv) {
+  const followup = inv.agent.followup;
+  if (typeof followup !== "function")
+    return false;
+  try {
+    followup({
+      id: crypto.randomUUID(),
+      role: "user",
+      content: [{ type: "text", text: FIRST_STEP_TEXT }],
+      source: { kind: "plugin", plugin: "dsh-infinite" }
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
 async function confirmOverwrite(ctx, inv, root, force) {
   if (!hasStory(root) || force)
     return "ok";
   const answers = await askUser(ctx, inv, [overwriteQuestion()]);
   if (!answers)
     return "need-force";
-  return pickAnswer(answers, "overwrite") === "\u8986\u76D6\u91CD\u5F00" ? "ok" : "cancel";
+  return pickAnswer(answers, "overwrite") === OVERWRITE_YES ? "ok" : "cancel";
+}
+async function afterGate(ctx, config, inv, root, templateId, protagonist) {
+  const world = bookNameForTemplate(templateId);
+  pinSessionTitle(sessionOf(inv), world, protagonist);
+  const answers = await askUser(ctx, inv, [embarkQuestion(world, protagonist)]);
+  if (!answers) {
+    return { kind: "success", text: openedWaiting(world, protagonist) };
+  }
+  const picked = pickAnswer(answers, "embark");
+  if (picked === REPICK_OPENING) {
+    const ask = openingQuestion(templateId, config);
+    if (ask) {
+      const next = await askUser(ctx, inv, [ask]);
+      const opening = next ? pickAnswer(next, "opening") : "";
+      if (opening && !isKeepDefaultChoice(opening, KEEP_DEFAULT_OPENING)) {
+        const plot = listTemplatePlots(config, templateId).find((item) => item.title === opening);
+        if (plot)
+          applyOpening(root, plot);
+      }
+    }
+    return afterGate(ctx, config, inv, root, templateId, protagonist);
+  }
+  if (picked === REPICK_PROTAGONIST) {
+    const next = await askUser(ctx, inv, [protagonistQuestion(templateId, config)]);
+    const name2 = next ? applyProtagonist(root, templateId, pickAnswer(next, "protagonist")) : protagonist;
+    bindSnapshot(root, sessionOf(inv));
+    return afterGate(ctx, config, inv, root, templateId, name2);
+  }
+  if (picked !== EMBARK) {
+    return { kind: "success", text: openedWaiting(world, protagonist) };
+  }
+  const woke = wakeEmbark(inv);
+  return {
+    kind: "success",
+    text: woke ? openedEmbarked(world, protagonist) : openedWaiting(world, protagonist)
+  };
 }
 async function handleNew(ctx, config, inv) {
   const { topic, force, rest } = parseCommandArgs(inv.rawInput);
@@ -1067,25 +1229,20 @@ async function handleNew(ctx, config, inv) {
   const root = infiniteRoot(resolveSessionDir(ctx, sessionOf(inv), config));
   const overwrite = await confirmOverwrite(ctx, inv, root, force);
   if (overwrite === "cancel")
-    return { kind: "success", text: "\u5DF2\u53D6\u6D88\uFF0C\u4ECD\u4F7F\u7528\u5F53\u524D\u6545\u4E8B\u3002" };
-  if (overwrite === "need-force") {
-    return { kind: "error", text: "this session already has a story; pass force to replace it" };
-  }
+    return { kind: "success", text: CANCELLED };
+  if (overwrite === "need-force")
+    return { kind: "error", text: needForceText() };
   let templateId = topic ? resolveTemplateId(topic) : null;
   if (topic && !templateId) {
-    return { kind: "error", text: `unknown topic "${topic}". try: ${knownTemplates(config)}` };
+    return { kind: "error", text: unknownWorld(`"${topic}". ${knownTemplates(config)}`) };
   }
   if (!templateId) {
     const answers = await askUser(ctx, inv, [topicQuestion()]);
-    if (!answers) {
-      return {
-        kind: "error",
-        text: `\u9009\u62E9\u9898\u6750\uFF1A/new ${TOPIC_CHOICES.map((item) => item.label).join(" | ")}`
-      };
-    }
+    if (!answers)
+      return { kind: "error", text: pickWorldHint() };
     templateId = templateIdFromLabel(pickAnswer(answers, "topic"));
     if (!templateId)
-      return { kind: "error", text: "\u672A\u9009\u62E9\u9898\u6750\u3002" };
+      return { kind: "error", text: "\u672A\u9009\u5B9A\u4E00\u754C\u3002" };
   }
   let protagonist = namedProtagonist;
   if (!protagonist) {
@@ -1103,13 +1260,13 @@ async function handleNew(ctx, config, inv) {
   try {
     seedStory(root, templateId, config, true);
     const name2 = applyProtagonist(root, templateId, protagonist);
-    if (opening && opening !== KEEP_DEFAULT_OPENING) {
+    if (opening && !isKeepDefaultChoice(opening, KEEP_DEFAULT_OPENING)) {
       const plot = listTemplatePlots(config, templateId).find((item) => item.title === opening);
       if (plot)
         applyOpening(root, plot);
     }
     bindSnapshot(root, sessionOf(inv));
-    return { kind: "success", text: openedText(templateId, name2) };
+    return afterGate(ctx, config, inv, root, templateId, name2);
   } catch (error) {
     return { kind: "error", text: error instanceof Error ? error.message : String(error) };
   }
@@ -1122,47 +1279,45 @@ async function handleBind(ctx, config, inv) {
     const answers = await askUser(ctx, inv, [{
       ...topicQuestion(),
       id: "bind",
-      question: "\u6362\u4E00\u672C\u89C4\u5219\u4E66\uFF1F",
-      detail: meta ? `\u5F53\u524D\u662F\u300C${topicChoice(meta.templateId).label}\u300D\u3002\u66F4\u6362\u4F1A\u8986\u76D6\u672C\u4F1A\u8BDD\u8BBE\u5B9A\u3002` : "\u8FD9\u4E2A\u4F1A\u8BDD\u8FD8\u6CA1\u6709\u6545\u4E8B\uFF0C\u9009\u4E00\u672C\u5373\u5F00\u4E66\u3002"
+      question: BIND_QUESTION,
+      detail: meta ? `\u5F53\u524D\u7ACB\u4E8E\u300C${topicChoice(meta.templateId).label}\u300D\u3002\u6539\u6295\u4F1A\u8986\u76D6\u672C\u4F1A\u8BDD\u5929\u4E66\u3002` : "\u6B64\u4F1A\u8BDD\u5C1A\u65E0\u4E16\u754C\uFF0C\u9009\u4E00\u754C\u5373\u5165\u3002"
     }]);
     if (!answers) {
       if (!meta)
-        return { kind: "error", text: "no story in this session. use /new [topic] first." };
+        return { kind: "error", text: noWorldYet() };
       return {
         kind: "success",
-        text: `bound template ${meta.templateId}; protagonist ${meta.protagonist || "(none)"}.`
+        text: `\u73B0\u754C ${meta.templateId}\uFF1B\u5929\u547D\u4E4B\u4EBA ${meta.protagonist || "\uFF08\u672A\u5B9A\uFF09"}\u3002`
       };
     }
     const picked = templateIdFromLabel(pickAnswer(answers, "bind"));
     if (!picked)
-      return { kind: "error", text: "\u672A\u9009\u62E9\u89C4\u5219\u4E66\u3002" };
+      return { kind: "error", text: "\u672A\u9009\u5B9A\u4E00\u754C\u3002" };
     const overwrite2 = await confirmOverwrite(ctx, inv, root, force);
     if (overwrite2 === "cancel")
-      return { kind: "success", text: "\u5DF2\u53D6\u6D88\uFF0C\u4ECD\u4F7F\u7528\u5F53\u524D\u6545\u4E8B\u3002" };
-    if (overwrite2 === "need-force") {
-      return { kind: "error", text: "this session already has a story; pass force to replace it" };
-    }
+      return { kind: "success", text: CANCELLED };
+    if (overwrite2 === "need-force")
+      return { kind: "error", text: needForceText() };
     try {
       const next = seedStory(root, picked, config, true);
       bindSnapshot(root, sessionOf(inv));
-      return { kind: "success", text: `\u5DF2\u7ED1\u5B9A\u300C${bookNameForTemplate(next.templateId)}\u300D\u3002` };
+      return { kind: "success", text: boundTo(bookNameForTemplate(next.templateId)) };
     } catch (error) {
       return { kind: "error", text: error instanceof Error ? error.message : String(error) };
     }
   }
   const templateId = resolveTemplateId(topic);
   if (!templateId)
-    return { kind: "error", text: `unknown topic "${topic}". try: ${knownTemplates(config)}` };
+    return { kind: "error", text: unknownWorld(`"${topic}". ${knownTemplates(config)}`) };
   const overwrite = await confirmOverwrite(ctx, inv, root, force);
   if (overwrite === "cancel")
-    return { kind: "success", text: "\u5DF2\u53D6\u6D88\uFF0C\u4ECD\u4F7F\u7528\u5F53\u524D\u6545\u4E8B\u3002" };
-  if (overwrite === "need-force") {
-    return { kind: "error", text: "this session already has a story; pass force to replace it" };
-  }
+    return { kind: "success", text: CANCELLED };
+  if (overwrite === "need-force")
+    return { kind: "error", text: needForceText() };
   try {
-    const meta = seedStory(root, templateId, config, true);
+    seedStory(root, templateId, config, true);
     bindSnapshot(root, sessionOf(inv));
-    return { kind: "success", text: `rebound this session to ${bookNameForTemplate(templateId)} (${meta.templateId}).` };
+    return { kind: "success", text: boundTo(bookNameForTemplate(templateId)) };
   } catch (error) {
     return { kind: "error", text: error instanceof Error ? error.message : String(error) };
   }
@@ -1172,65 +1327,40 @@ async function handleCast(ctx, config, inv) {
   const root = infiniteRoot(resolveSessionDir(ctx, sessionOf(inv), config));
   const meta = loadMeta(root);
   if (!meta)
-    return { kind: "error", text: "no story in this session. use /new [topic] first." };
+    return { kind: "error", text: noWorldYet() };
   if (!name2) {
     const answers = await askUser(ctx, inv, [protagonistQuestion(meta.templateId, config)]);
     if (!answers)
-      return { kind: "error", text: "usage: /cast <protagonist name>" };
+      return { kind: "error", text: castNeedName() };
     name2 = pickAnswer(answers, "protagonist");
     if (!name2)
-      return { kind: "error", text: "\u672A\u9009\u62E9\u4E3B\u89D2\u3002" };
+      return { kind: "error", text: "\u672A\u9009\u5B9A\u5929\u547D\u4E4B\u4EBA\u3002" };
   }
   const applied = applyProtagonist(root, meta.templateId, name2);
   bindSnapshot(root, sessionOf(inv));
   const cards = loadCharacters(root);
-  return { kind: "success", text: `protagonist is now ${applied} (${cards.length} character file(s)).` };
+  return { kind: "success", text: castDone(applied, cards.length) };
 }
 function handleExport(ctx, config, inv) {
   const includePlayer = /\bplayer\b/i.test(inv.rawInput);
   const root = infiniteRoot(resolveSessionDir(ctx, sessionOf(inv), config));
   const meta = loadMeta(root);
   if (!meta)
-    return { kind: "error", text: "no story in this session. use /new [topic] first." };
+    return { kind: "error", text: noWorldYet() };
   const title = bookNameForTemplate(meta.templateId);
   const text = exportTranscript(title, meta.protagonist, sessionMessages(sessionOf(inv)), includePlayer);
   const path = saveExport(root, text);
-  return { kind: "success", text: `wrote ${text.length} chars to ${path}` };
+  return { kind: "success", text: exportDone(text.length, path) };
 }
-var COMMANDS = [
-  {
-    name: "new",
-    description: "\u5F00\u4E00\u672C\u6545\u4E8B\uFF1A\u5F39\u51FA\u9009\u9898\u6750/\u4E3B\u89D2\uFF0C\u6216 /new \u4FEE\u4ED9 [\u4E3B\u89D2] [force]",
-    input: { hint: "\u4FEE\u4ED9 | \u672B\u4E16 | \u90FD\u5E02\u5F02\u80FD | \u73B0\u4EE3  [\u4E3B\u89D2]  [force]" },
-    handler: handleNew
-  },
-  {
-    name: "bind",
-    description: "\u67E5\u770B\u6216\u9009\u62E9\u66F4\u6362\u672C\u4F1A\u8BDD\u89C4\u5219\u4E66",
-    input: { hint: "[\u9898\u6750] [force]" },
-    handler: handleBind
-  },
-  {
-    name: "cast",
-    description: "\u9009\u62E9\u6216\u8F93\u5165\u4E3B\u89D2\u540D",
-    input: { hint: "[\u540D\u5B57]" },
-    handler: handleCast
-  },
-  {
-    name: "export-story",
-    description: "\u628A\u6D17\u51C0\u6B63\u6587\u5199\u5230\u672C\u4F1A\u8BDD export.txt\uFF08\u4E0D\u5360\u7528 DSH Web \u7684 /export\uFF09",
-    input: { hint: "[player]" },
-    handler: handleExport
-  }
-];
 function registerCommands(ctx, config) {
-  for (const command of COMMANDS) {
+  for (const [name2, copy] of Object.entries(COMMANDS_COPY)) {
+    const handler = name2 === "new" ? handleNew : name2 === "bind" ? handleBind : name2 === "cast" ? handleCast : handleExport;
     ctx.effect(() => ctx.commands.register({
-      name: command.name,
-      description: command.description,
-      input: command.input,
-      handler: (inv) => command.handler(ctx, config, inv)
-    }), `infinite.cmd.${command.name}`);
+      name: name2,
+      description: copy.description,
+      input: { hint: copy.hint },
+      handler: (inv) => handler(ctx, config, inv)
+    }), `infinite.cmd.${name2}`);
   }
 }
 
@@ -1370,8 +1500,19 @@ function installUserPreset(config) {
   }
   const dest = userPresetTarget(config);
   try {
-    if (statSync4(join4(dest, "agent.cordis.yml")).isFile())
+    if (statSync4(join4(dest, "agent.cordis.yml")).isFile()) {
+      let destPreset = "";
+      try {
+        destPreset = readFileSync3(join4(dest, "preset.yml"), "utf8");
+      } catch {
+        destPreset = "";
+      }
+      if (!/诸天万界/.test(destPreset)) {
+        writeFileSync2(join4(dest, "preset.yml"), readFileSync3(join4(src, "preset.yml")));
+        writeFileSync2(join4(dest, "agent.cordis.yml"), readFileSync3(join4(src, "agent.cordis.yml")));
+      }
       return dest;
+    }
   } catch {
   }
   mkdirSync2(dirname3(dest), { recursive: true });
@@ -1440,7 +1581,7 @@ function registerPrompt(ctx, config) {
       if (meta?.progressionGuard)
         parts.push(buildProgressionGuard());
       if (assemble.agent && !hasAssistantProse(assemble.agent.session)) {
-        parts.push("\u672C\u4F1A\u8BDD\u5C1A\u65E0\u6B63\u6587\u3002\u6839\u636E\u89C4\u5219\u4E66\u4E2D\u7684\u5F00\u7BC7\u79CD\u5B50\uFF0C\u76F4\u63A5\u5199\u4E0B\u7B2C\u4E00\u6BB5\u53D9\u8FF0\uFF0C\u4E0D\u8981\u590D\u8FF0\u8BBE\u5B9A\u6761\u76EE\u3002");
+        parts.push("\u6B64\u754C\u5C1A\u65E0\u6B63\u6587\u3002\u6839\u636E\u5929\u4E66\u5F00\u7BC7\u79CD\u5B50\uFF0C\u76F4\u63A5\u5199\u4E0B\u7B2C\u4E00\u6BB5\u53D9\u8FF0\uFF0C\u4E0D\u8981\u590D\u8FF0\u8BBE\u5B9A\u6761\u76EE\u3002\u5199\u5B8C\u540E\u63A5\u3010\u6B67\u8DEF\u3011\u4E09\u62E9\u4E0E\u300C\u4EA6\u53EF\u81EA\u5DF1\u5199\u300D\u3002");
       }
       return parts.join("\n\n");
     }

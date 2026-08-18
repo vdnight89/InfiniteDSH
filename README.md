@@ -9,10 +9,10 @@
 > 一个会话，就是一扇门。  
 > 推开它，你不是在聊天。你是在写，在杀，在活，在死，在诸天万界里把自己活成主角。
 
-这是 DeepSeek Harness 上的文学插件。仓库名 InfiniteDSH，组合包名 `dsh-infinite`。当前 **0.3.3**。  
+这是 DeepSeek Harness 上的文学插件。仓库名 InfiniteDSH，组合包名 `dsh-infinite`。当前 **0.4.0**。  
 不另做 App，不另做书架。DSH 侧栏里的一项会话，就是你脚下这一整本。切会话，就是切界。
 
-文学预设叫 **Infinite Play**：模型只许吐小说正文。bash、改文件、子代理，全部收刀。你要的不是助手。你要的是世界自己在呼吸。
+文学预设叫 **诸天万界**：模型只许吐小说正文。bash、改文件、子代理，全部收刀。你要的不是助手。你要的是世界自己在呼吸。
 
 ---
 
@@ -116,7 +116,7 @@ dsh --profile web --dump-config
 ```
 
 看见 `dsh-infinite` 这一层，就是界立住了。  
-插件首次加载会把 **Infinite Play** 拷到 `~/.dsh/.agent-presets/infinite-play`。你改过的 preset，不会被再次覆盖。
+插件首次加载会把 **诸天万界** 拷到 `~/.dsh/.agent-presets/infinite-play`。若你还停在旧英文名 Infinite Play，下次加载会改成诸天万界。已经含「诸天万界」的改稿，不会被覆盖。
 
 升级：`dsh plugin --profile web update dsh-infinite`  
 卸门：`dsh plugin --profile web remove dsh-infinite`（故事文件和 preset 会留在磁盘上）
@@ -127,18 +127,16 @@ dsh --profile web --dump-config
 
 1. 点亮 DSH Web。
 2. **新开一个会话。** 一本新书，一具新身体。
-3. preset 选 **Infinite Play**。默认编程预设会去跑命令，那是另一条命。
+3. preset 选 **诸天万界**。默认编程预设会去跑命令，那是另一条命。
 4. 输入：
 
 ```
 /new
 ```
 
-5. 点选题材、主角、开局。已经有故事会先问你敢不敢覆盖重开。
-6. 看见「已开《……》」，写下第一个行动。  
-   「推开山门。」  
-   「走进深井。」  
-   「我把那封英雄帖从门板上撕下来。」
+5. 点选一界、天命之人、落足之处。已经有故事会先问你要不要撕开重入。
+6. 三键出来：**启程** / 另择开局 / 更换天命之人。点「启程」，第一段才落笔。  
+   写完后正文末会有【歧路】三择；也可以自己写一条别的路。
 
 没有卡片 UI 时，手打：
 
@@ -164,16 +162,16 @@ dsh --profile web --dump-config
 - 「跳过旅途，直接写到夜宴开席。」
 - 「这一段改成更冷、更短的句子。」
 
-它若开始解释规则、列举选项、自称助手——检查两件事：是不是 **Infinite Play**，本会话有没有 `meta.yml`。
+它若开始解释规则、列举选项、自称助手——检查两件事：是不是 **诸天万界**，本会话有没有 `meta.yml`。
 
 | 令 | 事 |
 |---|---|
-| `/new` | 开书。选题材 / 主角 / 开局。 |
-| `/new 修仙 谢无妄 force` | 不弹窗，按参数开书。 |
-| `/bind` | 换一套规则书（会覆盖本会话设定）。 |
+| `/new` | 进入新世界。弹出界图，选题材与天命之人。 |
+| `/new 修仙 谢无妄 force` | 不弹窗，按参数开界。 |
+| `/bind` | 改投他界（会覆盖本会话天书）。 |
 | `/bind 末世` | 直接坠入末世。 |
-| `/cast` | 换主角；或 `/cast 林晏`。 |
-| `/export-story` | 洗净正文，写入 `export.txt`。 |
+| `/cast` | 更换天命之人；或 `/cast 林晏`。 |
+| `/export-story` | 誊出此界书稿（不是上面那个会话日志压缩包）。 |
 | `/export-story player` | 连你的行动一起留下。 |
 
 故事优先落在该会话 artifact 目录的 `infinite/`。没有逐会话路径时：
@@ -255,7 +253,7 @@ order: 10
 |---|---|
 | `infinite-core` | 匹配、抽卡、护栏、导出。不依赖 Cordis。 |
 | 根包 `dsh-infinite` | 对外组合包：命令、提示词、档案、封面路由。 |
-| `dsh-infinite-preset` | Infinite Play 与十九套模板。 |
+| `dsh-infinite-preset` | 诸天万界预设与十九套模板。 |
 
 规格 / 质询 / 变更：`docs/superpowers/specs/`、`docs/grill-airp-on-dsh.md`、[`CHANGELOG.md`](CHANGELOG.md)。
 
@@ -264,7 +262,7 @@ order: 10
 ## 卡关
 
 **`/new` 没弹窗。** 没有问答 UI。手打：`/new 修仙`。  
-**模型在列选项、跑命令。** 切到 Infinite Play。  
+**模型在列选项、跑命令。** 切到诸天万界。  
 **卡片没封面。** 确认 Web UI 且 `/infinite/covers` 活着。  
 **想同时活两本。** 再开一个会话。同一会话里来回 `/bind`，是撕书，不是分身。  
 **找不到稿。** 先看会话目录下的 `infinite/`，再看 `~/.dsh/infinite/stories/`。

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it } from 'vitest'
 import { apply, inject, name as pluginName } from '../src/index.ts'
 import { handleBind, handleCast, handleExport, handleNew } from '../src/commands.ts'
+import { COMMANDS_COPY } from '../src/copy.ts'
 import { installUserPreset } from '../src/install-preset.ts'
 import { onSessionEvent } from '../src/lifecycle.ts'
 import { safeCoverName } from '../src/covers-host.ts'
@@ -12,7 +13,7 @@ import { defaultTemplatesDir, infiniteRoot, resolveSessionDir } from '../src/pat
 import { loadArchive, loadCharacters, loadMeta, loadWorldbook } from '../src/story-files.ts'
 import type { CommandInvocation, DuckSession, InfiniteContext, PluginConfig } from '../src/types.ts'
 import { resolveConfig } from '../src/types.ts'
-import { buildWorldContext, parseLoreEntry, resolveTemplateId } from 'infinite-core'
+import { buildWorldContext, parseLoreEntry, resolveTemplateId, TEMPLATE_CATALOG } from 'infinite-core'
 
 const TEMPLATES = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'dsh-infinite-preset', 'templates')
 
@@ -125,6 +126,8 @@ describe('dsh-infinite plugin', () => {
     const { ctx, config } = setup()
     apply(ctx, config)
     expect(ctx.commandsList.sort()).toEqual(['bind', 'cast', 'export-story', 'new'])
+    expect(COMMANDS_COPY.new.description).toContain('进入新世界')
+    expect(COMMANDS_COPY['export-story'].description).toMatch(/誊出|书稿/)
   })
 
   it('injects world context only after /new on that session', async () => {
@@ -153,7 +156,8 @@ describe('dsh-infinite plugin', () => {
     const world = contexts.map((fn) => fn(lit)).join('\n')
     expect(world).toContain('【世界规则·修仙】')
     expect(world).toMatch(/宗门|藏经阁|境界/)
-    expect(sections.map((fn) => fn(lit)).join('\n')).toContain('直接输出故事正文')
+    expect(sections.map((fn) => fn(lit)).join('\n')).toMatch(/正文/)
+    expect(sections.map((fn) => fn(lit)).join('\n')).toContain('【歧路】')
   })
 
   it('seeds a cultivation story and refuses a second /new without force', async () => {
@@ -238,7 +242,8 @@ describe('dsh-infinite plugin', () => {
           const id = request.questions[0]?.id
           if (id === 'topic') return { answers: [{ id: 'topic', selected: ['末世'] }] }
           if (id === 'protagonist') return { answers: [{ id: 'protagonist', selected: ['周慎'] }] }
-          if (id === 'opening') return { answers: [{ id: 'opening', selected: ['用默认开篇'] }] }
+          if (id === 'opening') return { answers: [{ id: 'opening', selected: ['走此界默认开局'] }] }
+          if (id === 'embark') return { answers: [{ id: 'embark', selected: ['启程'] }] }
           return { answers: [] }
         },
       },
@@ -247,7 +252,8 @@ describe('dsh-infinite plugin', () => {
     expect(result.kind).toBe('success')
     expect(seen[0]).toEqual(['topic'])
     expect(seen[1]).toEqual(['protagonist'])
-    expect(seen.at(-1)).toEqual(['opening'])
+    expect(seen).toContainEqual(['opening'])
+    expect(seen.at(-1)).toEqual(['embark'])
     const meta = loadMeta(infiniteRoot(resolveSessionDir(asking, session('pick'), config)))
     expect(meta?.templateId).toBe('apocalypse')
     expect(meta?.protagonist).toBe('周慎')
@@ -260,13 +266,13 @@ describe('dsh-infinite plugin', () => {
       ...ctx,
       userQuestions: {
         async ask() {
-          return { answers: [{ id: 'overwrite', selected: ['取消'] }] }
+          return { answers: [{ id: 'overwrite', selected: ['留在此界'] }] }
         },
       },
     }
     const result = await handleNew(asking, config, inv('ow', '末世'))
     expect(result.kind).toBe('success')
-    expect(result.text).toMatch(/取消/)
+    expect(result.text).toMatch(/未改界/)
     expect(loadMeta(infiniteRoot(resolveSessionDir(ctx, session('ow'), config)))?.templateId).toBe('cultivation')
   })
 
@@ -341,12 +347,12 @@ describe('dsh-infinite plugin', () => {
         async ask(request: { questions: Array<{ id: string }> }) {
           const id = request.questions[0]?.id
           if (id === 'bind') return { answers: [{ id: 'bind', selected: ['末世'] }] }
-          return { answers: [{ id: 'overwrite', selected: ['取消'] }] }
+          return { answers: [{ id: 'overwrite', selected: ['留在此界'] }] }
         },
       },
     }
     const cancelled = await handleBind(asking, config, inv('bind', ''))
-    expect(cancelled.text).toMatch(/取消/)
+    expect(cancelled.text).toMatch(/未改界/)
     expect(loadMeta(infiniteRoot(resolveSessionDir(ctx, session('bind'), config)))?.templateId).toBe('cultivation')
     const refused = await handleBind(ctx, config, inv('bind', '末世'))
     expect(refused.kind).toBe('error')
@@ -386,6 +392,7 @@ describe('dsh-infinite plugin', () => {
       signal: new AbortController().signal,
     })
     expect(binds.some((item) => item.type === 'infinite/bind' && item.data?.templateId === 'cultivation')).toBe(true)
+    expect(binds.some((item) => item.type === 'session/title' && String(item.data?.title).includes('修仙'))).toBe(true)
     onSessionEvent(ctx, config, sess, {
       type: 'compaction/summary',
       data: { summary: [{ type: 'text', text: '第一段档案。' }] },
@@ -435,5 +442,70 @@ describe('dsh-infinite plugin', () => {
     const entry = parseLoreEntry(readFileSync(join(TEMPLATES, 'cultivation', 'worldbook', file!), 'utf8'), 'x')
     expect(entry.keys.length).toBeGreaterThan(0)
     expect(entry.title.length).toBeGreaterThan(0)
+  })
+
+  it('gives every world a default protagonist card and at least three openings', () => {
+    for (const item of TEMPLATE_CATALOG) {
+      const dir = join(TEMPLATES, item.id)
+      const chars = readdirSync(join(dir, 'characters')).filter((name) => name.endsWith('.md'))
+      expect(chars.length, item.id).toBeGreaterThan(0)
+      const hit = chars.some((name) => {
+        const raw = readFileSync(join(dir, 'characters', name), 'utf8')
+        return raw.includes(`title: ${item.defaultProtagonist}`)
+      })
+      expect(hit, `${item.id} missing ${item.defaultProtagonist}`).toBe(true)
+      const plots = readdirSync(join(dir, 'plots')).filter((name) => name.endsWith('.md'))
+      expect(plots.length, `${item.id} plots`).toBeGreaterThanOrEqual(3)
+    }
+  })
+
+  it('wakes the first turn with 启程 and uses 诸天万界 command copy', async () => {
+    const { ctx, config } = setup()
+    apply(ctx, config)
+    expect(ctx.commandsList).toContain('new')
+    const followups: Array<{ content: Array<{ text: string }> }> = []
+    const asking = {
+      ...ctx,
+      userQuestions: {
+        async ask(request: { questions: Array<{ id: string }> }) {
+          const id = request.questions[0]?.id
+          if (id === 'embark') return { answers: [{ id: 'embark', selected: ['启程'] }] }
+          if (id === 'protagonist') return { answers: [{ id: 'protagonist', selected: ['以此界默认之身'] }] }
+          if (id === 'opening') return { answers: [{ id: 'opening', selected: ['走此界默认开局'] }] }
+          return { answers: [] }
+        },
+      },
+    }
+    const result = await handleNew(asking, config, {
+      agent: {
+        session: session('wake'),
+        followup(message) {
+          followups.push(message as { content: Array<{ text: string }> })
+        },
+      },
+      rawInput: '修仙',
+      signal: new AbortController().signal,
+    })
+    expect(result.kind).toBe('success')
+    expect(result.text).toMatch(/已踏入|第一段正在落笔/)
+    expect(followups[0]?.content[0]?.text).toBe('启程。')
+  })
+
+  it('refreshes an old Infinite Play copy into 诸天万界', () => {
+    const { config } = setup()
+    const dest = installUserPreset(config)
+    expect(dest).toBeTruthy()
+    writeFileSync(join(dest!, 'preset.yml'), 'name: Infinite Play\ndescription: Literary session.\n')
+    writeFileSync(join(dest!, 'agent.cordis.yml'), 'old-english-persona\n')
+    installUserPreset(config)
+    expect(readFileSync(join(dest!, 'preset.yml'), 'utf8')).toContain('诸天万界')
+    expect(readFileSync(join(dest!, 'agent.cordis.yml'), 'utf8')).toContain('诸天万界')
+  })
+
+  it('styles a single radio option as a cover card', () => {
+    const js = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'static', 'cards.js'), 'utf8')
+    expect(js).toContain('buttons.length < 1')
+    expect(js).toContain('withCover >= 1')
+    expect(js).toMatch(/默认之身|默认开局/)
   })
 })

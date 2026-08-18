@@ -20,7 +20,6 @@ export {
   buildNarrativeGuard,
   buildProgressionGuard,
   buildProseOnlyGuard,
-  bookNameForTemplate,
 } from './guards.js'
 export { cleanProse, isOpeningInstruction, exportTranscript, formatArchive } from './export.js'
 export {
@@ -34,6 +33,8 @@ export {
   topicChoice,
   templateIdFromLabel,
   catalogEntry,
+  bookNameForTemplate,
+  isKeepDefaultChoice,
 } from './topics.js'
 export type { TopicChoice } from './topics.js'
 export { coverFileForLabel, buildCoverManifest } from './covers.js'

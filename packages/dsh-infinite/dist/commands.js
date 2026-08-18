@@ -1,5 +1,6 @@
-import { KEEP_DEFAULT_OPENING, KEEP_DEFAULT_PROTAGONIST, TOPIC_CHOICES, bookNameForTemplate, defaultProtagonist, exportTranscript, parseCommandArgs, resolveTemplateId, templateIdFromLabel, topicChoice, } from 'infinite-core';
+import { KEEP_DEFAULT_OPENING, KEEP_DEFAULT_PROTAGONIST, TOPIC_CHOICES, bookNameForTemplate, defaultProtagonist, exportTranscript, isKeepDefaultChoice, parseCommandArgs, resolveTemplateId, templateIdFromLabel, topicChoice, } from 'infinite-core';
 import { askUser, pickAnswer } from './ask.js';
+import { ASK_HEADER, BIND_QUESTION, CANCELLED, COMMANDS_COPY, EMBARK, FIRST_STEP_TEXT, OPENING_QUESTION, OVERWRITE_NO, OVERWRITE_QUESTION, OVERWRITE_YES, PROTAGONIST_QUESTION, REPICK_OPENING, REPICK_PROTAGONIST, TOPIC_DETAIL, TOPIC_QUESTION, boundTo, castDone, castNeedName, defaultBodyHint, embarkDetail, exportDone, needForceText, noWorldYet, openedEmbarked, openedWaiting, pickWorldHint, sessionTitle, unknownWorld, } from './copy.js';
 import { infiniteRoot, resolveSessionDir, templatesDir } from './paths.js';
 import { appendStoryBind, applyOpening, applyProtagonistIdentity, hasStory, listTemplateCharacters, listTemplatePlots, loadCharacters, loadMeta, saveExport, saveMeta, seedStory, } from './story-files.js';
 import { sessionMessages } from './transcript.js';
@@ -18,9 +19,9 @@ function knownTemplates(config) {
 function topicQuestion() {
     return {
         id: 'topic',
-        header: '开书',
-        question: '选一个题材',
-        detail: '规则书会按题材拷进本会话目录。也可以在命令里写成 /new 修仙。',
+        header: ASK_HEADER,
+        question: TOPIC_QUESTION,
+        detail: TOPIC_DETAIL,
         options: TOPIC_CHOICES.map((item) => ({
             label: item.label,
             description: item.description,
@@ -30,7 +31,7 @@ function topicQuestion() {
 function protagonistQuestion(templateId, config) {
     const fallback = defaultProtagonist(templateId);
     const cards = listTemplateCharacters(config, templateId);
-    const seen = new Set([KEEP_DEFAULT_PROTAGONIST, fallback]);
+    const seen = new Set([KEEP_DEFAULT_PROTAGONIST]);
     const options = [
         { label: `${KEEP_DEFAULT_PROTAGONIST}（推荐）`, description: fallback },
     ];
@@ -42,9 +43,9 @@ function protagonistQuestion(templateId, config) {
     }
     return {
         id: 'protagonist',
-        header: '开书',
-        question: '选一个主角',
-        detail: `选「${KEEP_DEFAULT_PROTAGONIST}」即 ${fallback}。要自己起名，用界面里的 Other。`,
+        header: ASK_HEADER,
+        question: PROTAGONIST_QUESTION,
+        detail: defaultBodyHint(fallback),
         options,
     };
 }
@@ -54,11 +55,11 @@ function openingQuestion(templateId, config) {
         return null;
     return {
         id: 'opening',
-        header: '开书',
-        question: '选一个开局',
-        detail: '开局会写入本会话的开篇种子。也可以选默认。',
+        header: ASK_HEADER,
+        question: OPENING_QUESTION,
+        detail: '点选一处落足。也可走此界默认开局。',
         options: [
-            { label: `${KEEP_DEFAULT_OPENING}（推荐）`, description: '使用模板自带的开篇。' },
+            { label: `${KEEP_DEFAULT_OPENING}（推荐）`, description: '使用此界自带的开篇。' },
             ...plots.map((plot) => ({
                 label: plot.title,
                 description: plot.content.slice(0, 56),
@@ -69,29 +70,35 @@ function openingQuestion(templateId, config) {
 function overwriteQuestion() {
     return {
         id: 'overwrite',
-        header: '开书',
-        question: '这个会话里已经有一本故事，要覆盖重开吗？',
+        header: ASK_HEADER,
+        question: OVERWRITE_QUESTION,
         options: [
-            { label: '覆盖重开', description: '删掉本会话目录里的旧设定，按新选题重拷。' },
-            { label: '取消', description: '保留现有故事。' },
+            { label: OVERWRITE_YES, description: '撕掉本会话旧天书，按新选之界重拷。' },
+            { label: OVERWRITE_NO, description: '留在当前这一界。' },
+        ],
+    };
+}
+function embarkQuestion(world, protagonist) {
+    return {
+        id: 'embark',
+        header: ASK_HEADER,
+        question: '界门已开，如何落足？',
+        detail: embarkDetail(world, protagonist),
+        options: [
+            { label: EMBARK, description: '按开篇写下第一段，踏入此界。' },
+            { label: REPICK_OPENING, description: '换一个开场，尚未启程。' },
+            { label: REPICK_PROTAGONIST, description: '换一个天命之人，尚未启程。' },
         ],
     };
 }
 function applyProtagonist(root, templateId, chosen) {
-    const name = !chosen || chosen === KEEP_DEFAULT_PROTAGONIST
+    const name = isKeepDefaultChoice(chosen, KEEP_DEFAULT_PROTAGONIST)
         ? defaultProtagonist(templateId)
         : chosen;
     const meta = loadMeta(root);
     if (meta)
         saveMeta(root, { ...meta, protagonist: name });
     return applyProtagonistIdentity(root, name);
-}
-function openedText(templateId, protagonist) {
-    return [
-        `已开《${bookNameForTemplate(templateId)}》。`,
-        `主角：${protagonist}。`,
-        '会话请切到 Infinite Play。输入第一个行动即可开写。',
-    ].join('');
 }
 function bindSnapshot(root, session) {
     const meta = loadMeta(root);
@@ -108,13 +115,78 @@ function bindSnapshot(root, session) {
         dir: 'infinite',
     });
 }
+function pinSessionTitle(session, world, protagonist) {
+    try {
+        session.append?.('session/title', {
+            title: sessionTitle(world, protagonist),
+            messageSeqs: [],
+            source: { kind: 'user' },
+        });
+    }
+    catch {
+        // title service may reject unknown writers
+    }
+}
+function wakeEmbark(inv) {
+    const followup = inv.agent.followup;
+    if (typeof followup !== 'function')
+        return false;
+    try {
+        followup({
+            id: crypto.randomUUID(),
+            role: 'user',
+            content: [{ type: 'text', text: FIRST_STEP_TEXT }],
+            source: { kind: 'plugin', plugin: 'dsh-infinite' },
+        });
+        return true;
+    }
+    catch {
+        return false;
+    }
+}
 async function confirmOverwrite(ctx, inv, root, force) {
     if (!hasStory(root) || force)
         return 'ok';
     const answers = await askUser(ctx, inv, [overwriteQuestion()]);
     if (!answers)
         return 'need-force';
-    return pickAnswer(answers, 'overwrite') === '覆盖重开' ? 'ok' : 'cancel';
+    return pickAnswer(answers, 'overwrite') === OVERWRITE_YES ? 'ok' : 'cancel';
+}
+async function afterGate(ctx, config, inv, root, templateId, protagonist) {
+    const world = bookNameForTemplate(templateId);
+    pinSessionTitle(sessionOf(inv), world, protagonist);
+    const answers = await askUser(ctx, inv, [embarkQuestion(world, protagonist)]);
+    if (!answers) {
+        return { kind: 'success', text: openedWaiting(world, protagonist) };
+    }
+    const picked = pickAnswer(answers, 'embark');
+    if (picked === REPICK_OPENING) {
+        const ask = openingQuestion(templateId, config);
+        if (ask) {
+            const next = await askUser(ctx, inv, [ask]);
+            const opening = next ? pickAnswer(next, 'opening') : '';
+            if (opening && !isKeepDefaultChoice(opening, KEEP_DEFAULT_OPENING)) {
+                const plot = listTemplatePlots(config, templateId).find((item) => item.title === opening);
+                if (plot)
+                    applyOpening(root, plot);
+            }
+        }
+        return afterGate(ctx, config, inv, root, templateId, protagonist);
+    }
+    if (picked === REPICK_PROTAGONIST) {
+        const next = await askUser(ctx, inv, [protagonistQuestion(templateId, config)]);
+        const name = next ? applyProtagonist(root, templateId, pickAnswer(next, 'protagonist')) : protagonist;
+        bindSnapshot(root, sessionOf(inv));
+        return afterGate(ctx, config, inv, root, templateId, name);
+    }
+    if (picked !== EMBARK) {
+        return { kind: 'success', text: openedWaiting(world, protagonist) };
+    }
+    const woke = wakeEmbark(inv);
+    return {
+        kind: 'success',
+        text: woke ? openedEmbarked(world, protagonist) : openedWaiting(world, protagonist),
+    };
 }
 export async function handleNew(ctx, config, inv) {
     const { topic, force, rest } = parseCommandArgs(inv.rawInput);
@@ -122,25 +194,20 @@ export async function handleNew(ctx, config, inv) {
     const root = infiniteRoot(resolveSessionDir(ctx, sessionOf(inv), config));
     const overwrite = await confirmOverwrite(ctx, inv, root, force);
     if (overwrite === 'cancel')
-        return { kind: 'success', text: '已取消，仍使用当前故事。' };
-    if (overwrite === 'need-force') {
-        return { kind: 'error', text: 'this session already has a story; pass force to replace it' };
-    }
+        return { kind: 'success', text: CANCELLED };
+    if (overwrite === 'need-force')
+        return { kind: 'error', text: needForceText() };
     let templateId = topic ? resolveTemplateId(topic) : null;
     if (topic && !templateId) {
-        return { kind: 'error', text: `unknown topic "${topic}". try: ${knownTemplates(config)}` };
+        return { kind: 'error', text: unknownWorld(`"${topic}". ${knownTemplates(config)}`) };
     }
     if (!templateId) {
         const answers = await askUser(ctx, inv, [topicQuestion()]);
-        if (!answers) {
-            return {
-                kind: 'error',
-                text: `选择题材：/new ${TOPIC_CHOICES.map((item) => item.label).join(' | ')}`,
-            };
-        }
+        if (!answers)
+            return { kind: 'error', text: pickWorldHint() };
         templateId = templateIdFromLabel(pickAnswer(answers, 'topic'));
         if (!templateId)
-            return { kind: 'error', text: '未选择题材。' };
+            return { kind: 'error', text: '未选定一界。' };
     }
     let protagonist = namedProtagonist;
     if (!protagonist) {
@@ -158,13 +225,13 @@ export async function handleNew(ctx, config, inv) {
     try {
         seedStory(root, templateId, config, true);
         const name = applyProtagonist(root, templateId, protagonist);
-        if (opening && opening !== KEEP_DEFAULT_OPENING) {
+        if (opening && !isKeepDefaultChoice(opening, KEEP_DEFAULT_OPENING)) {
             const plot = listTemplatePlots(config, templateId).find((item) => item.title === opening);
             if (plot)
                 applyOpening(root, plot);
         }
         bindSnapshot(root, sessionOf(inv));
-        return { kind: 'success', text: openedText(templateId, name) };
+        return afterGate(ctx, config, inv, root, templateId, name);
     }
     catch (error) {
         return { kind: 'error', text: error instanceof Error ? error.message : String(error) };
@@ -178,32 +245,31 @@ export async function handleBind(ctx, config, inv) {
         const answers = await askUser(ctx, inv, [{
                 ...topicQuestion(),
                 id: 'bind',
-                question: '换一本规则书？',
+                question: BIND_QUESTION,
                 detail: meta
-                    ? `当前是「${topicChoice(meta.templateId).label}」。更换会覆盖本会话设定。`
-                    : '这个会话还没有故事，选一本即开书。',
+                    ? `当前立于「${topicChoice(meta.templateId).label}」。改投会覆盖本会话天书。`
+                    : '此会话尚无世界，选一界即入。',
             }]);
         if (!answers) {
             if (!meta)
-                return { kind: 'error', text: 'no story in this session. use /new [topic] first.' };
+                return { kind: 'error', text: noWorldYet() };
             return {
                 kind: 'success',
-                text: `bound template ${meta.templateId}; protagonist ${meta.protagonist || '(none)'}.`,
+                text: `现界 ${meta.templateId}；天命之人 ${meta.protagonist || '（未定）'}。`,
             };
         }
         const picked = templateIdFromLabel(pickAnswer(answers, 'bind'));
         if (!picked)
-            return { kind: 'error', text: '未选择规则书。' };
+            return { kind: 'error', text: '未选定一界。' };
         const overwrite = await confirmOverwrite(ctx, inv, root, force);
         if (overwrite === 'cancel')
-            return { kind: 'success', text: '已取消，仍使用当前故事。' };
-        if (overwrite === 'need-force') {
-            return { kind: 'error', text: 'this session already has a story; pass force to replace it' };
-        }
+            return { kind: 'success', text: CANCELLED };
+        if (overwrite === 'need-force')
+            return { kind: 'error', text: needForceText() };
         try {
             const next = seedStory(root, picked, config, true);
             bindSnapshot(root, sessionOf(inv));
-            return { kind: 'success', text: `已绑定「${bookNameForTemplate(next.templateId)}」。` };
+            return { kind: 'success', text: boundTo(bookNameForTemplate(next.templateId)) };
         }
         catch (error) {
             return { kind: 'error', text: error instanceof Error ? error.message : String(error) };
@@ -211,17 +277,16 @@ export async function handleBind(ctx, config, inv) {
     }
     const templateId = resolveTemplateId(topic);
     if (!templateId)
-        return { kind: 'error', text: `unknown topic "${topic}". try: ${knownTemplates(config)}` };
+        return { kind: 'error', text: unknownWorld(`"${topic}". ${knownTemplates(config)}`) };
     const overwrite = await confirmOverwrite(ctx, inv, root, force);
     if (overwrite === 'cancel')
-        return { kind: 'success', text: '已取消，仍使用当前故事。' };
-    if (overwrite === 'need-force') {
-        return { kind: 'error', text: 'this session already has a story; pass force to replace it' };
-    }
+        return { kind: 'success', text: CANCELLED };
+    if (overwrite === 'need-force')
+        return { kind: 'error', text: needForceText() };
     try {
-        const meta = seedStory(root, templateId, config, true);
+        seedStory(root, templateId, config, true);
         bindSnapshot(root, sessionOf(inv));
-        return { kind: 'success', text: `rebound this session to ${bookNameForTemplate(templateId)} (${meta.templateId}).` };
+        return { kind: 'success', text: boundTo(bookNameForTemplate(templateId)) };
     }
     catch (error) {
         return { kind: 'error', text: error instanceof Error ? error.message : String(error) };
@@ -232,64 +297,45 @@ export async function handleCast(ctx, config, inv) {
     const root = infiniteRoot(resolveSessionDir(ctx, sessionOf(inv), config));
     const meta = loadMeta(root);
     if (!meta)
-        return { kind: 'error', text: 'no story in this session. use /new [topic] first.' };
+        return { kind: 'error', text: noWorldYet() };
     if (!name) {
         const answers = await askUser(ctx, inv, [protagonistQuestion(meta.templateId, config)]);
         if (!answers)
-            return { kind: 'error', text: 'usage: /cast <protagonist name>' };
+            return { kind: 'error', text: castNeedName() };
         name = pickAnswer(answers, 'protagonist');
         if (!name)
-            return { kind: 'error', text: '未选择主角。' };
+            return { kind: 'error', text: '未选定天命之人。' };
     }
     const applied = applyProtagonist(root, meta.templateId, name);
     bindSnapshot(root, sessionOf(inv));
     const cards = loadCharacters(root);
-    return { kind: 'success', text: `protagonist is now ${applied} (${cards.length} character file(s)).` };
+    return { kind: 'success', text: castDone(applied, cards.length) };
 }
 export function handleExport(ctx, config, inv) {
     const includePlayer = /\bplayer\b/i.test(inv.rawInput);
     const root = infiniteRoot(resolveSessionDir(ctx, sessionOf(inv), config));
     const meta = loadMeta(root);
     if (!meta)
-        return { kind: 'error', text: 'no story in this session. use /new [topic] first.' };
+        return { kind: 'error', text: noWorldYet() };
     const title = bookNameForTemplate(meta.templateId);
     const text = exportTranscript(title, meta.protagonist, sessionMessages(sessionOf(inv)), includePlayer);
     const path = saveExport(root, text);
-    return { kind: 'success', text: `wrote ${text.length} chars to ${path}` };
+    return { kind: 'success', text: exportDone(text.length, path) };
 }
-const COMMANDS = [
-    {
-        name: 'new',
-        description: '开一本故事：弹出选题材/主角，或 /new 修仙 [主角] [force]',
-        input: { hint: '修仙 | 末世 | 都市异能 | 现代  [主角]  [force]' },
-        handler: handleNew,
-    },
-    {
-        name: 'bind',
-        description: '查看或选择更换本会话规则书',
-        input: { hint: '[题材] [force]' },
-        handler: handleBind,
-    },
-    {
-        name: 'cast',
-        description: '选择或输入主角名',
-        input: { hint: '[名字]' },
-        handler: handleCast,
-    },
-    {
-        name: 'export-story',
-        description: '把洗净正文写到本会话 export.txt（不占用 DSH Web 的 /export）',
-        input: { hint: '[player]' },
-        handler: handleExport,
-    },
-];
 export function registerCommands(ctx, config) {
-    for (const command of COMMANDS) {
+    for (const [name, copy] of Object.entries(COMMANDS_COPY)) {
+        const handler = name === 'new'
+            ? handleNew
+            : name === 'bind'
+                ? handleBind
+                : name === 'cast'
+                    ? handleCast
+                    : handleExport;
         ctx.effect(() => ctx.commands.register({
-            name: command.name,
-            description: command.description,
-            input: command.input,
-            handler: (inv) => command.handler(ctx, config, inv),
-        }), `infinite.cmd.${command.name}`);
+            name,
+            description: copy.description,
+            input: { hint: copy.hint },
+            handler: (inv) => handler(ctx, config, inv),
+        }), `infinite.cmd.${name}`);
     }
 }

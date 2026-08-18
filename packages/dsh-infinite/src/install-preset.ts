@@ -13,7 +13,7 @@ function copyTree(from: string, to: string): void {
   }
 }
 
-/** Copy infinite-play into $DSH_HOME/.agent-presets once; never overwrite a live copy. */
+/** Copy infinite-play once. Refresh official 诸天万界 copy if the dest is still the old English name. */
 export function installUserPreset(config: Required<PluginConfig>): string | null {
   const src = defaultPresetDir()
   try {
@@ -23,7 +23,19 @@ export function installUserPreset(config: Required<PluginConfig>): string | null
   }
   const dest = userPresetTarget(config)
   try {
-    if (statSync(join(dest, 'agent.cordis.yml')).isFile()) return dest
+    if (statSync(join(dest, 'agent.cordis.yml')).isFile()) {
+      let destPreset = ''
+      try {
+        destPreset = readFileSync(join(dest, 'preset.yml'), 'utf8')
+      } catch {
+        destPreset = ''
+      }
+      if (!/诸天万界/.test(destPreset)) {
+        writeFileSync(join(dest, 'preset.yml'), readFileSync(join(src, 'preset.yml')))
+        writeFileSync(join(dest, 'agent.cordis.yml'), readFileSync(join(src, 'agent.cordis.yml')))
+      }
+      return dest
+    }
   } catch {
     // first install
   }

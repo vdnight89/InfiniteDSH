@@ -23,6 +23,15 @@ export function catalogEntry(id: string) {
   return TEMPLATE_CATALOG.find((item) => item.id === id)
 }
 
+export function bookNameForTemplate(templateId: string): string {
+  return catalogEntry(templateId)?.label || templateId
+}
+
+export function isKeepDefaultChoice(chosen: string, keep: string): boolean {
+  const t = chosen.replace(/\s*(?:\((?:recommended|推荐)\)|（(?:recommended|推荐)）)\s*$/i, '').trim()
+  return !t || t === keep || t.startsWith(keep)
+}
+
 /** Resolve a user topic token to a shipped template id. Empty → null (caller should ask). */
 export function resolveTemplateId(raw: string | undefined): TemplateId | null {
   const key = (raw ?? '').trim()
@@ -50,5 +59,5 @@ export function parseCommandArgs(rawInput: string): { topic: string; force: bool
   return { topic: rest[0] ?? '', force, rest }
 }
 
-export const KEEP_DEFAULT_PROTAGONIST = '用题材默认主角'
-export const KEEP_DEFAULT_OPENING = '用默认开篇'
+export const KEEP_DEFAULT_PROTAGONIST = '以此界默认之身'
+export const KEEP_DEFAULT_OPENING = '走此界默认开局'

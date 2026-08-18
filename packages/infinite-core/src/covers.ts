@@ -8,6 +8,14 @@ const CHARACTER_COVERS: Record<string, string> = {
   梁圣: 'liang.jpg',
   牢梁: 'liang.jpg',
   梁子: 'liang.jpg',
+  谢无妄: 'cultivation.jpg',
+  陆沉舟: 'modern.jpg',
+  顾晚棠: 'scifi.jpg',
+  周慎: 'apocalypse.jpg',
+  裴晏清: 'entertainment.jpg',
+  沈昭宁: 'palace.jpg',
+  白蘅: 'folklore.jpg',
+  林晏: 'campus.jpg',
 }
 
 /** Map a selectable label to a cover filename in the covers directory. */

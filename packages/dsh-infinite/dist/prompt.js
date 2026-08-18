@@ -24,7 +24,7 @@ export function registerPrompt(ctx, config) {
             if (meta?.progressionGuard)
                 parts.push(buildProgressionGuard());
             if (assemble.agent && !hasAssistantProse(assemble.agent.session)) {
-                parts.push('本会话尚无正文。根据规则书中的开篇种子，直接写下第一段叙述，不要复述设定条目。');
+                parts.push('此界尚无正文。根据天书开篇种子，直接写下第一段叙述，不要复述设定条目。写完后接【歧路】三择与「亦可自己写」。');
             }
             return parts.join('\n\n');
         },

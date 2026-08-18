@@ -22,8 +22,16 @@ export interface DuckEvent {
   readonly data?: Record<string, unknown>
 }
 
+export interface FollowupMessage {
+  readonly id: string
+  readonly role: 'user'
+  readonly content: readonly { readonly type: 'text'; readonly text: string }[]
+  readonly source: { readonly kind: string; readonly plugin?: string }
+}
+
 export interface DuckAgent {
   readonly session: DuckSession
+  followup?: (message: FollowupMessage) => void
 }
 
 export interface SessionLocation {
@@ -97,7 +105,6 @@ export interface InfiniteContext {
     register(route: WebRoute): () => void
     tapIndex?(transform: (html: string) => string): () => void
   }
-  get?(name: string): unknown
   get?(name: string): unknown
   effect(fn: () => (() => void) | void, label?: string): void
   on(event: string, handler: (...args: unknown[]) => void): () => void
