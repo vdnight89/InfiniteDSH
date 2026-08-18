@@ -32,7 +32,7 @@ dsh web
 | 还没有 DSH | `npx @deepseek-ai/dsh web`，浏览器开 http://127.0.0.1:3080 |
 | 没有 pnpm | 先装 pnpm。`dsh plugin` 会把它转发给 pnpm |
 | 想钉死这一刀 | `dsh plugin --profile web add github:vdnight89/InfiniteDSH#v0.4.1` |
-| 已经装过，要换新图新文案 | `dsh plugin --profile web update dsh-infinite`，再重启 `dsh web` |
+| 已经装过，要换新刀 | `dsh plugin --profile web update dsh-infinite`，**关掉再开** `dsh web`。pnpm 会把 Git 依赖钉在旧提交上，不跑 update 就永远停在旧版。 |
 | 卸门 | `dsh plugin --profile web remove dsh-infinite`（故事和 preset 会留在磁盘上） |
 
 仓库带着编好的 `dist/`，Git 安装不必再授权 `prepare`。若你装的是 0.3.0 以前的提交，把 `dsh-infinite` 写进该 profile 的 `pnpm-workspace.yaml` 再 `add` 一次：
