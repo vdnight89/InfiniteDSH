@@ -98,7 +98,11 @@ npx @deepseek-ai/dsh web
 浏览器开 [http://127.0.0.1:3080](http://127.0.0.1:3080)。凭据按 DSH 自己的规矩读：`DEEPSEEK_API_KEY`、`$DSH_HOME/.credentials.yaml` 或 `.env`。  
 Windows 上 `$HOME/.dsh` 多半是 `%USERPROFILE%\.dsh`。设了 `DSH_HOME`，本插件也认。
 
-官方发现靠 GitHub topic **`dsh-plugin`**。`dsh-find-plugin`、dsh-market 一类货架都扫这个标签。本仓已挂上。npm 包名预留 `dsh-infinite`，尚未上架——现在不要写 `dsh plugin add dsh-infinite`，会扑空。
+官方发现靠 GitHub topic，顺序按检索优先级：
+
+`dsh-plugin` · `dsh` · `deepseek-harness` · `cordis` · `deepseek` · `cordis-plugin` · `ai-agents`
+
+货架（`dsh-find-plugin`、dsh-market）默认扫 **`dsh-plugin`**，和官方仓、桌面端、awesome 列表同一套前缀。后面才是 `interactive-fiction` / `text-adventure` 这类题材标签。npm 包名预留 `dsh-infinite`，尚未上架——现在不要写 `dsh plugin add dsh-infinite`，会扑空。
 
 ### 从源码开炉
 

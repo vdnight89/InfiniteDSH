@@ -6,15 +6,21 @@
   "license": "MIT",
   "description": "诸天万界：DeepSeek Harness 文学插件。一个会话就是一本书。封面开书，只写正文。",
   "keywords": [
-    "dsh",
     "dsh-plugin",
+    "dsh",
     "deepseek-harness",
+    "cordis",
     "deepseek",
-    "诸天万界",
+    "cordis-plugin",
+    "ai-agents",
+    "plugins",
     "interactive-fiction",
     "text-adventure",
     "ai-writing",
-    "worldbook"
+    "worldbook",
+    "novel",
+    "chinese",
+    "诸天万界"
   ],
   "repository": {
     "type": "git",
