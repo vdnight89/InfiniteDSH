@@ -43,6 +43,7 @@ import {
   embarkDetail,
   exportDone,
   exportNoProse,
+  exportPolishing,
   needForceText,
   noWorldYet,
   openedEmbarked,
@@ -66,6 +67,7 @@ import {
   seedStory,
 } from './story-files.js'
 import { collectExportSource, sessionMessages } from './transcript.js'
+import { polishPrompt } from './polish.js'
 import { revealFile } from './reveal.js'
 import { wakeSoon } from './wake.js'
 import type {
@@ -407,7 +409,16 @@ export async function handleExport(
   if (!manuscriptHasBody(book)) return { kind: 'error', text: exportNoProse() }
   saveExport(root, book)
   const dest = saveNamedExport(destDir, safeBookFileName(title), book)
-  return { kind: 'success', text: exportDone(book.length, title, dest, revealFile(dest)) }
+  revealFile(dest)
+  saveMeta(root, {
+    ...meta,
+    exportPending: true,
+    exportTitle: title,
+    exportCwd: destDir,
+  })
+  const woke = wakeSoon(inv.agent, polishPrompt(title, world, meta.protagonist, prose))
+  if (!woke) return { kind: 'success', text: exportDone(book.length, title, dest, true) }
+  return { kind: 'success', text: exportPolishing(title, dest) }
 }
 
 export function registerCommands(ctx: InfiniteContext, config: Required<PluginConfig>): void {

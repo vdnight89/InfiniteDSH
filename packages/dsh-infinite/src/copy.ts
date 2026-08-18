@@ -70,8 +70,12 @@ export function exportDone(chars: number, title: string, path: string, revealed:
   return `已誊出 ${chars} 字书稿《${title}》：${path}。${open}`
 }
 
-export function exportPolishing(title: string): string {
-  return `正在从头润色《${title}》。写完会落入当前工作区，不必再手拷。`
+export function exportPolishing(title: string, path: string): string {
+  return `草稿《${title}》已落下：${path}。叙事者正在润色排版，完成后覆盖同一份。日期已写好，不必调工具。`
+}
+
+export function exportKeptDraft(title: string): string {
+  return `润色未成书，已保留草稿《${title}》。可再 /export-story。`
 }
 
 export function exportNoProse(): string {
@@ -110,7 +114,7 @@ export const COMMANDS_COPY = {
     hint: '[名字]',
   },
   'export-story': {
-    description: '把已写出的正文誊成精排 Markdown 书稿',
+    description: '请叙事者润色排版，誊成精排 Markdown 书稿',
     hint: '[player]',
   },
 } as const

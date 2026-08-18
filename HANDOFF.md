@@ -2,7 +2,7 @@
 
 给下一个 agent：读完这份就能开工。词汇以 [`CONTEXT.md`](CONTEXT.md) 为准。产品口吻以 [`README.md`](README.md) 为准。历史决策见 [`docs/grill-airp-on-dsh.md`](docs/grill-airp-on-dsh.md) 与 [`docs/grill-ux-2026-08-17.md`](docs/grill-ux-2026-08-17.md)。规格原稿 [`docs/superpowers/specs/2026-08-16-dsh-infinite-design.md`](docs/superpowers/specs/2026-08-16-dsh-infinite-design.md) 已过时（命令名、题材数、导出流程都变了），只当考古。
 
-**当前船：** `v0.4.10`（`94ac040`，2026-08-18）。GitHub：https://github.com/vdnight89/InfiniteDSH  
+**当前船：** `v0.4.11`。GitHub：https://github.com/vdnight89/InfiniteDSH  
 **组合包名：** `dsh-infinite`。产品中文名：**诸天万界**。  
 **主人：** vdnight89。本机 Windows，仓库 `F:\DocProject\InfiniteDSH`。
 
@@ -13,7 +13,7 @@
 这是 **DeepSeek Harness 的文学插件**，不是独立 App，不是 DSH fork。
 
 - 一个 DSH 会话 = 一本书。切会话就是切界。
-- 用户选 preset **诸天万界** → `/new` → 点界图 / 天命之人 / 开局 → 点 **启程** → 模型只写小说正文 → 文末【歧路】三条可点 → `/export-story` 当场誊成 Markdown。
+- 用户选 preset **诸天万界** → `/new` → 点界图 / 天命之人 / 开局 → 点 **启程** → 模型只写小说正文 → 文末【歧路】三条可点 → `/export-story` 先落草稿再请叙事者润色排版。
 - 文学会话应收掉 bash / 改文件 / 子代理。UI 上仍可能显示 Full access，那是 DSH 壳，不是我们授权了刀斧。
 
 没开过 `/new`（没有 `infinite/meta.yml`）的会话，插件必须当编码会话：不注入文学上下文。
@@ -36,7 +36,7 @@
 | 随机事件不二次调模型 | `turn/start` 从 worldbook 抽一条未用过的非常驻条目，注入上下文。不抽写法、不抽开篇、不抽剧情卡。 |
 | compaction 追加档案 | `archive.md` 只追加，不覆盖。 |
 | 不写自定义会话事件 | **禁止** `session.append('infinite/bind', …)`。DSH 不认识的 type 且没有 `ignorable: true` 会让整本历史冷加载失败。`Session.append` 写不了 `ignorable`。绑定只活在 `meta.yml`。 |
-| 誊书不叫醒模型 | 0.4.10：`/export-story` 当场装订已抽出的正文。不要再走「润色回合」。 |
+| 誊书先草稿再润色 | `/export-story` 先把抽出的正文写成 `.md`，再叫醒叙事者润色排版覆盖同一份。提示里写死日期，禁止工具。润色若吐出 `runshell` / 构思，保留草稿。 |
 | Git 安装带 dist | 根包无 `prepare`、无 `file:` 依赖。宿主打成 `index.bundle.js`。 |
 | 只 named export | **不要** `export default`。Cordis `unwrapExports` 会拿走 default、丢掉旁边的 `inject`，Web 直接炸。 |
 | `cordis.patch.yml` 不要 `[]` | 空数组会把 Web 的皮肤 list 弄坏。只要 `insert` 我们这一条。 |
@@ -117,7 +117,7 @@ C:\Users\于翔\.dsh\sessions\--<projectKey>--\<sessionId>\session.jsonl.zstd
 - 日志：`~\.dsh\sessions\--F-DocProject-InfiniteDSH--\session-1603c339-6922-4cfc-9e53-ed0a9582e240\`
 - 天书：`~\.dsh\infinite\stories\session-1603c339-6922-4cfc-9e53-ed0a9582e240\infinite\meta.yml`
 
-`meta.yml` 是绑定 SSOT：`templateId`、`protagonist`、三开关、`pickedEventIds`、`pendingEventId`。`exportPending` / `exportTitle` / `exportCwd` 是 0.4.6 润色流残留字段，新导出不再写。
+`meta.yml` 是绑定 SSOT：`templateId`、`protagonist`、三开关、`pickedEventIds`、`pendingEventId`。誊书进行中会短暂写入 `exportPending` / `exportTitle` / `exportCwd`，润色回合结束清掉。
 
 ---
 
@@ -131,7 +131,7 @@ C:\Users\于翔\.dsh\sessions\--<projectKey>--\<sessionId>\session.jsonl.zstd
 | `/new 修仙 谢无妄 force` | 不弹窗直入。 |
 | `/bind` / `/bind 末世` | 改投他界，覆盖本会话天书。 |
 | `/cast` / `/cast 林晏` | 换主角；旧 constant 英雄降为 NPC。 |
-| `/export-story` | 抽出正文 → 问书名 → 当场写 `<cwd>/<书名>.md`，并 `revealFile`。 |
+| `/export-story` | 抽出正文 → 问书名 → 先写草稿 `.md` → 叫醒叙事者润色 → `turn/end` 覆盖或保留草稿。 |
 | `/export-story player` | 玩家行动留成 `*你：…*`。 |
 
 `/new` 流水线：`seedStory` 拷模板 → `applyProtagonist` → 可选 `applyOpening`（把选中的 plot 写成 `worldbook/opening.md`）→ `afterGate` 三键。启程用 `wakeSoon` 提交用户句「启程。」。
@@ -194,7 +194,7 @@ Headless（`NO_PROVIDER`）：当没有问答 UI，用模板默认主角 / 默�
 
 ## 誊书（反复炸过，按这个实现）
 
-入口：`handleExport` → `collectExportSource` → 问书名 → `exportTranscript`，不行再 `bindManuscript` → 写工作区 `.md`。
+入口：`handleExport` → `collectExportSource` → 问书名 → `exportTranscript` / `bindManuscript` 先写草稿 → `exportPending` + `wakeSoon(polishPrompt)` → `turn/end` 时 `finalizeManuscript`，失败则保留草稿。
 
 ### 消息从哪来
 
@@ -226,9 +226,11 @@ DSH `Session` 有 `events` getter 和 `deriveMessages()`。助手消息的 `cont
 
 ### 不要再做的事
 
-- 不要 `wakeSoon(polishPrompt(...))`。模型会为「今天的中文日期」去调 `runshell`，回合结束 `finalizeManuscript` 拿到工具 XML，书稿是空的。0.4.6–0.4.9 的坑。
+- 不要只叫醒模型、不先写草稿。模型若去调 `runshell date`，用户会两手空空。
+- 润色提示里不要写「今天的中文日期」，必须写死 `formatExportDate()`，并写「禁止调用任何工具」。
 - 不要先问书名再发现没有正文（0.4.7 已改：没有 prose 直接报错）。
 - 不要把规划段（「用户让我写小说正文」「当前场景：」）当章节。
+- `exportPending` 回合不要抽随机事件，不要弹歧路，不要注入 world/characters。
 
 现场书稿：工作区里的 `掌中剑.md` 是从 session-1603c339 抽出的四章，**不要提交**。同类未跟踪文件：`无尽流浪.md`、`暗夜独行.md`（早期失败导出，规划垃圾）。
 
@@ -317,7 +319,7 @@ GitHub About 描述已是诸天万界那句。Topics 优先级（货架扫前面
 | 题材表 | `infinite-core/src/catalog.generated.ts` + `topics.ts` |
 | 封面 HTTP | `covers-host.ts` |
 | 插件入口 | `index.ts` |
-| 旧润色提示（勿再接入命令） | `polish.ts` |
+| 润色提示与定稿 | `polish.ts` |
 
 `Duck*` 类型在 `dsh-infinite/src/types.ts`，是对 DSH 的窄面，不要直接依赖 `@deepseek-ai/*`（Git 安装的 bundle 里也打不进主机那些包当 runtime 依赖）。
 
@@ -331,7 +333,7 @@ GitHub About 描述已是诸天万界那句。Topics 优先级（货架扫前面
 4. **会话标题。** 我们会 `session/title` 写成「奇幻·谢无妄」。用户若先手打「开始」，DSH 自己的标题逻辑可能抢先。
 5. **故事目录和日志目录是分开的。** 修日志别假定 `infinite/meta.yml` 在 session.jsonl 旁边。
 6. **导出质量上限是模型有没有写出可见 `text` 块。** 只有 reasoning、没有 text，仍然誊不出。
-7. **`exportPending` 残留。** 新代码不写。若用户卡在一次失败的润色回合，重启后再 `/export-story` 即可；`turn/end` 也会回退装订。
+7. **润色仍可能跑偏。** 草稿已在磁盘上。`turn/end` 若看到工具 XML 会保留草稿并提示可再 `/export-story`。
 8. **不要提交用户书稿。** `掌中剑.md`、`无尽流浪.md`、`暗夜独行.md` 留在工作区即可。
 
 ---
@@ -343,7 +345,7 @@ GitHub About 描述已是诸天万界那句。Topics 优先级（货架扫前面
 3. 应立刻出现小说正文，不是「界门已开请手打开始」
 4. 正文后弹【歧路】三择，点一条就续写；自己走写在「输入你的答案」
 5. Ctrl+C 再开，**同一会话必须还能进**，不能报 `SessionFormatUnsupportedError`
-6. `/export-story` 选书名后，工作区立刻出现 `.md`，不要再出现「正在润色」然后去调 date
+6. `/export-story` 选书名后工作区立刻有草稿 `.md`，随后模型应只输出以 `#` 开头的书稿，不得调 `date` / `runshell`
 
 对照会话：`session-1603c339-6922-4cfc-9e53-ed0a9582e240`（奇幻 / 谢无妄 / 酒铺 / 悬赏）。0.4.10 已能抽出四章《掌中剑》。
 

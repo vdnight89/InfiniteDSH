@@ -243,7 +243,7 @@ function clipChapterTitle(body: string): string {
   return cut.slice(0, 12)
 }
 
-function formatExportDate(at: Date): string {
+export function formatExportDate(at: Date = new Date()): string {
   return `${at.getFullYear()}年${at.getMonth() + 1}月${at.getDate()}日`
 }
 

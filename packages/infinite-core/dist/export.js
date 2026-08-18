@@ -238,7 +238,7 @@ function clipChapterTitle(body) {
         return '';
     return cut.slice(0, 12);
 }
-function formatExportDate(at) {
+export function formatExportDate(at = new Date()) {
     return `${at.getFullYear()}年${at.getMonth() + 1}月${at.getDate()}日`;
 }
 export function formatArchive(summary, at, previous = '') {

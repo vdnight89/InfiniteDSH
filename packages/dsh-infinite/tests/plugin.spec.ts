@@ -217,15 +217,52 @@ describe('dsh-infinite plugin', () => {
       signal: new AbortController().signal,
     })
     expect(exported.kind).toBe('success')
-    expect(exported.text).toMatch(/已誊出/)
-    expect(followups).toEqual([])
+    expect(exported.text).toMatch(/润色|草稿/)
+    expect(followups[0]).toMatch(/重誊成书/)
+    expect(followups[0]).toMatch(/禁止调用任何工具/)
+    expect(followups[0]).not.toContain('今天的中文日期')
     const book = readdirSync(dest).find((name) => name.endsWith('.md'))
     expect(book).toBeTruthy()
+    const draft = readFileSync(join(dest, book!), 'utf8')
+    expect(draft).toContain('# 现代·江澄')
+    expect(draft).toContain('电梯门开了。')
+    expect(draft).not.toContain('【正文】')
+    expect(loadMeta(infiniteRoot(resolveSessionDir(ctx, sess, config)))?.exportPending).toBe(true)
+
+    sess.events = [
+      ...events,
+      { type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '# 现代·江澄\n\n> 诸天万界 · 现代\n\n## 第一章　电梯门开了\n\n电梯门开了。江澄站在灯下，走廊深处有人咳嗽，他没有回头，只把袖口里的钥匙按进掌心。夜色从井道里涌上来。' }] } } },
+    ]
+    onSessionEvent(ctx, config, sess, { type: 'turn/end' })
     const txt = readFileSync(join(dest, book!), 'utf8')
-    expect(txt).toContain('# 现代·江澄')
+    expect(txt).toContain('钥匙按进掌心')
+    expect(txt).not.toContain('runshell')
+    expect(loadMeta(infiniteRoot(resolveSessionDir(ctx, sess, config)))?.exportPending).toBeUndefined()
+  })
+
+  it('keeps the export draft when polish emits a tool call', async () => {
+    const { ctx, config } = setup()
+    await handleNew(ctx, config, inv('s2b', '都市'))
+    const dest = mkdtempSync(join(tmpdir(), 'infinite-export-'))
+    dirs.push(dest)
+    const events = [
+      { type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '电梯门开了。江澄站在灯下，走廊里有人咳嗽。他没有回头。夜色从井道里涌上来。' }] } } },
+    ]
+    const sess = { ...session('s2b', events), header: { cwd: dest } }
+    const exported = await handleExport(ctx, config, {
+      agent: { session: sess, followup() { /* polish wake */ } },
+      rawInput: '',
+      signal: new AbortController().signal,
+    })
+    expect(exported.kind).toBe('success')
+    sess.events = [
+      ...events,
+      { type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '<tool_calls> <invoke name="runshell">date</invoke>' }] } } },
+    ]
+    onSessionEvent(ctx, config, sess, { type: 'turn/end' })
+    const book = readdirSync(dest).find((name) => name.endsWith('.md'))
+    const txt = readFileSync(join(dest, book!), 'utf8')
     expect(txt).toContain('电梯门开了。')
-    expect(txt).not.toContain('【正文】')
-    expect(txt).not.toContain('走进去')
     expect(txt).not.toContain('runshell')
   })
 

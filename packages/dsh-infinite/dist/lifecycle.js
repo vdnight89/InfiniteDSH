@@ -1,15 +1,17 @@
-import { bindManuscript, bookNameForTemplate, exportTranscript, formatArchive, manuscriptHasBody, pickRandomEventEntry, safeBookFileName } from 'infinite-core';
-import { exportDone } from './copy.js';
+import { bookNameForTemplate, formatArchive, pickRandomEventEntry, safeBookFileName } from 'infinite-core';
+import { exportDone, exportKeptDraft } from './copy.js';
 import { offerForks } from './forks-host.js';
 import { infiniteRoot, resolveSessionDir } from './paths.js';
 import { finalizeManuscript } from './polish.js';
 import { revealFile } from './reveal.js';
 import { loadArchive, loadMeta, loadWorldbook, saveArchive, saveExport, saveMeta, saveNamedExport } from './story-files.js';
-import { collectExportSource, lastAssistantRaw, recentText, sessionMessages, summaryFromCompaction } from './transcript.js';
+import { lastAssistantRaw, recentText, summaryFromCompaction } from './transcript.js';
 export function onSessionEvent(ctx, config, session, event) {
     const root = infiniteRoot(resolveSessionDir(ctx, session, config));
     const meta = loadMeta(root);
     if (!meta)
+        return;
+    if (event.type === 'turn/start' && meta.exportPending)
         return;
     if (event.type === 'turn/start' && meta.randomEvent) {
         const pool = loadWorldbook(root).filter((entry) => entry.category !== '写法' && entry.category !== '开篇' && entry.category !== '剧情');
@@ -43,21 +45,21 @@ export function onSessionEvent(ctx, config, session, event) {
 function finishPolishExport(root, session, meta) {
     const title = meta.exportTitle || meta.protagonist || '诸天万界书稿';
     const world = bookNameForTemplate(meta.templateId);
-    let book = finalizeManuscript(lastAssistantRaw(session), title, world, meta.protagonist);
-    if (!manuscriptHasBody(book)) {
-        book = exportTranscript(title, meta.protagonist, sessionMessages(session), false, world);
-    }
-    if (!manuscriptHasBody(book)) {
-        book = bindManuscript(title, meta.protagonist, world, collectExportSource(session));
-    }
     const destDir = meta.exportCwd || session.header?.cwd || process.cwd();
-    if (manuscriptHasBody(book)) {
+    const book = finalizeManuscript(lastAssistantRaw(session), title, world, meta.protagonist);
+    if (book) {
         const dest = saveNamedExport(destDir, safeBookFileName(title), book);
         saveExport(root, book);
         revealFile(dest);
         session.append?.('command/done', {
             kind: 'success',
             text: exportDone(book.length, title, dest, true),
+        });
+    }
+    else {
+        session.append?.('command/done', {
+            kind: 'success',
+            text: exportKeptDraft(title),
         });
     }
     saveMeta(root, {

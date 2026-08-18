@@ -447,7 +447,7 @@ function clipChapterTitle(body) {
     return "";
   return cut.slice(0, 12);
 }
-function formatExportDate(at) {
+function formatExportDate(at = /* @__PURE__ */ new Date()) {
   return `${at.getFullYear()}\u5E74${at.getMonth() + 1}\u6708${at.getDate()}\u65E5`;
 }
 function formatArchive(summary, at, previous = "") {
@@ -910,6 +910,12 @@ function exportDone(chars, title, path, revealed) {
   const open = revealed ? "\u5DF2\u6253\u5F00\u6240\u5728\u6587\u4EF6\u5939\u3002" : "\u53F3\u4FA7\u6587\u4EF6\u6811\u5373\u53EF\u6253\u5F00\u3002";
   return `\u5DF2\u8A8A\u51FA ${chars} \u5B57\u4E66\u7A3F\u300A${title}\u300B\uFF1A${path}\u3002${open}`;
 }
+function exportPolishing(title, path) {
+  return `\u8349\u7A3F\u300A${title}\u300B\u5DF2\u843D\u4E0B\uFF1A${path}\u3002\u53D9\u4E8B\u8005\u6B63\u5728\u6DA6\u8272\u6392\u7248\uFF0C\u5B8C\u6210\u540E\u8986\u76D6\u540C\u4E00\u4EFD\u3002\u65E5\u671F\u5DF2\u5199\u597D\uFF0C\u4E0D\u5FC5\u8C03\u5DE5\u5177\u3002`;
+}
+function exportKeptDraft(title) {
+  return `\u6DA6\u8272\u672A\u6210\u4E66\uFF0C\u5DF2\u4FDD\u7559\u8349\u7A3F\u300A${title}\u300B\u3002\u53EF\u518D /export-story\u3002`;
+}
 function exportNoProse() {
   return "\u6B64\u754C\u5C1A\u65E0\u53EF\u8A8A\u7684\u5C0F\u8BF4\u6B63\u6587\u3002\u6A21\u578B\u82E5\u53EA\u5199\u4E86\u6784\u601D\uFF0C\u8BF7\u5148\u5199\u51FA\u6545\u4E8B\u518D\u8A8A\u3002";
 }
@@ -939,7 +945,7 @@ var COMMANDS_COPY = {
     hint: "[\u540D\u5B57]"
   },
   "export-story": {
-    description: "\u628A\u5DF2\u5199\u51FA\u7684\u6B63\u6587\u8A8A\u6210\u7CBE\u6392 Markdown \u4E66\u7A3F",
+    description: "\u8BF7\u53D9\u4E8B\u8005\u6DA6\u8272\u6392\u7248\uFF0C\u8A8A\u6210\u7CBE\u6392 Markdown \u4E66\u7A3F",
     hint: "[player]"
   }
 };
@@ -1344,6 +1350,64 @@ function summaryFromCompaction(data) {
   return blocksToText(data.summary);
 }
 
+// packages/dsh-infinite/dist/polish.js
+function polishPrompt(title, world, protagonist, source) {
+  const dated = formatExportDate();
+  return [
+    `\u3010\u91CD\u8A8A\u6210\u4E66\u3011\u8FD9\u4E00\u56DE\u5408\u53EA\u8F93\u51FA\u5B8C\u6574 Markdown \u4E66\u7A3F\u3002`,
+    `\u7981\u6B62\u8C03\u7528\u4EFB\u4F55\u5DE5\u5177\uFF0C\u5305\u62EC bash\u3001runshell\u3001date\u3001\u8BFB\u6587\u4EF6\u3002\u65E5\u671F\u5DF2\u7ECF\u5199\u597D\uFF0C\u7167\u6284\u5373\u53EF\u3002`,
+    `\u4E0D\u8981\u3010\u6B67\u8DEF\u3011\uFF0C\u4E0D\u8981\u6784\u601D\uFF0C\u4E0D\u8981\u82F1\u6587\uFF0C\u4E0D\u8981\u89E3\u91CA\uFF0C\u4E0D\u8981 tool_calls\u3002\u7B2C\u4E00\u4E2A\u5B57\u5FC5\u987B\u662F #\u3002`,
+    `\u4E66\u540D\u300A${title}\u300B\u3002\u8BF8\u5929\u4E07\u754C \xB7 ${world}\u3002\u5929\u547D\u4E4B\u4EBA\uFF1A${protagonist}\u3002`,
+    `\u683C\u5F0F\u5FC5\u987B\u662F\uFF1A`,
+    `# ${title}`,
+    `> \u8BF8\u5929\u4E07\u754C \xB7 ${world}`,
+    `> \u5929\u547D\u4E4B\u4EBA\uFF1A${protagonist}`,
+    `> \u8A8A\u5F55\u4E8E ${dated}`,
+    ``,
+    `---`,
+    ``,
+    `## \u7B2C\u4E00\u7AE0\u3000\uFF08\u4ECE\u6B63\u6587\u62BD\u7684\u77ED\u9898\uFF09`,
+    `\uFF08\u6DA6\u8272\u540E\u7684\u6BB5\u843D\uFF09`,
+    ``,
+    `\u540E\u9762\u6309\u60C5\u8282\u81EA\u7136\u5206\u7AE0\u3002\u6309\u65F6\u95F4\u987A\u5E8F\u91CD\u5199\u7D20\u6750\u91CC\u7684\u6545\u4E8B\uFF0C\u8865\u4E0A\u65AD\u88C2\uFF0C\u4E0D\u8981\u53E6\u8D77\u4E00\u672C\u65E0\u5173\u7684\u4E66\u3002`,
+    ``,
+    `\u3010\u7D20\u6750\u3011`,
+    source.slice(0, 12e3)
+  ].join("\n");
+}
+function isFailedPolish(text) {
+  const raw = text.trim();
+  if (!raw)
+    return true;
+  if (/runshell|tool_calls|tool-call|<invoke\s|<\/tool/i.test(raw))
+    return true;
+  if (/^\s*(?:We need|Need |The user |用户让我)/i.test(raw))
+    return true;
+  return false;
+}
+function finalizeManuscript(raw, title, world, protagonist) {
+  if (isFailedPolish(raw))
+    return "";
+  const body = cleanManuscript(raw);
+  if (!body || isFailedPolish(body) || countCjk(body) < 24)
+    return "";
+  if (/^#\s+\S/m.test(body))
+    return `${body.trim()}
+`;
+  return [
+    `# ${title}`,
+    "",
+    `> \u8BF8\u5929\u4E07\u754C \xB7 ${world}`,
+    `> \u5929\u547D\u4E4B\u4EBA\uFF1A${protagonist}`,
+    `> \u8A8A\u5F55\u4E8E ${formatExportDate()}`,
+    "",
+    "---",
+    "",
+    body,
+    ""
+  ].join("\n");
+}
+
 // packages/dsh-infinite/dist/reveal.js
 import { spawn } from "node:child_process";
 import { dirname as dirname2 } from "node:path";
@@ -1716,7 +1780,17 @@ async function handleExport(ctx, config, inv) {
     return { kind: "error", text: exportNoProse() };
   saveExport(root, book);
   const dest = saveNamedExport(destDir, safeBookFileName(title), book);
-  return { kind: "success", text: exportDone(book.length, title, dest, revealFile(dest)) };
+  revealFile(dest);
+  saveMeta(root, {
+    ...meta,
+    exportPending: true,
+    exportTitle: title,
+    exportCwd: destDir
+  });
+  const woke = wakeSoon(inv.agent, polishPrompt(title, world, meta.protagonist, prose));
+  if (!woke)
+    return { kind: "success", text: exportDone(book.length, title, dest, true) };
+  return { kind: "success", text: exportPolishing(title, dest) };
 }
 function registerCommands(ctx, config) {
   for (const [name2, copy] of Object.entries(COMMANDS_COPY)) {
@@ -1927,32 +2001,13 @@ async function offerForks(ctx, session) {
   }
 }
 
-// packages/dsh-infinite/dist/polish.js
-function finalizeManuscript(raw, title, world, protagonist) {
-  const body = cleanManuscript(raw);
-  if (!body)
-    return "";
-  if (/^#\s+\S/m.test(body) && /[\u4e00-\u9fff]{24,}/.test(body))
-    return `${body.trim()}
-`;
-  return [
-    `# ${title}`,
-    "",
-    `> \u8BF8\u5929\u4E07\u754C \xB7 ${world}`,
-    `> \u5929\u547D\u4E4B\u4EBA\uFF1A${protagonist}`,
-    "",
-    "---",
-    "",
-    body,
-    ""
-  ].join("\n");
-}
-
 // packages/dsh-infinite/dist/lifecycle.js
 function onSessionEvent(ctx, config, session, event) {
   const root = infiniteRoot(resolveSessionDir(ctx, session, config));
   const meta = loadMeta(root);
   if (!meta)
+    return;
+  if (event.type === "turn/start" && meta.exportPending)
     return;
   if (event.type === "turn/start" && meta.randomEvent) {
     const pool = loadWorldbook(root).filter((entry) => entry.category !== "\u5199\u6CD5" && entry.category !== "\u5F00\u7BC7" && entry.category !== "\u5267\u60C5");
@@ -1986,21 +2041,20 @@ function onSessionEvent(ctx, config, session, event) {
 function finishPolishExport(root, session, meta) {
   const title = meta.exportTitle || meta.protagonist || "\u8BF8\u5929\u4E07\u754C\u4E66\u7A3F";
   const world = bookNameForTemplate(meta.templateId);
-  let book = finalizeManuscript(lastAssistantRaw(session), title, world, meta.protagonist);
-  if (!manuscriptHasBody(book)) {
-    book = exportTranscript(title, meta.protagonist, sessionMessages(session), false, world);
-  }
-  if (!manuscriptHasBody(book)) {
-    book = bindManuscript(title, meta.protagonist, world, collectExportSource(session));
-  }
   const destDir = meta.exportCwd || session.header?.cwd || process.cwd();
-  if (manuscriptHasBody(book)) {
+  const book = finalizeManuscript(lastAssistantRaw(session), title, world, meta.protagonist);
+  if (book) {
     const dest = saveNamedExport(destDir, safeBookFileName(title), book);
     saveExport(root, book);
     revealFile(dest);
     session.append?.("command/done", {
       kind: "success",
       text: exportDone(book.length, title, dest, true)
+    });
+  } else {
+    session.append?.("command/done", {
+      kind: "success",
+      text: exportKeptDraft(title)
     });
   }
   saveMeta(root, {
@@ -2034,7 +2088,7 @@ function registerPrompt(ctx, config) {
         return "";
       const meta = loadMeta(root);
       if (meta?.exportPending) {
-        return "\u8FD9\u4E00\u56DE\u5408\u662F\u91CD\u8A8A\u6210\u4E66\u3002\u53EA\u8F93\u51FA\u5B8C\u6574 Markdown \u4E66\u7A3F\u3002\u4E0D\u8981\u3010\u6B67\u8DEF\u3011\uFF0C\u4E0D\u8981\u6784\u601D\uFF0C\u4E0D\u8981\u82F1\u6587\u6307\u4EE4\uFF0C\u4E0D\u8981\u590D\u8FF0\u62A4\u680F\u3002";
+        return "\u8FD9\u4E00\u56DE\u5408\u662F\u91CD\u8A8A\u6210\u4E66\u3002\u53EA\u8F93\u51FA\u5B8C\u6574 Markdown \u4E66\u7A3F\u3002\u7981\u6B62\u8C03\u7528\u4EFB\u4F55\u5DE5\u5177\u3002\u4E0D\u8981\u3010\u6B67\u8DEF\u3011\uFF0C\u4E0D\u8981\u6784\u601D\uFF0C\u4E0D\u8981\u82F1\u6587\uFF0C\u4E0D\u8981\u590D\u8FF0\u62A4\u680F\u3002\u7B2C\u4E00\u4E2A\u5B57\u5FC5\u987B\u662F #\u3002";
       }
       const parts = [buildProseOnlyGuard()];
       if (meta?.narrativeGuard)

@@ -23,4 +23,5 @@ export declare function manuscriptHasBody(text: string): boolean;
 export declare function bindManuscript(title: string, protagonist: string, world: string, source: string): string;
 export declare function chapterHeading(index: number, body: string): string;
 export declare function chineseChapter(index: number): string;
+export declare function formatExportDate(at?: Date): string;
 export declare function formatArchive(summary: string, at: string, previous?: string): string;

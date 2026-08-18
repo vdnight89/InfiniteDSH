@@ -9,7 +9,7 @@
 > 一个会话，就是一扇门。  
 > 推开它，你不是在聊天。你是在写，在杀，在活，在死，在诸天万界里把自己活成主角。
 
-这是 DeepSeek Harness 上的文学插件。仓库名 InfiniteDSH，组合包名 `dsh-infinite`。当前 **0.4.10**。  
+这是 DeepSeek Harness 上的文学插件。仓库名 InfiniteDSH，组合包名 `dsh-infinite`。当前 **0.4.11**。  
 不另做 App，不另做书架。DSH 侧栏里的一项会话，就是你脚下这一整本。切会话，就是切界。
 
 文学预设叫 **诸天万界**：模型只许吐小说正文。bash、改文件、子代理，全部收刀。你要的不是助手。你要的是世界自己在呼吸。
@@ -31,7 +31,7 @@ dsh web
 |---|---|
 | 还没有 DSH | `npx @deepseek-ai/dsh web`，浏览器开 http://127.0.0.1:3080 |
 | 没有 pnpm | 先装 pnpm。`dsh plugin` 会把它转发给 pnpm |
-| 想钉死这一刀 | `dsh plugin --profile web add github:vdnight89/InfiniteDSH#v0.4.10` |
+| 想钉死这一刀 | `dsh plugin --profile web add github:vdnight89/InfiniteDSH#v0.4.11` |
 | 已经装过，要换新刀 | `dsh plugin --profile web update dsh-infinite`，**关掉再开** `dsh web`。pnpm 会把 Git 依赖钉在旧提交上，不跑 update 就永远停在旧版。 |
 | 卸门 | `dsh plugin --profile web remove dsh-infinite`（故事和 preset 会留在磁盘上） |
 
@@ -68,7 +68,7 @@ allowBuilds:
 | 随机世界事件 | 每回合可从尚未动用的设定里抽一条刺激。不抽写法，不抽开篇，不开第二次模型。 |
 | 只出正文 | 叙事护栏 + 推进护栏默认全开。空转描写，滚。 |
 | 长篇落档案 | compaction 把剧情要点**追加**进 `archive.md`。同一会话写到地老天荒。 |
-| 洗净导出 | `/export-story` 当场誊成精排 Markdown。DSH Web 自己的 `/export` 是日志 ZIP，别抢。 |
+| 洗净导出 | `/export-story` 先落草稿，再请叙事者润色排版。DSH Web 自己的 `/export` 是日志 ZIP，别抢。 |
 
 没开过 `/new` 的会话，插件不碰。编码的人继续编码。写书的人，去写书。
 
@@ -175,7 +175,7 @@ dsh --profile web --dump-config
 | `/bind` | 改投他界（会覆盖本会话天书）。 |
 | `/bind 末世` | 直接坠入末世。 |
 | `/cast` | 更换天命之人；或 `/cast 林晏`。 |
-| `/export-story` | 拟题后当场把已写出的正文誊成精排 Markdown（不是上面那个会话日志压缩包）。 |
+| `/export-story` | 拟题后先落草稿，再请叙事者润色排版成精排 Markdown（不是上面那个会话日志压缩包）。 |
 | `/export-story player` | 连你的行动一起留下。 |
 
 故事优先落在该会话 artifact 目录的 `infinite/`。没有逐会话路径时：

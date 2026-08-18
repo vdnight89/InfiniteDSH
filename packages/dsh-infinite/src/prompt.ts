@@ -28,7 +28,7 @@ export function registerPrompt(ctx: InfiniteContext, config: Required<PluginConf
       if (!root) return ''
       const meta = loadMeta(root)
       if (meta?.exportPending) {
-        return '这一回合是重誊成书。只输出完整 Markdown 书稿。不要【歧路】，不要构思，不要英文指令，不要复述护栏。'
+        return '这一回合是重誊成书。只输出完整 Markdown 书稿。禁止调用任何工具。不要【歧路】，不要构思，不要英文，不要复述护栏。第一个字必须是 #。'
       }
       const parts = [buildProseOnlyGuard()]
       if (meta?.narrativeGuard) parts.push(buildNarrativeGuard())
