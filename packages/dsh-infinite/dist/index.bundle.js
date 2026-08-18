@@ -76,7 +76,10 @@ ${source.trim()}
     randomEvent: parseBool(fields.randomEvent, true),
     pickedEventIds: parseStringList(fields.pickedEventIds),
     pendingEventId: fields.pendingEventId && fields.pendingEventId !== "null" ? fields.pendingEventId : null,
-    createdAt: fields.createdAt?.trim() || (/* @__PURE__ */ new Date()).toISOString()
+    createdAt: fields.createdAt?.trim() || (/* @__PURE__ */ new Date()).toISOString(),
+    ...parseBool(fields.exportPending, false) ? { exportPending: true } : {},
+    ...fields.exportTitle?.trim() ? { exportTitle: fields.exportTitle.trim() } : {},
+    ...fields.exportCwd?.trim() ? { exportCwd: fields.exportCwd.trim().replace(/^['"]|['"]$/g, "") } : {}
   };
 }
 function formatStoryMeta(meta) {
@@ -92,6 +95,9 @@ function formatStoryMeta(meta) {
     `pickedEventIds: ${picked}`,
     `pendingEventId: ${pending}`,
     `createdAt: ${meta.createdAt}`,
+    ...meta.exportPending ? ["exportPending: true"] : [],
+    ...meta.exportTitle ? [`exportTitle: ${JSON.stringify(meta.exportTitle)}`] : [],
+    ...meta.exportCwd ? [`exportCwd: ${JSON.stringify(meta.exportCwd)}`] : [],
     ""
   ].join("\n");
 }
@@ -240,7 +246,16 @@ var PLANNING_MARKERS = [
   /Need obey/i,
   /output story body/i,
   /fiction narrative/i,
+  /The user gave/i,
+  /I need to (?:continue|write|be careful)/i,
+  /Let's (?:craft|draft|write|final)/i,
+  /Need to write/i,
+  /Do not write plan/i,
+  /Must ensure/i,
+  /Option \d:/i,
   /用户让我写/,
+  /我们需要回应/,
+  /按照要求/,
   /需要遵守叙事护栏/,
   /我要推进剧情/,
   /让我构思/,
@@ -249,34 +264,67 @@ var PLANNING_MARKERS = [
   /已出场角色：/,
   /剧情要素：/,
   /不要输出章节名/,
-  /同时活跃的主要角色/
+  /同时活跃的主要角色/,
+  /第三人称有限视角/
 ];
+var PLANNING_LINE = /^(?:The |I |We |Need |Let's |Must |Could |Option |Count |Draft |Do not |Need to )/i;
+var PLANNING_CN_LINE = /我们需要回应|按照要求|只写小说正文|第三人称有限|不要输出|我要推进|让我构思|用户让我|已出场角色|当前场景：|剧情要素：|Need to write|I need to|Let's draft|Let's write|Let's final|Must ensure|Do not write plan/;
+function isPlanningParagraph(text) {
+  const t = text.trim();
+  if (!t)
+    return true;
+  if (PLANNING_LINE.test(t) || PLANNING_CN_LINE.test(t))
+    return true;
+  for (const marker of PLANNING_MARKERS) {
+    if (marker.test(t))
+      return true;
+  }
+  const letters = t.match(/[A-Za-z]/g)?.length ?? 0;
+  const cjk = t.match(/[\u4e00-\u9fff]/g)?.length ?? 0;
+  return letters >= 16 && letters > cjk * 0.35;
+}
 function isPlanningDump(text) {
   const t = text.trim();
   if (!t)
     return false;
-  if (/^(?:We need|Need obey|用户让我|我要推进|让我构思|我写正文)/i.test(t))
+  if (/^(?:We need|Need obey|The user |用户让我|我们需要回应|我要推进|让我构思|我写正文)/i.test(t))
     return true;
-  let hits = 0;
-  for (const marker of PLANNING_MARKERS) {
-    if (marker.test(t))
-      hits += 1;
-    if (hits >= 2)
-      return true;
-  }
-  return false;
+  const paras = t.split(/\n\s*\n/);
+  const plan = paras.filter((p) => isPlanningParagraph(p)).length;
+  return plan >= 2 || paras.length > 0 && plan / paras.length >= 0.5;
 }
 function extractStoryBody(text) {
   const cleaned = cleanProse(text);
   if (!cleaned)
     return "";
-  if (!isPlanningDump(cleaned))
-    return cleaned;
-  const split = cleaned.split(/(?:^|\n)我写正文[^\n]*/).pop() ?? "";
-  const maybe = cleanProse(split);
-  if (maybe && maybe !== cleaned && !isPlanningDump(maybe) && maybe.length > 40)
-    return maybe;
-  return "";
+  const runs = [];
+  let current = [];
+  for (const para of cleaned.split(/\n\s*\n/)) {
+    if (isPlanningParagraph(para)) {
+      if (current.length > 0) {
+        runs.push(current);
+        current = [];
+      }
+      continue;
+    }
+    current.push(para);
+  }
+  if (current.length > 0)
+    runs.push(current);
+  for (let i = runs.length - 1; i >= 0; i -= 1) {
+    const body = runs[i].join("\n\n").trim();
+    const cjk = body.match(/[\u4e00-\u9fff]/g)?.length ?? 0;
+    if (cjk >= 24 && !isPlanningDump(body))
+      return body;
+  }
+  if (isPlanningDump(cleaned))
+    return "";
+  return cleaned;
+}
+function cleanManuscript(text) {
+  const withoutFork = text.replace(FENCE_BLOCK, "").replace(FORK_BLOCK, "");
+  const kept = withoutFork.split(/\n\s*\n/).filter((para) => !isPlanningParagraph(para) && !/^(?:亦可自己写一条)/.test(para.trim())).join("\n\n").replace(BODY_TAG, "").replace(/\n{3,}/g, "\n\n").trim();
+  return isPlanningDump(kept) ? "" : kept;
 }
 function isOpeningInstruction(text) {
   const t = text.trim();
@@ -818,6 +866,12 @@ function exportDone(chars, title, path, revealed) {
   const open = revealed ? "\u5DF2\u6253\u5F00\u6240\u5728\u6587\u4EF6\u5939\u3002" : "\u53F3\u4FA7\u6587\u4EF6\u6811\u5373\u53EF\u6253\u5F00\u3002";
   return `\u5DF2\u8A8A\u51FA ${chars} \u5B57\u4E66\u7A3F\u300A${title}\u300B\uFF1A${path}\u3002${open}`;
 }
+function exportPolishing(title) {
+  return `\u6B63\u5728\u4ECE\u5934\u6DA6\u8272\u300A${title}\u300B\u3002\u5199\u5B8C\u4F1A\u843D\u5165\u5F53\u524D\u5DE5\u4F5C\u533A\uFF0C\u4E0D\u5FC5\u518D\u624B\u62F7\u3002`;
+}
+function exportNoProse() {
+  return "\u6B64\u754C\u5C1A\u65E0\u53EF\u8A8A\u7684\u5C0F\u8BF4\u6B63\u6587\u3002\u6A21\u578B\u82E5\u53EA\u5199\u4E86\u6784\u601D\uFF0C\u8BF7\u5148\u5199\u51FA\u6545\u4E8B\u518D\u8A8A\u3002";
+}
 function sessionTitle(world, protagonist) {
   return `${world}\xB7${protagonist}`;
 }
@@ -844,7 +898,7 @@ var COMMANDS_COPY = {
     hint: "[\u540D\u5B57]"
   },
   "export-story": {
-    description: "\u8A8A\u51FA\u7CBE\u6392 Markdown \u4E66\u7A3F\u5230\u5F53\u524D\u5DE5\u4F5C\u533A",
+    description: "\u8BF7\u53D9\u4E8B\u8005\u4ECE\u5934\u6DA6\u8272\uFF0C\u8A8A\u6210\u7CBE\u6392 Markdown \u4E66\u7A3F",
     hint: "[player]"
   }
 };
@@ -1205,6 +1259,48 @@ function summaryFromCompaction(data) {
   if (typeof data.summary === "string")
     return data.summary;
   return blocksToText(data.summary);
+}
+
+// packages/dsh-infinite/dist/polish.js
+function polishPrompt(title, world, protagonist, source) {
+  return [
+    `\u3010\u91CD\u8A8A\u6210\u4E66\u3011\u8FD9\u4E00\u56DE\u5408\u53EA\u8F93\u51FA\u5B8C\u6574 Markdown \u4E66\u7A3F\uFF0C\u4E0D\u8981\u3010\u6B67\u8DEF\u3011\uFF0C\u4E0D\u8981\u6784\u601D\uFF0C\u4E0D\u8981\u82F1\u6587\uFF0C\u4E0D\u8981\u89E3\u91CA\u3002`,
+    `\u4E66\u540D\u300A${title}\u300B\u3002\u8BF8\u5929\u4E07\u754C \xB7 ${world}\u3002\u5929\u547D\u4E4B\u4EBA\uFF1A${protagonist}\u3002`,
+    `\u683C\u5F0F\u5FC5\u987B\u662F\uFF1A`,
+    `# ${title}`,
+    `> \u8BF8\u5929\u4E07\u754C \xB7 ${world}`,
+    `> \u5929\u547D\u4E4B\u4EBA\uFF1A${protagonist}`,
+    `> \u8A8A\u5F55\u4E8E \uFF08\u4ECA\u5929\u7684\u4E2D\u6587\u65E5\u671F\uFF09`,
+    ``,
+    `---`,
+    ``,
+    `## \u7B2C\u4E00\u7AE0\u3000\uFF08\u4ECE\u6B63\u6587\u62BD\u7684\u77ED\u9898\uFF09`,
+    `\uFF08\u6DA6\u8272\u540E\u7684\u6BB5\u843D\uFF09`,
+    ``,
+    `\u540E\u9762\u6309\u60C5\u8282\u81EA\u7136\u5206\u7AE0\u3002\u4E22\u6389\u7D20\u6750\u91CC\u7684\u82F1\u6587\u3001\u63D0\u7EB2\u3001\u62A4\u680F\u3001\u5BF9\u81EA\u5DF1\u8BF4\u8BDD\u3002\u6309\u65F6\u95F4\u987A\u5E8F\u91CD\u5199\uFF0C\u8865\u4E0A\u65AD\u88C2\uFF0C\u4E0D\u8981\u53E6\u8D77\u4E00\u672C\u65E0\u5173\u7684\u4E66\u3002\u7B2C\u4E00\u4E2A\u5B57\u5C31\u662F #\u3002`,
+    ``,
+    `\u3010\u7D20\u6750\u3011`,
+    source.slice(0, 12e3)
+  ].join("\n");
+}
+function finalizeManuscript(raw, title, world, protagonist) {
+  const body = cleanManuscript(raw);
+  if (!body)
+    return "";
+  if (/^#\s+\S/m.test(body) && /[\u4e00-\u9fff]{24,}/.test(body))
+    return `${body.trim()}
+`;
+  return [
+    `# ${title}`,
+    "",
+    `> \u8BF8\u5929\u4E07\u754C \xB7 ${world}`,
+    `> \u5929\u547D\u4E4B\u4EBA\uFF1A${protagonist}`,
+    "",
+    "---",
+    "",
+    body,
+    ""
+  ].join("\n");
 }
 
 // packages/dsh-infinite/dist/reveal.js
@@ -1589,12 +1685,23 @@ async function handleExport(ctx, config, inv) {
     if (picked)
       title = picked;
   }
-  const text = exportTranscript(title, meta.protagonist, messages, includePlayer, world);
-  saveExport(root, text);
+  if (!prose.trim())
+    return { kind: "error", text: exportNoProse() };
   const destDir = session.header?.cwd || process.cwd();
-  const dest = saveNamedExport(destDir, safeBookFileName(title), text);
-  const revealed = revealFile(dest);
-  return { kind: "success", text: exportDone(text.length, title, dest, revealed) };
+  saveMeta(root, {
+    ...meta,
+    exportPending: true,
+    exportTitle: title,
+    exportCwd: destDir
+  });
+  const woke = wakeSoon(inv.agent, polishPrompt(title, world, meta.protagonist, prose));
+  if (!woke) {
+    const fallback = exportTranscript(title, meta.protagonist, messages, includePlayer, world);
+    saveExport(root, fallback);
+    const dest = saveNamedExport(destDir, safeBookFileName(title), fallback);
+    return { kind: "success", text: exportDone(fallback.length, title, dest, revealFile(dest)) };
+  }
+  return { kind: "success", text: exportPolishing(title) };
 }
 function registerCommands(ctx, config) {
   for (const [name2, copy] of Object.entries(COMMANDS_COPY)) {
@@ -1819,6 +1926,10 @@ function onSessionEvent(ctx, config, session, event) {
   }
   if (event.type === "turn/end") {
     const latest = loadMeta(root);
+    if (latest?.exportPending) {
+      finishPolishExport(root, session, latest);
+      return;
+    }
     if (latest?.pendingEventId) {
       const next = {
         ...latest,
@@ -1843,6 +1954,32 @@ function onSessionEvent(ctx, config, session, event) {
     saveArchive(root, text);
   }
 }
+function finishPolishExport(root, session, meta) {
+  const title = meta.exportTitle || meta.protagonist || "\u8BF8\u5929\u4E07\u754C\u4E66\u7A3F";
+  const world = bookNameForTemplate(meta.templateId);
+  const book = finalizeManuscript(lastAssistantRaw(session), title, world, meta.protagonist);
+  const destDir = meta.exportCwd || session.header?.cwd || process.cwd();
+  if (book) {
+    const dest = saveNamedExport(destDir, safeBookFileName(title), book);
+    saveExport(root, book);
+    revealFile(dest);
+    session.append?.("command/done", {
+      kind: "success",
+      text: exportDone(book.length, title, dest, true)
+    });
+  }
+  saveMeta(root, {
+    version: meta.version,
+    templateId: meta.templateId,
+    protagonist: meta.protagonist,
+    narrativeGuard: meta.narrativeGuard,
+    progressionGuard: meta.progressionGuard,
+    randomEvent: meta.randomEvent,
+    pickedEventIds: meta.pickedEventIds,
+    pendingEventId: meta.pendingEventId,
+    createdAt: meta.createdAt
+  });
+}
 
 // packages/dsh-infinite/dist/prompt.js
 function storyRoot(ctx, assemble, config) {
@@ -1860,8 +1997,11 @@ function registerPrompt(ctx, config) {
       const root = storyRoot(ctx, assemble, config);
       if (!root)
         return "";
-      const parts = [buildProseOnlyGuard()];
       const meta = loadMeta(root);
+      if (meta?.exportPending) {
+        return "\u8FD9\u4E00\u56DE\u5408\u662F\u91CD\u8A8A\u6210\u4E66\u3002\u53EA\u8F93\u51FA\u5B8C\u6574 Markdown \u4E66\u7A3F\u3002\u4E0D\u8981\u3010\u6B67\u8DEF\u3011\uFF0C\u4E0D\u8981\u6784\u601D\uFF0C\u4E0D\u8981\u82F1\u6587\u6307\u4EE4\uFF0C\u4E0D\u8981\u590D\u8FF0\u62A4\u680F\u3002";
+      }
+      const parts = [buildProseOnlyGuard()];
       if (meta?.narrativeGuard)
         parts.push(buildNarrativeGuard());
       if (meta?.progressionGuard)

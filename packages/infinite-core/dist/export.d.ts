@@ -1,10 +1,14 @@
 import type { TranscriptMessage } from './types.js';
 /** Drop template labels and author notes from one assistant blob. */
 export declare function cleanProse(text: string): string;
-/** True when the blob is a writing plan or instruction echo, not fiction. */
+/** True when a paragraph is a writing plan, not fiction. */
+export declare function isPlanningParagraph(text: string): boolean;
+/** True when the blob is mostly a writing plan or instruction echo. */
 export declare function isPlanningDump(text: string): boolean;
 /** Keep only the story; drop planning dumps and instruction echoes. */
 export declare function extractStoryBody(text: string): string;
+/** Strip 歧路 and planning, but keep Markdown headings for a polished book. */
+export declare function cleanManuscript(text: string): string;
 export declare function isOpeningInstruction(text: string): boolean;
 /**
  * Build a typeset Markdown manuscript from one session transcript.

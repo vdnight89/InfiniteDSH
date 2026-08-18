@@ -21,7 +21,16 @@ const PLANNING_MARKERS = [
     /Need obey/i,
     /output story body/i,
     /fiction narrative/i,
+    /The user gave/i,
+    /I need to (?:continue|write|be careful)/i,
+    /Let's (?:craft|draft|write|final)/i,
+    /Need to write/i,
+    /Do not write plan/i,
+    /Must ensure/i,
+    /Option \d:/i,
     /用户让我写/,
+    /我们需要回应/,
+    /按照要求/,
     /需要遵守叙事护栏/,
     /我要推进剧情/,
     /让我构思/,
@@ -31,35 +40,76 @@ const PLANNING_MARKERS = [
     /剧情要素：/,
     /不要输出章节名/,
     /同时活跃的主要角色/,
+    /第三人称有限视角/,
 ];
-/** True when the blob is a writing plan or instruction echo, not fiction. */
+const PLANNING_LINE = /^(?:The |I |We |Need |Let's |Must |Could |Option |Count |Draft |Do not |Need to )/i;
+const PLANNING_CN_LINE = /我们需要回应|按照要求|只写小说正文|第三人称有限|不要输出|我要推进|让我构思|用户让我|已出场角色|当前场景：|剧情要素：|Need to write|I need to|Let's draft|Let's write|Let's final|Must ensure|Do not write plan/;
+/** True when a paragraph is a writing plan, not fiction. */
+export function isPlanningParagraph(text) {
+    const t = text.trim();
+    if (!t)
+        return true;
+    if (PLANNING_LINE.test(t) || PLANNING_CN_LINE.test(t))
+        return true;
+    for (const marker of PLANNING_MARKERS) {
+        if (marker.test(t))
+            return true;
+    }
+    const letters = t.match(/[A-Za-z]/g)?.length ?? 0;
+    const cjk = t.match(/[\u4e00-\u9fff]/g)?.length ?? 0;
+    return letters >= 16 && letters > cjk * 0.35;
+}
+/** True when the blob is mostly a writing plan or instruction echo. */
 export function isPlanningDump(text) {
     const t = text.trim();
     if (!t)
         return false;
-    if (/^(?:We need|Need obey|用户让我|我要推进|让我构思|我写正文)/i.test(t))
+    if (/^(?:We need|Need obey|The user |用户让我|我们需要回应|我要推进|让我构思|我写正文)/i.test(t))
         return true;
-    let hits = 0;
-    for (const marker of PLANNING_MARKERS) {
-        if (marker.test(t))
-            hits += 1;
-        if (hits >= 2)
-            return true;
-    }
-    return false;
+    const paras = t.split(/\n\s*\n/);
+    const plan = paras.filter((p) => isPlanningParagraph(p)).length;
+    return plan >= 2 || (paras.length > 0 && plan / paras.length >= 0.5);
 }
 /** Keep only the story; drop planning dumps and instruction echoes. */
 export function extractStoryBody(text) {
     const cleaned = cleanProse(text);
     if (!cleaned)
         return '';
-    if (!isPlanningDump(cleaned))
-        return cleaned;
-    const split = cleaned.split(/(?:^|\n)我写正文[^\n]*/).pop() ?? '';
-    const maybe = cleanProse(split);
-    if (maybe && maybe !== cleaned && !isPlanningDump(maybe) && maybe.length > 40)
-        return maybe;
-    return '';
+    const runs = [];
+    let current = [];
+    for (const para of cleaned.split(/\n\s*\n/)) {
+        if (isPlanningParagraph(para)) {
+            if (current.length > 0) {
+                runs.push(current);
+                current = [];
+            }
+            continue;
+        }
+        current.push(para);
+    }
+    if (current.length > 0)
+        runs.push(current);
+    for (let i = runs.length - 1; i >= 0; i -= 1) {
+        const body = runs[i].join('\n\n').trim();
+        const cjk = body.match(/[\u4e00-\u9fff]/g)?.length ?? 0;
+        if (cjk >= 24 && !isPlanningDump(body))
+            return body;
+    }
+    if (isPlanningDump(cleaned))
+        return '';
+    return cleaned;
+}
+/** Strip 歧路 and planning, but keep Markdown headings for a polished book. */
+export function cleanManuscript(text) {
+    const withoutFork = text.replace(FENCE_BLOCK, '').replace(FORK_BLOCK, '');
+    const kept = withoutFork
+        .split(/\n\s*\n/)
+        .filter((para) => !isPlanningParagraph(para) && !/^(?:亦可自己写一条)/.test(para.trim()))
+        .join('\n\n')
+        .replace(BODY_TAG, '')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+    return isPlanningDump(kept) ? '' : kept;
 }
 export function isOpeningInstruction(text) {
     const t = text.trim();

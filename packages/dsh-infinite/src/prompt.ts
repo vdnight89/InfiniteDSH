@@ -26,8 +26,11 @@ export function registerPrompt(ctx: InfiniteContext, config: Required<PluginConf
     text: (assemble) => {
       const root = storyRoot(ctx, assemble, config)
       if (!root) return ''
-      const parts = [buildProseOnlyGuard()]
       const meta = loadMeta(root)
+      if (meta?.exportPending) {
+        return '这一回合是重誊成书。只输出完整 Markdown 书稿。不要【歧路】，不要构思，不要英文指令，不要复述护栏。'
+      }
+      const parts = [buildProseOnlyGuard()]
       if (meta?.narrativeGuard) parts.push(buildNarrativeGuard())
       if (meta?.progressionGuard) parts.push(buildProgressionGuard())
       if (assemble.agent && !hasAssistantProse(assemble.agent.session)) {

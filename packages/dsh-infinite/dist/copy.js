@@ -51,6 +51,12 @@ export function exportDone(chars, title, path, revealed) {
     const open = revealed ? '已打开所在文件夹。' : '右侧文件树即可打开。';
     return `已誊出 ${chars} 字书稿《${title}》：${path}。${open}`;
 }
+export function exportPolishing(title) {
+    return `正在从头润色《${title}》。写完会落入当前工作区，不必再手拷。`;
+}
+export function exportNoProse() {
+    return '此界尚无可誊的小说正文。模型若只写了构思，请先写出故事再誊。';
+}
 export function sessionTitle(world, protagonist) {
     return `${world}·${protagonist}`;
 }
@@ -77,7 +83,7 @@ export const COMMANDS_COPY = {
         hint: '[名字]',
     },
     'export-story': {
-        description: '誊出精排 Markdown 书稿到当前工作区',
+        description: '请叙事者从头润色，誊成精排 Markdown 书稿',
         hint: '[player]',
     },
 };

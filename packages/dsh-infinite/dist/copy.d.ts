@@ -26,6 +26,8 @@ export declare function noWorldYet(): string;
 export declare function castNeedName(): string;
 export declare function castDone(name: string, count: number): string;
 export declare function exportDone(chars: number, title: string, path: string, revealed: boolean): string;
+export declare function exportPolishing(title: string): string;
+export declare function exportNoProse(): string;
 export declare function sessionTitle(world: string, protagonist: string): string;
 export declare const FIRST_STEP_TEXT = "\u542F\u7A0B\u3002";
 export declare const FORK_QUESTION = "\u8D70\u54EA\u4E00\u6761\u6B67\u8DEF\uFF1F";
@@ -47,7 +49,7 @@ export declare const COMMANDS_COPY: {
         readonly hint: "[名字]";
     };
     readonly 'export-story': {
-        readonly description: "誊出精排 Markdown 书稿到当前工作区";
+        readonly description: "请叙事者从头润色，誊成精排 Markdown 书稿";
         readonly hint: "[player]";
     };
 };

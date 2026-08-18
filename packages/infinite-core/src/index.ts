@@ -23,8 +23,10 @@ export {
 } from './guards.js'
 export {
   cleanProse,
+  cleanManuscript,
   extractStoryBody,
   isPlanningDump,
+  isPlanningParagraph,
   isOpeningInstruction,
   exportTranscript,
   formatArchive,

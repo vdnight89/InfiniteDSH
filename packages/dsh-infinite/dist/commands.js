@@ -1,9 +1,10 @@
 import { KEEP_DEFAULT_OPENING, KEEP_DEFAULT_PROTAGONIST, TOPIC_CHOICES, bookNameForTemplate, extractStoryBody, defaultProtagonist, exportTranscript, isKeepDefaultChoice, safeBookFileName, suggestExportTitles, parseCommandArgs, resolveTemplateId, templateIdFromLabel, topicChoice, } from 'infinite-core';
 import { askUser, pickAnswer } from './ask.js';
-import { ASK_HEADER, BIND_QUESTION, CANCELLED, COMMANDS_COPY, EMBARK, FIRST_STEP_TEXT, isEmbarkChoice, OPENING_QUESTION, OVERWRITE_NO, OVERWRITE_QUESTION, OVERWRITE_YES, PROTAGONIST_QUESTION, REPICK_OPENING, REPICK_PROTAGONIST, TOPIC_DETAIL, TITLE_DETAIL, TITLE_QUESTION, TOPIC_QUESTION, boundTo, castDone, castNeedName, defaultBodyHint, embarkDetail, exportDone, needForceText, noWorldYet, openedEmbarked, openedWaiting, pickWorldHint, sessionTitle, unknownWorld, } from './copy.js';
+import { ASK_HEADER, BIND_QUESTION, CANCELLED, COMMANDS_COPY, EMBARK, FIRST_STEP_TEXT, isEmbarkChoice, OPENING_QUESTION, OVERWRITE_NO, OVERWRITE_QUESTION, OVERWRITE_YES, PROTAGONIST_QUESTION, REPICK_OPENING, REPICK_PROTAGONIST, TOPIC_DETAIL, TITLE_DETAIL, TITLE_QUESTION, TOPIC_QUESTION, boundTo, castDone, castNeedName, defaultBodyHint, embarkDetail, exportDone, exportNoProse, exportPolishing, needForceText, noWorldYet, openedEmbarked, openedWaiting, pickWorldHint, sessionTitle, unknownWorld, } from './copy.js';
 import { infiniteRoot, resolveSessionDir, templatesDir } from './paths.js';
 import { appendStoryBind, applyOpening, applyProtagonistIdentity, hasStory, listTemplateCharacters, listTemplatePlots, loadCharacters, loadMeta, saveExport, saveMeta, saveNamedExport, seedStory, } from './story-files.js';
 import { sessionMessages } from './transcript.js';
+import { polishPrompt } from './polish.js';
 import { revealFile } from './reveal.js';
 import { wakeSoon } from './wake.js';
 import { readdirSync } from 'node:fs';
@@ -329,12 +330,23 @@ export async function handleExport(ctx, config, inv) {
         if (picked)
             title = picked;
     }
-    const text = exportTranscript(title, meta.protagonist, messages, includePlayer, world);
-    saveExport(root, text);
+    if (!prose.trim())
+        return { kind: 'error', text: exportNoProse() };
     const destDir = session.header?.cwd || process.cwd();
-    const dest = saveNamedExport(destDir, safeBookFileName(title), text);
-    const revealed = revealFile(dest);
-    return { kind: 'success', text: exportDone(text.length, title, dest, revealed) };
+    saveMeta(root, {
+        ...meta,
+        exportPending: true,
+        exportTitle: title,
+        exportCwd: destDir,
+    });
+    const woke = wakeSoon(inv.agent, polishPrompt(title, world, meta.protagonist, prose));
+    if (!woke) {
+        const fallback = exportTranscript(title, meta.protagonist, messages, includePlayer, world);
+        saveExport(root, fallback);
+        const dest = saveNamedExport(destDir, safeBookFileName(title), fallback);
+        return { kind: 'success', text: exportDone(fallback.length, title, dest, revealFile(dest)) };
+    }
+    return { kind: 'success', text: exportPolishing(title) };
 }
 export function registerCommands(ctx, config) {
     for (const [name, copy] of Object.entries(COMMANDS_COPY)) {

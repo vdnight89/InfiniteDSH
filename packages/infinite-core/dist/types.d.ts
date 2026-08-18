@@ -20,6 +20,9 @@ export interface StoryMeta {
     readonly pickedEventIds: readonly string[];
     readonly pendingEventId: string | null;
     readonly createdAt: string;
+    readonly exportPending?: boolean;
+    readonly exportTitle?: string;
+    readonly exportCwd?: string;
 }
 export interface WorldContextOptions {
     readonly maxChars?: number;

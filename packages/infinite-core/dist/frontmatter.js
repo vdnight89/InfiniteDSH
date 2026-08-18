@@ -82,6 +82,11 @@ export function parseStoryMeta(source) {
             ? fields.pendingEventId
             : null,
         createdAt: fields.createdAt?.trim() || new Date().toISOString(),
+        ...(parseBool(fields.exportPending, false) ? { exportPending: true } : {}),
+        ...(fields.exportTitle?.trim() ? { exportTitle: fields.exportTitle.trim() } : {}),
+        ...(fields.exportCwd?.trim()
+            ? { exportCwd: fields.exportCwd.trim().replace(/^['"]|['"]$/g, '') }
+            : {}),
     };
 }
 /** Serialize story meta to a flat YAML document. */
@@ -100,6 +105,9 @@ export function formatStoryMeta(meta) {
         `pickedEventIds: ${picked}`,
         `pendingEventId: ${pending}`,
         `createdAt: ${meta.createdAt}`,
+        ...(meta.exportPending ? ['exportPending: true'] : []),
+        ...(meta.exportTitle ? [`exportTitle: ${JSON.stringify(meta.exportTitle)}`] : []),
+        ...(meta.exportCwd ? [`exportCwd: ${JSON.stringify(meta.exportCwd)}`] : []),
         '',
     ].join('\n');
 }

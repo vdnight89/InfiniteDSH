@@ -199,26 +199,37 @@ describe('dsh-infinite plugin', () => {
     expect(loadMeta(infiniteRoot(resolveSessionDir(ctx, session('s2'), config)))?.protagonist).toBe('江澄')
     const dest = mkdtempSync(join(tmpdir(), 'infinite-export-'))
     dirs.push(dest)
+    const followups: string[] = []
+    const events = [
+      { type: 'user/message', data: { message: { content: [{ type: 'text', text: '【开局】开始' }] } } },
+      { type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '【正文】电梯门开了。江澄站在灯下，走廊里有人咳嗽。他没有回头。' }] } } },
+    ]
+    const sess = { ...session('s2', events), header: { cwd: dest } }
     const exported = await handleExport(ctx, config, {
-      agent: { session: { ...session('s2', [
-        { type: 'user/message', data: { message: { content: [{ type: 'text', text: '【开局】开始' }] } } },
-        { type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '【正文】电梯门开了。' }] } } },
-        { type: 'user/message', data: { message: { content: [{ type: 'text', text: '走进去' }] } } },
-      ]), header: { cwd: dest } } },
+      agent: {
+        session: sess,
+        followup(message: { content: Array<{ text: string }> }) {
+          followups.push(message.content[0]?.text ?? '')
+        },
+      },
       rawInput: '',
       signal: new AbortController().signal,
     })
     expect(exported.kind).toBe('success')
-    const root = infiniteRoot(resolveSessionDir(ctx, session('s2'), config))
-    const txt = readFileSync(join(root, 'export.md'), 'utf8')
-    expect(txt).toContain('# ')
-    expect(txt).toContain('## 第一章')
+    expect(exported.text).toMatch(/润色/)
+    expect(followups[0]).toMatch(/重誊成书/)
+    sess.events = [
+      ...events,
+      { type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '# 现代·江澄\n\n> 诸天万界 · 现代\n\n电梯门开了。江澄站在灯下，走廊深处有人咳嗽，他没有回头，只把袖口里的钥匙按进掌心。夜色从井道里涌上来。' }] } } },
+    ]
+    onSessionEvent(ctx, config, sess, { type: 'turn/end' })
+    const book = readdirSync(dest).find((name) => name.endsWith('.md'))
+    expect(book).toBeTruthy()
+    const txt = readFileSync(join(dest, book!), 'utf8')
+    expect(txt).toContain('# 现代·江澄')
     expect(txt).toContain('电梯门开了。')
     expect(txt).not.toContain('【正文】')
     expect(txt).not.toContain('走进去')
-    expect(txt).toContain('江澄')
-    expect(exported.text).toMatch(/现代·江澄/)
-    expect(readdirSync(dest).some((name) => name.endsWith('.md'))).toBe(true)
   })
 
   it('draws a random event on turn/start and writes archive on compaction', async () => {

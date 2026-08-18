@@ -82,6 +82,11 @@ export function parseStoryMeta(source: string): StoryMeta {
       ? fields.pendingEventId
       : null,
     createdAt: fields.createdAt?.trim() || new Date().toISOString(),
+    ...(parseBool(fields.exportPending, false) ? { exportPending: true as const } : {}),
+    ...(fields.exportTitle?.trim() ? { exportTitle: fields.exportTitle.trim() } : {}),
+    ...(fields.exportCwd?.trim()
+      ? { exportCwd: fields.exportCwd.trim().replace(/^['"]|['"]$/g, '') }
+      : {}),
   }
 }
 
@@ -101,6 +106,9 @@ export function formatStoryMeta(meta: StoryMeta): string {
     `pickedEventIds: ${picked}`,
     `pendingEventId: ${pending}`,
     `createdAt: ${meta.createdAt}`,
+    ...(meta.exportPending ? ['exportPending: true'] : []),
+    ...(meta.exportTitle ? [`exportTitle: ${JSON.stringify(meta.exportTitle)}`] : []),
+    ...(meta.exportCwd ? [`exportCwd: ${JSON.stringify(meta.exportCwd)}`] : []),
     '',
   ].join('\n')
 }

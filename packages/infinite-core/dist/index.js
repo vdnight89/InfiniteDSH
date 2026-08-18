@@ -3,7 +3,7 @@ export { parseFrontMatter, parseLoreEntry, parseStoryMeta, formatStoryMeta, defa
 export { findMatchingEntries, buildWorldContext, buildCharacterContext } from './worldbook.js';
 export { pickRandomEventEntry, formatRandomEvent } from './random-event.js';
 export { buildNarrativeGuard, buildProgressionGuard, buildProseOnlyGuard, } from './guards.js';
-export { cleanProse, extractStoryBody, isPlanningDump, isOpeningInstruction, exportTranscript, formatArchive, chapterHeading, chineseChapter, } from './export.js';
+export { cleanProse, cleanManuscript, extractStoryBody, isPlanningDump, isPlanningParagraph, isOpeningInstruction, exportTranscript, formatArchive, chapterHeading, chineseChapter, } from './export.js';
 export { parseForkOptions } from './forks.js';
 export { suggestExportTitles, safeBookFileName } from './titles.js';
 export { TEMPLATE_IDS, TOPIC_CHOICES, KEEP_DEFAULT_PROTAGONIST, KEEP_DEFAULT_OPENING, resolveTemplateId, defaultProtagonist, parseCommandArgs, topicChoice, templateIdFromLabel, catalogEntry, bookNameForTemplate, isKeepDefaultChoice, } from './topics.js';

@@ -1,8 +1,11 @@
-import { formatArchive, pickRandomEventEntry } from 'infinite-core';
+import { bookNameForTemplate, formatArchive, pickRandomEventEntry, safeBookFileName } from 'infinite-core';
+import { exportDone } from './copy.js';
 import { offerForks } from './forks-host.js';
 import { infiniteRoot, resolveSessionDir } from './paths.js';
-import { appendStoryBind, loadArchive, loadMeta, loadWorldbook, saveArchive, saveMeta } from './story-files.js';
-import { recentText, summaryFromCompaction } from './transcript.js';
+import { finalizeManuscript } from './polish.js';
+import { revealFile } from './reveal.js';
+import { appendStoryBind, loadArchive, loadMeta, loadWorldbook, saveArchive, saveExport, saveMeta, saveNamedExport } from './story-files.js';
+import { lastAssistantRaw, recentText, summaryFromCompaction } from './transcript.js';
 export function onSessionEvent(ctx, config, session, event) {
     const root = infiniteRoot(resolveSessionDir(ctx, session, config));
     const meta = loadMeta(root);
@@ -16,6 +19,10 @@ export function onSessionEvent(ctx, config, session, event) {
     }
     if (event.type === 'turn/end') {
         const latest = loadMeta(root);
+        if (latest?.exportPending) {
+            finishPolishExport(root, session, latest);
+            return;
+        }
         if (latest?.pendingEventId) {
             const next = {
                 ...latest,
@@ -39,4 +46,30 @@ export function onSessionEvent(ctx, config, session, event) {
         const text = formatArchive(summary, new Date().toISOString(), loadArchive(root));
         saveArchive(root, text);
     }
+}
+function finishPolishExport(root, session, meta) {
+    const title = meta.exportTitle || meta.protagonist || '诸天万界书稿';
+    const world = bookNameForTemplate(meta.templateId);
+    const book = finalizeManuscript(lastAssistantRaw(session), title, world, meta.protagonist);
+    const destDir = meta.exportCwd || session.header?.cwd || process.cwd();
+    if (book) {
+        const dest = saveNamedExport(destDir, safeBookFileName(title), book);
+        saveExport(root, book);
+        revealFile(dest);
+        session.append?.('command/done', {
+            kind: 'success',
+            text: exportDone(book.length, title, dest, true),
+        });
+    }
+    saveMeta(root, {
+        version: meta.version,
+        templateId: meta.templateId,
+        protagonist: meta.protagonist,
+        narrativeGuard: meta.narrativeGuard,
+        progressionGuard: meta.progressionGuard,
+        randomEvent: meta.randomEvent,
+        pickedEventIds: meta.pickedEventIds,
+        pendingEventId: meta.pendingEventId,
+        createdAt: meta.createdAt,
+    });
 }

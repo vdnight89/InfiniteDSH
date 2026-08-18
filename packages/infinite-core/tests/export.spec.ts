@@ -35,6 +35,24 @@ describe('planning dump', () => {
     expect(isPlanningDump('巷口的驴鸣突然断了。')).toBe(false)
   })
 
+  it('pulls the last Chinese fiction run out of a mixed English draft', () => {
+    const mixed = `The user gave an action: 装昏诱魔修近前.
+I need to continue the narrative. Let's draft.
+
+Need to write a fresh segment. Do not write plan.
+
+她向后一仰，后脑磕在车板草席上，眼皮沉沉合拢。水囊从膝边滚落。领头的灰袍魔修拿鞭杆挑开车帘。
+
+Let's final. Must ensure no markdown.
+
+她向后一仰，后脑磕在车板草叶上，眼皮沉沉合拢，连呼吸都放成将断未断的细丝。水囊从膝边滚落。领头的灰袍魔修拿鞭杆挑开车帘，半个身子探进来探她鼻息。那股混着尸油与铜灰的气味压近时，她忽然睁眼，肩膀撞开身后朽烂的板条。`
+    const body = extractStoryBody(mixed)
+    expect(body).toContain('车板草叶')
+    expect(body).not.toContain('The user gave')
+    expect(body).not.toContain('Let\'s draft')
+    expect(isPlanningDump('我们需要回应用户“启程。”按照要求：只写小说正文')).toBe(true)
+  })
+
   it('keeps planning out of the manuscript', () => {
     const txt = exportTranscript('无尽流浪', '陆沉舟', [
       { role: 'assistant', text: dump },

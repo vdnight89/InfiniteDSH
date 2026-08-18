@@ -41,6 +41,8 @@ import {
   defaultBodyHint,
   embarkDetail,
   exportDone,
+  exportNoProse,
+  exportPolishing,
   needForceText,
   noWorldYet,
   openedEmbarked,
@@ -65,6 +67,7 @@ import {
   seedStory,
 } from './story-files.js'
 import { sessionMessages } from './transcript.js'
+import { polishPrompt } from './polish.js'
 import { revealFile } from './reveal.js'
 import { wakeSoon } from './wake.js'
 import type {
@@ -422,12 +425,22 @@ export async function handleExport(
     const picked = pickAnswer(answers, 'title')
     if (picked) title = picked
   }
-  const text = exportTranscript(title, meta.protagonist, messages, includePlayer, world)
-  saveExport(root, text)
+  if (!prose.trim()) return { kind: 'error', text: exportNoProse() }
   const destDir = session.header?.cwd || process.cwd()
-  const dest = saveNamedExport(destDir, safeBookFileName(title), text)
-  const revealed = revealFile(dest)
-  return { kind: 'success', text: exportDone(text.length, title, dest, revealed) }
+  saveMeta(root, {
+    ...meta,
+    exportPending: true,
+    exportTitle: title,
+    exportCwd: destDir,
+  })
+  const woke = wakeSoon(inv.agent, polishPrompt(title, world, meta.protagonist, prose))
+  if (!woke) {
+    const fallback = exportTranscript(title, meta.protagonist, messages, includePlayer, world)
+    saveExport(root, fallback)
+    const dest = saveNamedExport(destDir, safeBookFileName(title), fallback)
+    return { kind: 'success', text: exportDone(fallback.length, title, dest, revealFile(dest)) }
+  }
+  return { kind: 'success', text: exportPolishing(title) }
 }
 
 export function registerCommands(ctx: InfiniteContext, config: Required<PluginConfig>): void {

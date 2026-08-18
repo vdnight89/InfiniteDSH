@@ -70,6 +70,14 @@ export function exportDone(chars: number, title: string, path: string, revealed:
   return `已誊出 ${chars} 字书稿《${title}》：${path}。${open}`
 }
 
+export function exportPolishing(title: string): string {
+  return `正在从头润色《${title}》。写完会落入当前工作区，不必再手拷。`
+}
+
+export function exportNoProse(): string {
+  return '此界尚无可誊的小说正文。模型若只写了构思，请先写出故事再誊。'
+}
+
 export function sessionTitle(world: string, protagonist: string): string {
   return `${world}·${protagonist}`
 }
@@ -102,7 +110,7 @@ export const COMMANDS_COPY = {
     hint: '[名字]',
   },
   'export-story': {
-    description: '誊出精排 Markdown 书稿到当前工作区',
+    description: '请叙事者从头润色，誊成精排 Markdown 书稿',
     hint: '[player]',
   },
 } as const
