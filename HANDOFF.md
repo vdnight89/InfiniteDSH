@@ -355,6 +355,10 @@ Literary DSH plugin: one session is one book. Cover-card /new opens one of 19 re
 | [Zhiyuan-Fan/Awesome-DeepSeek-Harness-Plugins](https://github.com/Zhiyuan-Fan/Awesome-DeepSeek-Harness-Plugins) | 精选列表 | **PR 已开** https://github.com/Zhiyuan-Fan/Awesome-DeepSeek-Harness-Plugins/pull/31 | 盯合并 |
 | [Dominic789654/awesome-deepseek-harness](https://github.com/Dominic789654/awesome-deepseek-harness) | 精选列表 | **已收录**（上游 main 已有中英条目） | — |
 | [dsh.so/submit](https://www.dsh.so/submit/) | 验证向目录，填仓库 URL | **已投**：站点 `/api/submit` 服务端 `token-invalid`（站点故障），改投其收件仓 https://github.com/ihuajiu/dsh-plugin-submissions/issues/6 | 站点修复后可再走一次表单 |
+| [Alex-Yanggg/awesome-DSH-plugin](https://github.com/Alex-Yanggg/awesome-DSH-plugin) | 精选列表 | **PR 已开** https://github.com/Alex-Yanggg/awesome-DSH-plugin/pull/83 | 盯合并 |
+| [billLiao/awesome-dsh-plugin](https://github.com/billLiao/awesome-dsh-plugin) | 精选列表 | **PR 已开** https://github.com/billLiao/awesome-dsh-plugin/pull/7 | 盯合并 |
+| [fendouai/awesome-deepseek-harness](https://github.com/fendouai/awesome-deepseek-harness) | 精选列表 | **PR 已开** https://github.com/fendouai/awesome-deepseek-harness/pull/19 | 盯合并 |
+| [deepseek-ai/awesome-deepseek-agent](https://github.com/deepseek-ai/awesome-deepseek-agent) | 官方集成指南（非插件列表） | **跳过**：无 DSH 插件板块，投必被拒 | — |
 | [deepseekplugins.com](https://deepseekplugins.com/) | 独立目录 | **无公开投稿渠道**（人工精选，无表单/联系入口/GitHub 仓） | 等站主开放 |
 | [dshplugin.store](https://dshplugin.store/) / [dshmarketplace.dev](https://dshmarketplace.dev/) / [dshplugin.me](https://dshplugin.me/) | 多数扫 topic | **不用单独投** | 1616 合上后描述会更好看 |
 | [Anil-matcha/awesome-dsh-plugin](https://github.com/Anil-matcha/awesome-dsh-plugin) | 镜像/精选 | **陈旧遗留库**，官方列表 1616 已覆盖，不重复投 | — |

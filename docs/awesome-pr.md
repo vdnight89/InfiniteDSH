@@ -22,6 +22,10 @@
 | [Zhiyuan-Fan/Awesome-DeepSeek-Harness-Plugins](https://github.com/Zhiyuan-Fan/Awesome-DeepSeek-Harness-Plugins) | **PR 已开**：https://github.com/Zhiyuan-Fan/Awesome-DeepSeek-Harness-Plugins/pull/31 。Tools & Skills 分类，中英各一行 |
 | [Dominic789654/awesome-deepseek-harness](https://github.com/Dominic789654/awesome-deepseek-harness) | **已收录**（上游 main 已有我们的中英条目，无需再 PR） |
 | [dsh.so](https://www.dsh.so) | **已投**：站点 `/api/submit` 服务端报 `token-invalid`（站点自身故障），改为直接投它们的收件仓 https://github.com/ihuajiu/dsh-plugin-submissions/issues/6 。站点修复后可再走一次表单 |
+| [Alex-Yanggg/awesome-DSH-plugin](https://github.com/Alex-Yanggg/awesome-DSH-plugin) | **PR 已开**：https://github.com/Alex-Yanggg/awesome-DSH-plugin/pull/83 。AI, design & media 分类，含 catalog/plugins.json 双语元数据 |
+| [billLiao/awesome-dsh-plugin](https://github.com/billLiao/awesome-dsh-plugin) | **PR 已开**：https://github.com/billLiao/awesome-dsh-plugin/pull/7 。Just for Fun 分类 |
+| [fendouai/awesome-deepseek-harness](https://github.com/fendouai/awesome-deepseek-harness) | **PR 已开**：https://github.com/fendouai/awesome-deepseek-harness/pull/19 。data/plugins.json + 生成 README 双语 + 独立插件页 docs/*/resources/infinitedsh.md |
+| [deepseek-ai/awesome-deepseek-agent](https://github.com/deepseek-ai/awesome-deepseek-agent) | **跳过**：官方集成指南列表（把 DeepSeek 接进 Cherry Studio / Claude Code 等），无 DSH 插件板块，投必被拒 |
 | [deepseekplugins.com](https://deepseekplugins.com) | **无公开投稿渠道**（人工精选目录，无表单/无联系入口/无 GitHub 仓）。无法自动投 |
 | GitHub About | 已改成热血短句（见下） |
 
