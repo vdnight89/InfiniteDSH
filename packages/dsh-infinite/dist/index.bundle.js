@@ -500,9 +500,10 @@ function suggestExportTitles(world, protagonist, prose) {
   pushUnique(titles, clipTitle(sentence.replace(/^[“"]|[”"]$/g, "")));
   return titles.slice(0, 3);
 }
-function safeBookFileName(title) {
+function safeBookFileName(title, variant = "book") {
   const cleaned = title.replace(/[<>:"/\\|?*\u0000-\u001f]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 40);
-  return `${cleaned || "\u8BF8\u5929\u4E07\u754C\u4E66\u7A3F"}.md`;
+  const stem = cleaned || "\u8BF8\u5929\u4E07\u754C\u4E66\u7A3F";
+  return variant === "draft" ? `${stem}.\u8349\u7A3F.md` : `${stem}.md`;
 }
 function clipTitle(raw) {
   const cut = raw.replace(/[。！？…]+$/g, "").trim();
@@ -910,11 +911,11 @@ function exportDone(chars, title, path, revealed) {
   const open = revealed ? "\u5DF2\u6253\u5F00\u6240\u5728\u6587\u4EF6\u5939\u3002" : "\u53F3\u4FA7\u6587\u4EF6\u6811\u5373\u53EF\u6253\u5F00\u3002";
   return `\u5DF2\u8A8A\u51FA ${chars} \u5B57\u4E66\u7A3F\u300A${title}\u300B\uFF1A${path}\u3002${open}`;
 }
-function exportPolishing(title, path) {
-  return `\u8349\u7A3F\u300A${title}\u300B\u5DF2\u843D\u4E0B\uFF1A${path}\u3002\u53D9\u4E8B\u8005\u6B63\u5728\u6DA6\u8272\u6392\u7248\uFF0C\u5B8C\u6210\u540E\u8986\u76D6\u540C\u4E00\u4EFD\u3002\u65E5\u671F\u5DF2\u5199\u597D\uFF0C\u4E0D\u5FC5\u8C03\u5DE5\u5177\u3002`;
+function exportPolishing(title, draftPath, bookPath) {
+  return `\u8349\u7A3F\u5DF2\u843D\u4E0B\uFF1A${draftPath}\u3002\u6210\u7A3F\u5148\u6309\u8349\u7A3F\u6284\u4E86\u4E00\u4EFD\uFF1A${bookPath}\u3002\u53D9\u4E8B\u8005\u6B63\u6309\u672C\u5730\u8349\u7A3F\u6DA6\u8272\u6392\u7248\uFF0C\u5B8C\u6210\u540E\u53EA\u8986\u76D6\u6210\u7A3F\u3002`;
 }
 function exportKeptDraft(title) {
-  return `\u6DA6\u8272\u672A\u6210\u4E66\uFF0C\u5DF2\u4FDD\u7559\u8349\u7A3F\u300A${title}\u300B\u3002\u53EF\u518D /export-story\u3002`;
+  return `\u6DA6\u8272\u672A\u6210\u4E66\uFF0C\u672C\u5730\u8349\u7A3F\u4E0E\u6210\u7A3F\u300A${title}\u300B\u90FD\u8FD8\u5728\u3002\u53EF\u518D /export-story\u3002`;
 }
 function exportNoProse() {
   return "\u6B64\u754C\u5C1A\u65E0\u53EF\u8A8A\u7684\u5C0F\u8BF4\u6B63\u6587\u3002\u6A21\u578B\u82E5\u53EA\u5199\u4E86\u6784\u601D\uFF0C\u8BF7\u5148\u5199\u51FA\u6545\u4E8B\u518D\u8A8A\u3002";
@@ -1351,13 +1352,15 @@ function summaryFromCompaction(data) {
 }
 
 // packages/dsh-infinite/dist/polish.js
-function polishPrompt(title, world, protagonist, source) {
+function polishPrompt(title, world, protagonist, draft, draftPath) {
   const dated = formatExportDate();
   return [
     `\u3010\u91CD\u8A8A\u6210\u4E66\u3011\u8FD9\u4E00\u56DE\u5408\u53EA\u8F93\u51FA\u5B8C\u6574 Markdown \u4E66\u7A3F\u3002`,
-    `\u7981\u6B62\u8C03\u7528\u4EFB\u4F55\u5DE5\u5177\uFF0C\u5305\u62EC bash\u3001runshell\u3001date\u3001\u8BFB\u6587\u4EF6\u3002\u65E5\u671F\u5DF2\u7ECF\u5199\u597D\uFF0C\u7167\u6284\u5373\u53EF\u3002`,
+    `\u7981\u6B62\u8C03\u7528\u4EFB\u4F55\u5DE5\u5177\uFF0C\u5305\u62EC bash\u3001runshell\u3001date\u3001\u8BFB\u6587\u4EF6\u3002\u8349\u7A3F\u5DF2\u5728\u4E0B\u9762\u8D34\u51FA\uFF0C\u4E0D\u8981\u53BB\u6253\u5F00\u78C1\u76D8\u3002`,
     `\u4E0D\u8981\u3010\u6B67\u8DEF\u3011\uFF0C\u4E0D\u8981\u6784\u601D\uFF0C\u4E0D\u8981\u82F1\u6587\uFF0C\u4E0D\u8981\u89E3\u91CA\uFF0C\u4E0D\u8981 tool_calls\u3002\u7B2C\u4E00\u4E2A\u5B57\u5FC5\u987B\u662F #\u3002`,
     `\u4E66\u540D\u300A${title}\u300B\u3002\u8BF8\u5929\u4E07\u754C \xB7 ${world}\u3002\u5929\u547D\u4E4B\u4EBA\uFF1A${protagonist}\u3002`,
+    `\u672C\u5730\u8349\u7A3F\uFF1A${draftPath}`,
+    `\u53EA\u57FA\u4E8E\u8FD9\u4EFD\u5DF2\u843D\u76D8\u7684\u8349\u7A3F\u6DA6\u8272\u3001\u987A\u53E5\u3001\u5206\u7AE0\uFF0C\u4E0D\u8981\u53E6\u8D77\u4E00\u672C\u65E0\u5173\u7684\u4E66\u3002\u65E5\u671F\u7167\u6284\uFF1A${dated}`,
     `\u683C\u5F0F\u5FC5\u987B\u662F\uFF1A`,
     `# ${title}`,
     `> \u8BF8\u5929\u4E07\u754C \xB7 ${world}`,
@@ -1366,13 +1369,11 @@ function polishPrompt(title, world, protagonist, source) {
     ``,
     `---`,
     ``,
-    `## \u7B2C\u4E00\u7AE0\u3000\uFF08\u4ECE\u6B63\u6587\u62BD\u7684\u77ED\u9898\uFF09`,
+    `## \u7B2C\u4E00\u7AE0\u3000\uFF08\u4ECE\u8349\u7A3F\u62BD\u7684\u77ED\u9898\uFF09`,
     `\uFF08\u6DA6\u8272\u540E\u7684\u6BB5\u843D\uFF09`,
     ``,
-    `\u540E\u9762\u6309\u60C5\u8282\u81EA\u7136\u5206\u7AE0\u3002\u6309\u65F6\u95F4\u987A\u5E8F\u91CD\u5199\u7D20\u6750\u91CC\u7684\u6545\u4E8B\uFF0C\u8865\u4E0A\u65AD\u88C2\uFF0C\u4E0D\u8981\u53E6\u8D77\u4E00\u672C\u65E0\u5173\u7684\u4E66\u3002`,
-    ``,
-    `\u3010\u7D20\u6750\u3011`,
-    source.slice(0, 12e3)
+    `\u3010\u672C\u5730\u8349\u7A3F\u3011`,
+    draft.slice(0, 12e3)
   ].join("\n");
 }
 function isFailedPolish(text) {
@@ -1480,7 +1481,7 @@ function tryCall(fn) {
 }
 
 // packages/dsh-infinite/dist/commands.js
-import { readdirSync as readdirSync2 } from "node:fs";
+import { readFileSync as readFileSync2, readdirSync as readdirSync2 } from "node:fs";
 function sessionOf(inv) {
   return inv.agent.session;
 }
@@ -1779,6 +1780,7 @@ async function handleExport(ctx, config, inv) {
   if (!manuscriptHasBody(book))
     return { kind: "error", text: exportNoProse() };
   saveExport(root, book);
+  const draftPath = saveNamedExport(destDir, safeBookFileName(title, "draft"), book);
   const dest = saveNamedExport(destDir, safeBookFileName(title), book);
   revealFile(dest);
   saveMeta(root, {
@@ -1787,10 +1789,11 @@ async function handleExport(ctx, config, inv) {
     exportTitle: title,
     exportCwd: destDir
   });
-  const woke = wakeSoon(inv.agent, polishPrompt(title, world, meta.protagonist, prose));
+  const draftOnDisk = readFileSync2(draftPath, "utf8");
+  const woke = wakeSoon(inv.agent, polishPrompt(title, world, meta.protagonist, draftOnDisk, draftPath));
   if (!woke)
     return { kind: "success", text: exportDone(book.length, title, dest, true) };
-  return { kind: "success", text: exportPolishing(title, dest) };
+  return { kind: "success", text: exportPolishing(title, draftPath, dest) };
 }
 function registerCommands(ctx, config) {
   for (const [name2, copy] of Object.entries(COMMANDS_COPY)) {
@@ -1805,7 +1808,7 @@ function registerCommands(ctx, config) {
 }
 
 // packages/dsh-infinite/dist/covers-host.js
-import { existsSync, readFileSync as readFileSync2, statSync as statSync3 } from "node:fs";
+import { existsSync, readFileSync as readFileSync3, statSync as statSync3 } from "node:fs";
 import { extname, join as join3, normalize as normalize2, sep } from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
 import { dirname as dirname3 } from "node:path";
@@ -1831,7 +1834,7 @@ function safeCoverName(name2) {
 function sendFile(res, file, method = "GET") {
   const ext = extname(file).toLowerCase();
   const type = MIME[ext] ?? "application/octet-stream";
-  const body = readFileSync2(file);
+  const body = readFileSync3(file);
   res.writeHead(200, {
     "content-type": type,
     "cache-control": "public, max-age=86400",
@@ -1917,7 +1920,7 @@ function registerCoverServer(ctx, config) {
 }
 
 // packages/dsh-infinite/dist/install-preset.js
-import { mkdirSync as mkdirSync2, readdirSync as readdirSync3, readFileSync as readFileSync3, statSync as statSync4, writeFileSync as writeFileSync2 } from "node:fs";
+import { mkdirSync as mkdirSync2, readdirSync as readdirSync3, readFileSync as readFileSync4, statSync as statSync4, writeFileSync as writeFileSync2 } from "node:fs";
 import { dirname as dirname4, join as join4 } from "node:path";
 function copyTree2(from, to) {
   mkdirSync2(to, { recursive: true });
@@ -1927,7 +1930,7 @@ function copyTree2(from, to) {
     if (statSync4(src).isDirectory())
       copyTree2(src, dest);
     else
-      writeFileSync2(dest, readFileSync3(src));
+      writeFileSync2(dest, readFileSync4(src));
   }
 }
 function installUserPreset(config) {
@@ -1943,19 +1946,19 @@ function installUserPreset(config) {
     if (statSync4(join4(dest, "agent.cordis.yml")).isFile()) {
       let destPreset = "";
       try {
-        destPreset = readFileSync3(join4(dest, "preset.yml"), "utf8");
+        destPreset = readFileSync4(join4(dest, "preset.yml"), "utf8");
       } catch {
         destPreset = "";
       }
       let destPersona = "";
       try {
-        destPersona = readFileSync3(join4(dest, "agent.cordis.yml"), "utf8");
+        destPersona = readFileSync4(join4(dest, "agent.cordis.yml"), "utf8");
       } catch {
         destPersona = "";
       }
       if (!/诸天万界/.test(destPreset) || !/禁止把思考/.test(destPersona)) {
-        writeFileSync2(join4(dest, "preset.yml"), readFileSync3(join4(src, "preset.yml")));
-        writeFileSync2(join4(dest, "agent.cordis.yml"), readFileSync3(join4(src, "agent.cordis.yml")));
+        writeFileSync2(join4(dest, "preset.yml"), readFileSync4(join4(src, "preset.yml")));
+        writeFileSync2(join4(dest, "agent.cordis.yml"), readFileSync4(join4(src, "agent.cordis.yml")));
       }
       return dest;
     }
@@ -2163,7 +2166,7 @@ ${archive}`;
 }
 
 // packages/dsh-infinite/dist/repair-sessions.js
-import { copyFileSync, existsSync as existsSync2, readdirSync as readdirSync4, readFileSync as readFileSync4, renameSync, unlinkSync, writeFileSync as writeFileSync3 } from "node:fs";
+import { copyFileSync, existsSync as existsSync2, readdirSync as readdirSync4, readFileSync as readFileSync5, renameSync, unlinkSync, writeFileSync as writeFileSync3 } from "node:fs";
 import { join as join5 } from "node:path";
 import { constants, zstdCompressSync, zstdDecompressSync } from "node:zlib";
 var LEGACY_BIND_TYPE = "infinite/bind";
@@ -2193,7 +2196,7 @@ function repairSessionTree(root) {
   return { scanned: files.length, repaired: repaired.length, failed, files: repaired };
 }
 function repairSessionLog(path) {
-  const raw = readFileSync4(path);
+  const raw = readFileSync5(path);
   if (path.endsWith(".zstd") || isZstd(raw)) {
     const next = patchZstd(raw);
     if (!next)

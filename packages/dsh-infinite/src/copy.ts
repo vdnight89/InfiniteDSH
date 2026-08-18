@@ -70,12 +70,12 @@ export function exportDone(chars: number, title: string, path: string, revealed:
   return `已誊出 ${chars} 字书稿《${title}》：${path}。${open}`
 }
 
-export function exportPolishing(title: string, path: string): string {
-  return `草稿《${title}》已落下：${path}。叙事者正在润色排版，完成后覆盖同一份。日期已写好，不必调工具。`
+export function exportPolishing(title: string, draftPath: string, bookPath: string): string {
+  return `草稿已落下：${draftPath}。成稿先按草稿抄了一份：${bookPath}。叙事者正按本地草稿润色排版，完成后只覆盖成稿。`
 }
 
 export function exportKeptDraft(title: string): string {
-  return `润色未成书，已保留草稿《${title}》。可再 /export-story。`
+  return `润色未成书，本地草稿与成稿《${title}》都还在。可再 /export-story。`
 }
 
 export function exportNoProse(): string {

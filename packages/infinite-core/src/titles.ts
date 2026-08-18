@@ -10,10 +10,11 @@ export function suggestExportTitles(world: string, protagonist: string, prose: s
   return titles.slice(0, 3)
 }
 
-/** Windows-safe file stem plus .txt. */
-export function safeBookFileName(title: string): string {
+/** Windows-safe file stem plus `.md`, or `.草稿.md` for the pre-polish pass. */
+export function safeBookFileName(title: string, variant: 'book' | 'draft' = 'book'): string {
   const cleaned = title.replace(/[<>:"/\\|?*\u0000-\u001f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 40)
-  return `${cleaned || '诸天万界书稿'}.md`
+  const stem = cleaned || '诸天万界书稿'
+  return variant === 'draft' ? `${stem}.草稿.md` : `${stem}.md`
 }
 
 function clipTitle(raw: string): string {

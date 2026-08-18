@@ -26,7 +26,7 @@ export declare function noWorldYet(): string;
 export declare function castNeedName(): string;
 export declare function castDone(name: string, count: number): string;
 export declare function exportDone(chars: number, title: string, path: string, revealed: boolean): string;
-export declare function exportPolishing(title: string, path: string): string;
+export declare function exportPolishing(title: string, draftPath: string, bookPath: string): string;
 export declare function exportKeptDraft(title: string): string;
 export declare function exportNoProse(): string;
 export declare function sessionTitle(world: string, protagonist: string): string;

@@ -166,6 +166,7 @@ describe('suggestExportTitles', () => {
 
   it('builds a safe windows file name', () => {
     expect(safeBookFileName('奇幻·谢无妄')).toBe('奇幻·谢无妄.md')
+    expect(safeBookFileName('奇幻·谢无妄', 'draft')).toBe('奇幻·谢无妄.草稿.md')
     expect(safeBookFileName('a<b>:"c')).toBe('a b c.md')
   })
 })

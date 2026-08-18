@@ -2,7 +2,7 @@
 
 给下一个 agent：读完这份就能开工。词汇以 [`CONTEXT.md`](CONTEXT.md) 为准。产品口吻以 [`README.md`](README.md) 为准。历史决策见 [`docs/grill-airp-on-dsh.md`](docs/grill-airp-on-dsh.md) 与 [`docs/grill-ux-2026-08-17.md`](docs/grill-ux-2026-08-17.md)。规格原稿 [`docs/superpowers/specs/2026-08-16-dsh-infinite-design.md`](docs/superpowers/specs/2026-08-16-dsh-infinite-design.md) 已过时（命令名、题材数、导出流程都变了），只当考古。
 
-**当前船：** `v0.4.11`。GitHub：https://github.com/vdnight89/InfiniteDSH  
+**当前船：** `v0.4.12`。GitHub：https://github.com/vdnight89/InfiniteDSH  
 **组合包名：** `dsh-infinite`。产品中文名：**诸天万界**。  
 **主人：** vdnight89。本机 Windows，仓库 `F:\DocProject\InfiniteDSH`。
 
@@ -36,7 +36,7 @@
 | 随机事件不二次调模型 | `turn/start` 从 worldbook 抽一条未用过的非常驻条目，注入上下文。不抽写法、不抽开篇、不抽剧情卡。 |
 | compaction 追加档案 | `archive.md` 只追加，不覆盖。 |
 | 不写自定义会话事件 | **禁止** `session.append('infinite/bind', …)`。DSH 不认识的 type 且没有 `ignorable: true` 会让整本历史冷加载失败。`Session.append` 写不了 `ignorable`。绑定只活在 `meta.yml`。 |
-| 誊书先草稿再润色 | `/export-story` 先把抽出的正文写成 `.md`，再叫醒叙事者润色排版覆盖同一份。提示里写死日期，禁止工具。润色若吐出 `runshell` / 构思，保留草稿。 |
+| 誊书先草稿再润色 | `/export-story` 先写 `书名.草稿.md`，再抄一份 `书名.md`。润色按磁盘上那份草稿（全文贴进提示，因为文学会话不能读盘），只覆盖成稿。失败则两份都留着。 |
 | Git 安装带 dist | 根包无 `prepare`、无 `file:` 依赖。宿主打成 `index.bundle.js`。 |
 | 只 named export | **不要** `export default`。Cordis `unwrapExports` 会拿走 default、丢掉旁边的 `inject`，Web 直接炸。 |
 | `cordis.patch.yml` 不要 `[]` | 空数组会把 Web 的皮肤 list 弄坏。只要 `insert` 我们这一条。 |
@@ -131,7 +131,7 @@ C:\Users\于翔\.dsh\sessions\--<projectKey>--\<sessionId>\session.jsonl.zstd
 | `/new 修仙 谢无妄 force` | 不弹窗直入。 |
 | `/bind` / `/bind 末世` | 改投他界，覆盖本会话天书。 |
 | `/cast` / `/cast 林晏` | 换主角；旧 constant 英雄降为 NPC。 |
-| `/export-story` | 抽出正文 → 问书名 → 先写草稿 `.md` → 叫醒叙事者润色 → `turn/end` 覆盖或保留草稿。 |
+| `/export-story` | 抽出正文 → 问书名 → 写 `书名.草稿.md` 和 `书名.md` → 按草稿润色 → `turn/end` 只覆盖成稿。 |
 | `/export-story player` | 玩家行动留成 `*你：…*`。 |
 
 `/new` 流水线：`seedStory` 拷模板 → `applyProtagonist` → 可选 `applyOpening`（把选中的 plot 写成 `worldbook/opening.md`）→ `afterGate` 三键。启程用 `wakeSoon` 提交用户句「启程。」。

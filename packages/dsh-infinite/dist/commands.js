@@ -7,7 +7,7 @@ import { collectExportSource, sessionMessages } from './transcript.js';
 import { polishPrompt } from './polish.js';
 import { revealFile } from './reveal.js';
 import { wakeSoon } from './wake.js';
-import { readdirSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 function sessionOf(inv) {
     return inv.agent.session;
 }
@@ -316,6 +316,7 @@ export async function handleExport(ctx, config, inv) {
     if (!manuscriptHasBody(book))
         return { kind: 'error', text: exportNoProse() };
     saveExport(root, book);
+    const draftPath = saveNamedExport(destDir, safeBookFileName(title, 'draft'), book);
     const dest = saveNamedExport(destDir, safeBookFileName(title), book);
     revealFile(dest);
     saveMeta(root, {
@@ -324,10 +325,11 @@ export async function handleExport(ctx, config, inv) {
         exportTitle: title,
         exportCwd: destDir,
     });
-    const woke = wakeSoon(inv.agent, polishPrompt(title, world, meta.protagonist, prose));
+    const draftOnDisk = readFileSync(draftPath, 'utf8');
+    const woke = wakeSoon(inv.agent, polishPrompt(title, world, meta.protagonist, draftOnDisk, draftPath));
     if (!woke)
         return { kind: 'success', text: exportDone(book.length, title, dest, true) };
-    return { kind: 'success', text: exportPolishing(title, dest) };
+    return { kind: 'success', text: exportPolishing(title, draftPath, dest) };
 }
 export function registerCommands(ctx, config) {
     for (const [name, copy] of Object.entries(COMMANDS_COPY)) {

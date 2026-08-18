@@ -217,13 +217,18 @@ describe('dsh-infinite plugin', () => {
       signal: new AbortController().signal,
     })
     expect(exported.kind).toBe('success')
-    expect(exported.text).toMatch(/润色|草稿/)
+    expect(exported.text).toMatch(/草稿已落下/)
     expect(followups[0]).toMatch(/重誊成书/)
+    expect(followups[0]).toMatch(/本地草稿/)
     expect(followups[0]).toMatch(/禁止调用任何工具/)
+    expect(followups[0]).toContain('电梯门开了。')
     expect(followups[0]).not.toContain('今天的中文日期')
-    const book = readdirSync(dest).find((name) => name.endsWith('.md'))
-    expect(book).toBeTruthy()
-    const draft = readFileSync(join(dest, book!), 'utf8')
+    const names = readdirSync(dest).filter((name) => name.endsWith('.md'))
+    const draftName = names.find((name) => name.includes('草稿'))
+    const bookName = names.find((name) => name.endsWith('.md') && !name.includes('草稿'))
+    expect(draftName).toBeTruthy()
+    expect(bookName).toBeTruthy()
+    const draft = readFileSync(join(dest, draftName!), 'utf8')
     expect(draft).toContain('# 现代·江澄')
     expect(draft).toContain('电梯门开了。')
     expect(draft).not.toContain('【正文】')
@@ -234,9 +239,10 @@ describe('dsh-infinite plugin', () => {
       { type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '# 现代·江澄\n\n> 诸天万界 · 现代\n\n## 第一章　电梯门开了\n\n电梯门开了。江澄站在灯下，走廊深处有人咳嗽，他没有回头，只把袖口里的钥匙按进掌心。夜色从井道里涌上来。' }] } } },
     ]
     onSessionEvent(ctx, config, sess, { type: 'turn/end' })
-    const txt = readFileSync(join(dest, book!), 'utf8')
+    const txt = readFileSync(join(dest, bookName!), 'utf8')
     expect(txt).toContain('钥匙按进掌心')
     expect(txt).not.toContain('runshell')
+    expect(readFileSync(join(dest, draftName!), 'utf8')).not.toContain('钥匙按进掌心')
     expect(loadMeta(infiniteRoot(resolveSessionDir(ctx, sess, config)))?.exportPending).toBeUndefined()
   })
 
@@ -260,8 +266,10 @@ describe('dsh-infinite plugin', () => {
       { type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '<tool_calls> <invoke name="runshell">date</invoke>' }] } } },
     ]
     onSessionEvent(ctx, config, sess, { type: 'turn/end' })
-    const book = readdirSync(dest).find((name) => name.endsWith('.md'))
-    const txt = readFileSync(join(dest, book!), 'utf8')
+    const names = readdirSync(dest).filter((name) => name.endsWith('.md'))
+    expect(names.some((name) => name.includes('草稿'))).toBe(true)
+    const bookName = names.find((name) => name.endsWith('.md') && !name.includes('草稿'))
+    const txt = readFileSync(join(dest, bookName!), 'utf8')
     expect(txt).toContain('电梯门开了。')
     expect(txt).not.toContain('runshell')
   })
