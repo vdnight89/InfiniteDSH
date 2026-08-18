@@ -351,11 +351,14 @@ Literary DSH plugin: one session is one book. Cover-card /new opens one of 19 re
 |---|---|---|---|
 | GitHub topic `dsh-plugin` 等 | `dsh-find-plugin`、多数市场自动扫 | **已挂** | 保持；改描述别丢掉这个 topic |
 | [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) | 正门。合并后 [awesome-dsh-plugin.com](https://awesome-dsh-plugin.com/) 和站内 **dsh-market** 自动带上 | **PR 已开** https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/1616 分类 `skill`。CI 全绿。描述已原地更新（更具体的新版），`data/screenshots.json` 已挂 4 张截图（指向本仓 main 分支 docs/ 下的 png）。Fork：`vdnight89/awesome-dsh-plugin` 分支 `add-infinitedsh` | **盯合并**。要再改就往 fork 分支推新提交，不用撤回 |
-| [0xsline/awesome-deepseek-harness](https://github.com/0xsline/awesome-deepseek-harness) | 人工精选，不扫 topic | **未投** | 1616 合上后再开。分类 Domain & Specialist Skills（或 Fun & Lifestyle）。`README.md` + `README.zh-CN.md` 各加一行，PR 标题 `docs: add InfiniteDSH` |
-| [dsh.so/submit](https://www.dsh.so/submit/) | 验证向目录，填仓库 URL | **未投** | 填 `https://github.com/vdnight89/InfiniteDSH` |
-| [deepseekplugins.com](https://deepseekplugins.com/) | 独立目录 | **未投** | 看站内 `/submit` |
+| [0xsline/awesome-deepseek-harness](https://github.com/0xsline/awesome-deepseek-harness) | 人工精选，不扫 topic | **PR 已开** https://github.com/0xsline/awesome-deepseek-harness/pull/385 Domain & Specialist Skills 分类，中英 README 各一行 | 盯合并 |
+| [Zhiyuan-Fan/Awesome-DeepSeek-Harness-Plugins](https://github.com/Zhiyuan-Fan/Awesome-DeepSeek-Harness-Plugins) | 精选列表 | **PR 已开** https://github.com/Zhiyuan-Fan/Awesome-DeepSeek-Harness-Plugins/pull/31 | 盯合并 |
+| [Dominic789654/awesome-deepseek-harness](https://github.com/Dominic789654/awesome-deepseek-harness) | 精选列表 | **已收录**（上游 main 已有中英条目） | — |
+| [dsh.so/submit](https://www.dsh.so/submit/) | 验证向目录，填仓库 URL | **已投**：站点 `/api/submit` 服务端 `token-invalid`（站点故障），改投其收件仓 https://github.com/ihuajiu/dsh-plugin-submissions/issues/6 | 站点修复后可再走一次表单 |
+| [deepseekplugins.com](https://deepseekplugins.com/) | 独立目录 | **无公开投稿渠道**（人工精选，无表单/联系入口/GitHub 仓） | 等站主开放 |
 | [dshplugin.store](https://dshplugin.store/) / [dshmarketplace.dev](https://dshmarketplace.dev/) / [dshplugin.me](https://dshplugin.me/) | 多数扫 topic | **不用单独投** | 1616 合上后描述会更好看 |
-| [Anil-matcha/awesome-dsh-plugin](https://github.com/Anil-matcha/awesome-dsh-plugin) | 镜像/精选 | **未投** | 优先级低于 0xsline |
+| [Anil-matcha/awesome-dsh-plugin](https://github.com/Anil-matcha/awesome-dsh-plugin) | 镜像/精选 | **陈旧遗留库**，官方列表 1616 已覆盖，不重复投 | — |
+| [libukai/awesome-deepseek-harness](https://github.com/libukai/awesome-deepseek-harness) | 强策展列表 | 无写作/文学分类，**确认跳过** | 留意遗留空 fork `vdnight89/awesome-deepseek-harness-libukai` 待手工删除 |
 
 不要去投只收 `dsh.client` 皮肤的货架。我们是 Host `dsh.bundle`。
 

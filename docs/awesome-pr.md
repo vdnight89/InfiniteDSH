@@ -18,7 +18,12 @@
 |---|---|
 | GitHub topic `dsh-plugin` + `dsh` + `deepseek-harness` + `cordis` | 已挂。`dsh-find-plugin` 等货架默认搜这个 |
 | [awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) | PR 已开：https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/1616 。CI 全绿（Submission gate + check），等维护者合并。描述已原地更新（见下「货架条目」），并挂了 4 张截图进 `data/screenshots.json`。合并后 [awesome-dsh-plugin.com](https://awesome-dsh-plugin.com/) 和站内 **dsh-market** 会自动带上 |
-| GitHub About | 已改成上句 |
+| [0xsline/awesome-deepseek-harness](https://github.com/0xsline/awesome-deepseek-harness) | **PR 已开**：https://github.com/0xsline/awesome-deepseek-harness/pull/385 。Domain & Specialist Skills 分类，中英 README 各一行 |
+| [Zhiyuan-Fan/Awesome-DeepSeek-Harness-Plugins](https://github.com/Zhiyuan-Fan/Awesome-DeepSeek-Harness-Plugins) | **PR 已开**：https://github.com/Zhiyuan-Fan/Awesome-DeepSeek-Harness-Plugins/pull/31 。Tools & Skills 分类，中英各一行 |
+| [Dominic789654/awesome-deepseek-harness](https://github.com/Dominic789654/awesome-deepseek-harness) | **已收录**（上游 main 已有我们的中英条目，无需再 PR） |
+| [dsh.so](https://www.dsh.so) | **已投**：站点 `/api/submit` 服务端报 `token-invalid`（站点自身故障），改为直接投它们的收件仓 https://github.com/ihuajiu/dsh-plugin-submissions/issues/6 。站点修复后可再走一次表单 |
+| [deepseekplugins.com](https://deepseekplugins.com) | **无公开投稿渠道**（人工精选目录，无表单/无联系入口/无 GitHub 仓）。无法自动投 |
+| GitHub About | 已改成热血短句（见下） |
 
 awesome 的提交格式：不要手改 README。在 `data/plugins/vdnight89__InfiniteDSH.yml` 加一条，再跑 `npm ci && node scripts/generate-readme.mjs`，把 YAML 和两份生成的 README 一起提交。分类用 `skill`。描述只写功能、以句号结尾，禁止营销词。已发出的 PR 不用撤回：往 fork 分支 `add-infinitedsh` 推新提交即原地更新。
 
@@ -27,29 +32,22 @@ awesome 的提交格式：不要手改 README。在 `data/plugins/vdnight89__Inf
 ## 还能投的货架（按优先级）
 
 1. **[0xsline/awesome-deepseek-harness](https://github.com/0xsline/awesome-deepseek-harness)**  
-   人工精选，不自动扫 topic。分类建议 **Domain & Specialist Skills**（写作）或 **Fun & Lifestyle**。  
-   在 `README.md` 与 `README.zh-CN.md` 各加一行，PR 标题 `docs: add InfiniteDSH`。1616 合上后再开。
-
-   英文：
-   ```
-   - [vdnight89/InfiniteDSH](https://github.com/vdnight89/InfiniteDSH) — 诸天万界DSH: one DSH session is one book; a cover-card picker opens 19 realms, a prose-only preset locks the model to fiction, keyword worldbook lore grounds each turn, and /export-story typesets the session into a Markdown novel.
-   ```
-   中文：
-   ```
-   - [vdnight89/InfiniteDSH](https://github.com/vdnight89/InfiniteDSH) — 诸天万界DSH：一个会话就是一本书。封面开书十九界，只写正文，规则书按关键词注入，/export-story 誊成 Markdown 小说。
-   ```
+   ✅ 已开 PR #385，等合并。
 
 2. **[dsh.so/submit](https://www.dsh.so/submit/)**  
-   验证向目录。填仓库 URL 即可，他们用 GitHub API 核存在。
+   ✅ 已投收件仓 issue #6。站点 `/api/submit` 恢复后可从表单再走一次（幂等即可）。
 
 3. **[deepseekplugins.com](https://deepseekplugins.com/)**  
-   独立目录，页面写了欢迎投稿。看站内 `/submit`。
+   ⏭️ 无公开投稿渠道，等站主开放。
 
 4. **[dshplugin.store](https://dshplugin.store/)**、[dshmarketplace.dev](https://dshmarketplace.dev/)、[dshplugin.me](https://dshplugin.me/)  
    多数扫 `dsh-plugin` topic，**不用单独投稿**。awesome 合并后描述会更好看。
 
 5. **[Anil-matcha/awesome-dsh-plugin](https://github.com/Anil-matcha/awesome-dsh-plugin)**  
-   镜像/精选列表，可顺手开同样一行的 PR，优先级低于上面两个。
+   陈旧遗留库（fork parent 是官方 awesome-dsh-plugin），官方列表 PR #1616 已覆盖，不重复投。
+
+6. **[libukai/awesome-deepseek-harness](https://github.com/libukai/awesome-deepseek-harness)**  
+   强策展列表，无写作/文学分类，已确认跳过。
 
 不要去投只收 `dsh.client` 皮肤的货架。我们是 Host bundle。
 
