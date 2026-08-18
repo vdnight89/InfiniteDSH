@@ -7,15 +7,13 @@
 
 ## 先做完再开 PR
 
-1. GitHub 仓库 Settings → Topics 加上：`dsh-plugin`、`dsh`、`deepseek-harness`（本机 `gh` 未登录，无法代加）。
-2. 推送包含根包 `dsh.bundle` 的提交。
-3. 确认一行能装：
+1. GitHub Topics 已挂：`dsh-plugin`、`dsh`、`deepseek-harness`。
+2. 根包带 `dsh.bundle`，`dist/` 随仓库。
+3. 一行能装：
 
 ```sh
 dsh plugin --profile web add github:vdnight89/InfiniteDSH
 ```
-
-pnpm ≥10 第一次会要求在 profile 的 `pnpm-workspace.yaml` 里写 `allowBuilds.dsh-infinite: true`。
 
 ## PR 标题
 
@@ -27,24 +25,24 @@ Add vdnight89/InfiniteDSH to Skills
 
 ```
 Repo declares a dsh.bundle manifest (installable via dsh plugin add).
-Monorepo: the root package is dsh-infinite; compiled dist is in the repo.
+Product name: 诸天万界. Root package: dsh-infinite. Compiled dist is in the repo.
 
 Install:
 dsh plugin --profile web add github:vdnight89/InfiniteDSH
 
-One DSH session is one literary book: cover-card /new, session-local worldbook, prose-only Infinite Play preset.
+One DSH session is one literary book: cover-card /new, 诸天万界 prose-only preset, keyword worldbook.
 ```
 
 ## README.md 要加的一行（Skills）
 
 ```
-- [vdnight89/InfiniteDSH](https://github.com/vdnight89/InfiniteDSH) - Literary sessions for DeepSeek Harness: one chat is one book, with cover-card openings and keyword worldbook injection.
+- [vdnight89/InfiniteDSH](https://github.com/vdnight89/InfiniteDSH) - 诸天万界: literary sessions for DeepSeek Harness. One chat is one book, with cover-card openings and keyword worldbook injection.
 ```
 
 ## README.zh.md 要加的一行（Skills）
 
 ```
-- [vdnight89/InfiniteDSH](https://github.com/vdnight89/InfiniteDSH) — 文学会话：一个 DSH 会话就是一本书，封面卡片开书，规则书按关键词注入。
+- [vdnight89/InfiniteDSH](https://github.com/vdnight89/InfiniteDSH) — 诸天万界：一个 DSH 会话就是一本书，封面开书，点启程落第一段，规则书按关键词注入。
 ```
 
 开 PR：https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/compare

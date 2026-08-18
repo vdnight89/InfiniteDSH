@@ -117,6 +117,7 @@ describe('dsh-infinite plugin', () => {
   it('ships a root dsh.bundle so github/npm add can load the plugin', () => {
     const manifest = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'package.json'), 'utf8'))
     expect(manifest.name).toBe('dsh-infinite')
+    expect(manifest.description).toMatch(/诸天万界/)
     expect(manifest.dsh.bundle.patch).toBe('./cordis.patch.yml')
     expect(manifest.main).toContain('index.bundle.js')
     expect(manifest.dependencies ?? {}).toEqual({})

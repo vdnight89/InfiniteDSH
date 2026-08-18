@@ -1,16 +1,20 @@
 {
   "name": "dsh-infinite",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": false,
   "type": "module",
   "license": "MIT",
-  "description": "诸天万界 for DeepSeek Harness: one session is one book",
+  "description": "诸天万界：DeepSeek Harness 文学插件。一个会话就是一本书。封面开书，只写正文。",
   "keywords": [
     "dsh",
     "dsh-plugin",
     "deepseek-harness",
+    "deepseek",
+    "诸天万界",
     "interactive-fiction",
-    "text-adventure"
+    "text-adventure",
+    "ai-writing",
+    "worldbook"
   ],
   "repository": {
     "type": "git",

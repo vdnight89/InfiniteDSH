@@ -1,18 +1,50 @@
 # 诸天万界
 
-**for DeepSeek Harness**
+**DeepSeek Harness · AI 文字世界冒险**
 
 <p align="center">
-  <img src="docs/banner.jpg" alt="诸天万界：鲸鱼娘、梁组、阿澜立于碎裂的算力祭坛上，身后万界同时炸开" width="100%">
+  <img src="docs/banner.jpg" alt="诸天万界 DSH：鲸鱼娘与梁圣立于碎裂的万界，身后是修仙、末世、球场、规则怪谈与赛博霓虹" width="100%">
 </p>
 
 > 一个会话，就是一扇门。  
 > 推开它，你不是在聊天。你是在写，在杀，在活，在死，在诸天万界里把自己活成主角。
 
-这是 DeepSeek Harness 上的文学插件。仓库名 InfiniteDSH，组合包名 `dsh-infinite`。当前 **0.4.0**。  
+这是 DeepSeek Harness 上的文学插件。仓库名 InfiniteDSH，组合包名 `dsh-infinite`。当前 **0.4.1**。  
 不另做 App，不另做书架。DSH 侧栏里的一项会话，就是你脚下这一整本。切会话，就是切界。
 
 文学预设叫 **诸天万界**：模型只许吐小说正文。bash、改文件、子代理，全部收刀。你要的不是助手。你要的是世界自己在呼吸。
+
+---
+
+## 一行入界
+
+别人要进这扇门，只需要已经能跑的 DSH，再敲两行。门在 GitHub 上，不走 npm，不求商店审核。
+
+```sh
+dsh plugin --profile web add github:vdnight89/InfiniteDSH
+dsh web
+```
+
+然后：**新开一个会话** → preset 选 **诸天万界** → 输入 `/new` → 点界图 → 点 **启程**。
+
+| 你卡在哪 | 怎么办 |
+|---|---|
+| 还没有 DSH | `npx @deepseek-ai/dsh web`，浏览器开 http://127.0.0.1:3080 |
+| 没有 pnpm | 先装 pnpm。`dsh plugin` 会把它转发给 pnpm |
+| 想钉死这一刀 | `dsh plugin --profile web add github:vdnight89/InfiniteDSH#v0.4.1` |
+| 已经装过，要换新图新文案 | `dsh plugin --profile web update dsh-infinite`，再重启 `dsh web` |
+| 卸门 | `dsh plugin --profile web remove dsh-infinite`（故事和 preset 会留在磁盘上） |
+
+仓库带着编好的 `dist/`，Git 安装不必再授权 `prepare`。若你装的是 0.3.0 以前的提交，把 `dsh-infinite` 写进该 profile 的 `pnpm-workspace.yaml` 再 `add` 一次：
+
+```yaml
+onlyBuiltDependencies:
+  - dsh-infinite
+allowBuilds:
+  dsh-infinite: true
+```
+
+改天书、从源码开炉，往下看「渡劫三途」。
 
 ---
 
@@ -46,8 +78,8 @@
 
 | 你是谁 | 怎么入界 |
 |---|---|
-| 只想开书 | 一行命令，把组合包装进 DSH 的 `web` profile |
-| 要改天书 | 克隆本仓，`npm install`，根目录 `dsh plugin --profile web add .` |
+| 只想开书 | 回到上面「一行入界」。GitHub 这一行就是正门。 |
+| 要改天书 | 克隆本仓，根目录 `dsh plugin --profile web add .` |
 | 从 DSH 源码里凿门 | `--patch` 指向 `examples/play.cordis.yml`（改成你机器上的绝对路径） |
 
 先备好刀：
@@ -66,36 +98,7 @@ npx @deepseek-ai/dsh web
 浏览器开 [http://127.0.0.1:3080](http://127.0.0.1:3080)。凭据按 DSH 自己的规矩读：`DEEPSEEK_API_KEY`、`$DSH_HOME/.credentials.yaml` 或 `.env`。  
 Windows 上 `$HOME/.dsh` 多半是 `%USERPROFILE%\.dsh`。设了 `DSH_HOME`，本插件也认。
 
-### 一行入界（推荐）
-
-```sh
-dsh plugin --profile web add github:vdnight89/InfiniteDSH
-dsh web
-```
-
-npm 上架之后也可以：
-
-```sh
-dsh plugin --profile web add dsh-infinite
-dsh web
-```
-
-0.3.1 起仓库里带着编好的 `dist/`，Git 安装**不必**再授权 `prepare`。若你装的是更早的提交，pnpm 会要你把包名写进该 profile 的 `pnpm-workspace.yaml`：
-
-```yaml
-onlyBuiltDependencies:
-  - dsh-infinite
-allowBuilds:
-  dsh-infinite: true
-```
-
-再跑同一条 `add`。
-
-锁定某一刀，免得后人改了你脚下的界：
-
-```sh
-dsh plugin --profile web add github:vdnight89/InfiniteDSH#<commit-sha>
-```
+官方发现靠 GitHub topic **`dsh-plugin`**。`dsh-find-plugin`、dsh-market 一类货架都扫这个标签。本仓已挂上。npm 包名预留 `dsh-infinite`，尚未上架——现在不要写 `dsh plugin add dsh-infinite`，会扑空。
 
 ### 从源码开炉
 
@@ -117,9 +120,6 @@ dsh --profile web --dump-config
 
 看见 `dsh-infinite` 这一层，就是界立住了。  
 插件首次加载会把 **诸天万界** 拷到 `~/.dsh/.agent-presets/infinite-play`。若你还停在旧英文名 Infinite Play，下次加载会改成诸天万界。已经含「诸天万界」的改稿，不会被覆盖。
-
-升级：`dsh plugin --profile web update dsh-infinite`  
-卸门：`dsh plugin --profile web remove dsh-infinite`（故事文件和 preset 会留在磁盘上）
 
 ---
 
