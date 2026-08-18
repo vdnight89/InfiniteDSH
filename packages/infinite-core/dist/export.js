@@ -77,7 +77,7 @@ export function extractStoryBody(text) {
         return '';
     const runs = [];
     let current = [];
-    for (const para of cleaned.split(/\n\s*\n/)) {
+    for (const para of splitUnits(cleaned)) {
         if (isPlanningParagraph(para)) {
             if (current.length > 0) {
                 runs.push(current);
@@ -110,6 +110,21 @@ export function cleanManuscript(text) {
         .replace(/\n{3,}/g, '\n\n')
         .trim();
     return isPlanningDump(kept) ? '' : kept;
+}
+function splitUnits(text) {
+    const chunks = [];
+    for (const para of text.split(/\n\s*\n/)) {
+        if (para.includes('\n') && (isPlanningParagraph(para) || /[A-Za-z]{16,}/.test(para))) {
+            for (const line of para.split(/\n+/)) {
+                if (line.trim())
+                    chunks.push(line.trim());
+            }
+        }
+        else if (para.trim()) {
+            chunks.push(para);
+        }
+    }
+    return chunks;
 }
 export function isOpeningInstruction(text) {
     const t = text.trim();

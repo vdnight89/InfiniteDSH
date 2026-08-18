@@ -9,7 +9,7 @@
 > 一个会话，就是一扇门。  
 > 推开它，你不是在聊天。你是在写，在杀，在活，在死，在诸天万界里把自己活成主角。
 
-这是 DeepSeek Harness 上的文学插件。仓库名 InfiniteDSH，组合包名 `dsh-infinite`。当前 **0.4.6**。  
+这是 DeepSeek Harness 上的文学插件。仓库名 InfiniteDSH，组合包名 `dsh-infinite`。当前 **0.4.7**。  
 不另做 App，不另做书架。DSH 侧栏里的一项会话，就是你脚下这一整本。切会话，就是切界。
 
 文学预设叫 **诸天万界**：模型只许吐小说正文。bash、改文件、子代理，全部收刀。你要的不是助手。你要的是世界自己在呼吸。
@@ -31,7 +31,7 @@ dsh web
 |---|---|
 | 还没有 DSH | `npx @deepseek-ai/dsh web`，浏览器开 http://127.0.0.1:3080 |
 | 没有 pnpm | 先装 pnpm。`dsh plugin` 会把它转发给 pnpm |
-| 想钉死这一刀 | `dsh plugin --profile web add github:vdnight89/InfiniteDSH#v0.4.6` |
+| 想钉死这一刀 | `dsh plugin --profile web add github:vdnight89/InfiniteDSH#v0.4.7` |
 | 已经装过，要换新刀 | `dsh plugin --profile web update dsh-infinite`，**关掉再开** `dsh web`。pnpm 会把 Git 依赖钉在旧提交上，不跑 update 就永远停在旧版。 |
 | 卸门 | `dsh plugin --profile web remove dsh-infinite`（故事和 preset 会留在磁盘上） |
 

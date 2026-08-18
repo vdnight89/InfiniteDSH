@@ -299,7 +299,7 @@ function extractStoryBody(text) {
     return "";
   const runs = [];
   let current = [];
-  for (const para of cleaned.split(/\n\s*\n/)) {
+  for (const para of splitUnits(cleaned)) {
     if (isPlanningParagraph(para)) {
       if (current.length > 0) {
         runs.push(current);
@@ -325,6 +325,20 @@ function cleanManuscript(text) {
   const withoutFork = text.replace(FENCE_BLOCK, "").replace(FORK_BLOCK, "");
   const kept = withoutFork.split(/\n\s*\n/).filter((para) => !isPlanningParagraph(para) && !/^(?:亦可自己写一条)/.test(para.trim())).join("\n\n").replace(BODY_TAG, "").replace(/\n{3,}/g, "\n\n").trim();
   return isPlanningDump(kept) ? "" : kept;
+}
+function splitUnits(text) {
+  const chunks = [];
+  for (const para of text.split(/\n\s*\n/)) {
+    if (para.includes("\n") && (isPlanningParagraph(para) || /[A-Za-z]{16,}/.test(para))) {
+      for (const line of para.split(/\n+/)) {
+        if (line.trim())
+          chunks.push(line.trim());
+      }
+    } else if (para.trim()) {
+      chunks.push(para);
+    }
+  }
+  return chunks;
 }
 function isOpeningInstruction(text) {
   const t = text.trim();
@@ -1213,17 +1227,13 @@ function eventToMessage(event) {
   }
   return null;
 }
-function sessionMessages(session) {
-  if (Array.isArray(session.events) && session.events.length > 0) {
-    const out2 = [];
-    for (const event of session.events) {
-      const msg = eventToMessage(event);
-      if (msg && msg.text.trim())
-        out2.push(msg);
-    }
-    return out2;
+function fromDeriveMessages(session) {
+  let derived = [];
+  try {
+    derived = session.deriveMessages?.() ?? [];
+  } catch {
+    derived = [];
   }
-  const derived = session.deriveMessages?.() ?? [];
   const out = [];
   for (const item of derived) {
     if (!item || typeof item !== "object")
@@ -1232,11 +1242,56 @@ function sessionMessages(session) {
     const role = rec.role;
     if (role !== "user" && role !== "assistant" && role !== "system")
       continue;
-    const text = blocksToText(rec.content);
+    const text = typeof rec.text === "string" ? rec.text : blocksToText(rec.content);
     if (text.trim())
       out.push({ role, text });
   }
   return out;
+}
+function fromEvents(session) {
+  if (!Array.isArray(session.events))
+    return [];
+  const out = [];
+  for (const event of session.events) {
+    const msg = eventToMessage(event);
+    if (msg && msg.text.trim())
+      out.push(msg);
+  }
+  return out;
+}
+function sessionMessages(session) {
+  const derived = fromDeriveMessages(session);
+  if (derived.some((item) => item.role === "assistant" && item.text.trim()))
+    return derived;
+  const events = fromEvents(session);
+  return events.length > 0 ? events : derived;
+}
+function collectExportSource(session) {
+  const messages = sessionMessages(session);
+  const extracted = messages.filter((message) => message.role === "assistant").map((message) => extractStoryBody(message.text)).filter((text) => text.trim().length > 0);
+  if (extracted.length > 0)
+    return extracted.join("\n\n");
+  const harvested = messages.filter((message) => message.role === "assistant").map((message) => harvestFictionLines(message.text)).filter((text) => text.trim().length > 0);
+  return harvested.join("\n\n");
+}
+function harvestFictionLines(text) {
+  const cleaned = cleanProse(text);
+  if (!cleaned)
+    return "";
+  const kept = [];
+  for (const line of cleaned.split(/\n+/)) {
+    const t = line.trim();
+    if (!t)
+      continue;
+    const cjk = t.match(/[\u4e00-\u9fff]/g)?.length ?? 0;
+    const letters = t.match(/[A-Za-z]/g)?.length ?? 0;
+    if (cjk < 8 || letters > cjk)
+      continue;
+    if (/我们需要回应|按照要求|用户让我|让我构思|我写正文|当前场景：|已出场角色：/.test(t))
+      continue;
+    kept.push(t);
+  }
+  return kept.join("\n\n");
 }
 function recentText(session, last = 4) {
   const msgs = sessionMessages(session).filter((m) => m.role !== "system");
@@ -1667,7 +1722,9 @@ async function handleExport(ctx, config, inv) {
     return { kind: "error", text: noWorldYet() };
   const world = bookNameForTemplate(meta.templateId);
   const messages = sessionMessages(session);
-  const prose = messages.filter((message) => message.role === "assistant").map((message) => extractStoryBody(message.text)).join("\n");
+  const prose = collectExportSource(session);
+  if (!prose.trim())
+    return { kind: "error", text: exportNoProse() };
   const suggestions = suggestExportTitles(world, meta.protagonist, prose);
   let title = suggestions[0] || sessionTitle(world, meta.protagonist);
   const answers = await askUser(ctx, inv, [{
@@ -1685,8 +1742,6 @@ async function handleExport(ctx, config, inv) {
     if (picked)
       title = picked;
   }
-  if (!prose.trim())
-    return { kind: "error", text: exportNoProse() };
   const destDir = session.header?.cwd || process.cwd();
   saveMeta(root, {
     ...meta,

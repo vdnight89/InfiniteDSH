@@ -7,6 +7,7 @@ import { apply, inject, name as pluginName } from '../src/index.ts'
 import { handleBind, handleCast, handleExport, handleNew } from '../src/commands.ts'
 import { COMMANDS_COPY, isEmbarkChoice } from '../src/copy.ts'
 import { offerForks } from '../src/forks-host.ts'
+import { collectExportSource } from '../src/transcript.ts'
 import { installUserPreset } from '../src/install-preset.ts'
 import { onSessionEvent } from '../src/lifecycle.ts'
 import { safeCoverName } from '../src/covers-host.ts'
@@ -523,6 +524,17 @@ describe('dsh-infinite plugin', () => {
     installUserPreset(config)
     expect(readFileSync(join(dest!, 'preset.yml'), 'utf8')).toContain('诸天万界')
     expect(readFileSync(join(dest!, 'agent.cordis.yml'), 'utf8')).toContain('诸天万界')
+  })
+
+  it('collects export source from deriveMessages when the event log has no assistant rows', () => {
+    const sess = session('src')
+    sess.events = [{ type: 'command/run', data: { name: 'export-story' } }]
+    sess.deriveMessages = () => [
+      { role: 'assistant', content: [{ type: 'text', text: '巷口的驴鸣突然断了。谢无妄把碗推过柜台，问谁的人头、谁的价。猎人没有立刻回答。' }] },
+    ]
+    const source = collectExportSource(sess)
+    expect(source).toContain('谢无妄')
+    expect(source).not.toContain('command')
   })
 
   it('treats 启程 variants as embark', () => {

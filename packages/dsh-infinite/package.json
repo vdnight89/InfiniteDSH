@@ -1,6 +1,6 @@
 {
   "name": "@infinite-dsh/host",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "private": true,
   "type": "module",
   "description": "DSH host plugin sources (install the repo root package dsh-infinite)",
@@ -27,8 +27,8 @@
     }
   },
   "dependencies": {
-    "infinite-core": "0.4.6",
-    "dsh-infinite-preset": "0.4.6"
+    "infinite-core": "0.4.7",
+    "dsh-infinite-preset": "0.4.7"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json"

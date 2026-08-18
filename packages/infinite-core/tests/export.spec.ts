@@ -35,6 +35,17 @@ describe('planning dump', () => {
     expect(isPlanningDump('巷口的驴鸣突然断了。')).toBe(false)
   })
 
+  it('pulls fiction out of a single-paragraph mixed dump', () => {
+    const wall = [
+      'The user gave an action: 装昏诱魔修近前.',
+      'I need to continue the narrative. Let\'s draft. Need to write a fresh segment.',
+      '她向后一仰，后脑磕在车板草叶上，眼皮沉沉合拢，连呼吸都放成将断未断的细丝。水囊从膝边滚落。领头的灰袍魔修拿鞭杆挑开车帘。',
+    ].join('\n')
+    const body = extractStoryBody(wall)
+    expect(body).toContain('车板草叶')
+    expect(body).not.toContain('The user gave')
+  })
+
   it('pulls the last Chinese fiction run out of a mixed English draft', () => {
     const mixed = `The user gave an action: 装昏诱魔修近前.
 I need to continue the narrative. Let's draft.

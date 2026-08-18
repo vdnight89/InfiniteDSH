@@ -79,7 +79,7 @@ export function extractStoryBody(text: string): string {
   if (!cleaned) return ''
   const runs: string[][] = []
   let current: string[] = []
-  for (const para of cleaned.split(/\n\s*\n/)) {
+  for (const para of splitUnits(cleaned)) {
     if (isPlanningParagraph(para)) {
       if (current.length > 0) {
         runs.push(current)
@@ -110,6 +110,20 @@ export function cleanManuscript(text: string): string {
     .replace(/\n{3,}/g, '\n\n')
     .trim()
   return isPlanningDump(kept) ? '' : kept
+}
+
+function splitUnits(text: string): string[] {
+  const chunks: string[] = []
+  for (const para of text.split(/\n\s*\n/)) {
+    if (para.includes('\n') && (isPlanningParagraph(para) || /[A-Za-z]{16,}/.test(para))) {
+      for (const line of para.split(/\n+/)) {
+        if (line.trim()) chunks.push(line.trim())
+      }
+    } else if (para.trim()) {
+      chunks.push(para)
+    }
+  }
+  return chunks
 }
 
 export function isOpeningInstruction(text: string): boolean {

@@ -32,27 +32,72 @@ function eventToMessage(event: DuckEvent): TranscriptMessage | null {
   return null
 }
 
-/** Project a session log (or deriveMessages fallback) into role/text pairs. */
-export function sessionMessages(session: DuckSession): TranscriptMessage[] {
-  if (Array.isArray(session.events) && session.events.length > 0) {
-    const out: TranscriptMessage[] = []
-    for (const event of session.events) {
-      const msg = eventToMessage(event)
-      if (msg && msg.text.trim()) out.push(msg)
-    }
-    return out
+function fromDeriveMessages(session: DuckSession): TranscriptMessage[] {
+  let derived: readonly unknown[] = []
+  try {
+    derived = session.deriveMessages?.() ?? []
+  } catch {
+    derived = []
   }
-  const derived = session.deriveMessages?.() ?? []
   const out: TranscriptMessage[] = []
   for (const item of derived) {
     if (!item || typeof item !== 'object') continue
-    const rec = item as { role?: string; content?: unknown }
+    const rec = item as { role?: string; content?: unknown; text?: unknown }
     const role = rec.role
     if (role !== 'user' && role !== 'assistant' && role !== 'system') continue
-    const text = blocksToText(rec.content)
+    const text = typeof rec.text === 'string' ? rec.text : blocksToText(rec.content)
     if (text.trim()) out.push({ role, text })
   }
   return out
+}
+
+function fromEvents(session: DuckSession): TranscriptMessage[] {
+  if (!Array.isArray(session.events)) return []
+  const out: TranscriptMessage[] = []
+  for (const event of session.events) {
+    const msg = eventToMessage(event)
+    if (msg && msg.text.trim()) out.push(msg)
+  }
+  return out
+}
+
+/** Prefer the live transcript projection; fall back to walking the event log. */
+export function sessionMessages(session: DuckSession): TranscriptMessage[] {
+  const derived = fromDeriveMessages(session)
+  if (derived.some((item) => item.role === 'assistant' && item.text.trim())) return derived
+  const events = fromEvents(session)
+  return events.length > 0 ? events : derived
+}
+
+/** Story-only source for polish/export. Harvests Chinese narrative if filters are too strict. */
+export function collectExportSource(session: DuckSession): string {
+  const messages = sessionMessages(session)
+  const extracted = messages
+    .filter((message) => message.role === 'assistant')
+    .map((message) => extractStoryBody(message.text))
+    .filter((text) => text.trim().length > 0)
+  if (extracted.length > 0) return extracted.join('\n\n')
+  const harvested = messages
+    .filter((message) => message.role === 'assistant')
+    .map((message) => harvestFictionLines(message.text))
+    .filter((text) => text.trim().length > 0)
+  return harvested.join('\n\n')
+}
+
+function harvestFictionLines(text: string): string {
+  const cleaned = cleanProse(text)
+  if (!cleaned) return ''
+  const kept: string[] = []
+  for (const line of cleaned.split(/\n+/)) {
+    const t = line.trim()
+    if (!t) continue
+    const cjk = t.match(/[\u4e00-\u9fff]/g)?.length ?? 0
+    const letters = t.match(/[A-Za-z]/g)?.length ?? 0
+    if (cjk < 8 || letters > cjk) continue
+    if (/我们需要回应|按照要求|用户让我|让我构思|我写正文|当前场景：|已出场角色：/.test(t)) continue
+    kept.push(t)
+  }
+  return kept.join('\n\n')
 }
 
 export function recentText(session: DuckSession, last = 4): string {

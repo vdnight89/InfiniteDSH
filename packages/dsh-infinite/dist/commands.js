@@ -1,9 +1,9 @@
-import { KEEP_DEFAULT_OPENING, KEEP_DEFAULT_PROTAGONIST, TOPIC_CHOICES, bookNameForTemplate, extractStoryBody, defaultProtagonist, exportTranscript, isKeepDefaultChoice, safeBookFileName, suggestExportTitles, parseCommandArgs, resolveTemplateId, templateIdFromLabel, topicChoice, } from 'infinite-core';
+import { KEEP_DEFAULT_OPENING, KEEP_DEFAULT_PROTAGONIST, TOPIC_CHOICES, bookNameForTemplate, defaultProtagonist, exportTranscript, isKeepDefaultChoice, safeBookFileName, suggestExportTitles, parseCommandArgs, resolveTemplateId, templateIdFromLabel, topicChoice, } from 'infinite-core';
 import { askUser, pickAnswer } from './ask.js';
 import { ASK_HEADER, BIND_QUESTION, CANCELLED, COMMANDS_COPY, EMBARK, FIRST_STEP_TEXT, isEmbarkChoice, OPENING_QUESTION, OVERWRITE_NO, OVERWRITE_QUESTION, OVERWRITE_YES, PROTAGONIST_QUESTION, REPICK_OPENING, REPICK_PROTAGONIST, TOPIC_DETAIL, TITLE_DETAIL, TITLE_QUESTION, TOPIC_QUESTION, boundTo, castDone, castNeedName, defaultBodyHint, embarkDetail, exportDone, exportNoProse, exportPolishing, needForceText, noWorldYet, openedEmbarked, openedWaiting, pickWorldHint, sessionTitle, unknownWorld, } from './copy.js';
 import { infiniteRoot, resolveSessionDir, templatesDir } from './paths.js';
 import { appendStoryBind, applyOpening, applyProtagonistIdentity, hasStory, listTemplateCharacters, listTemplatePlots, loadCharacters, loadMeta, saveExport, saveMeta, saveNamedExport, seedStory, } from './story-files.js';
-import { sessionMessages } from './transcript.js';
+import { collectExportSource, sessionMessages } from './transcript.js';
 import { polishPrompt } from './polish.js';
 import { revealFile } from './reveal.js';
 import { wakeSoon } from './wake.js';
@@ -309,10 +309,9 @@ export async function handleExport(ctx, config, inv) {
         return { kind: 'error', text: noWorldYet() };
     const world = bookNameForTemplate(meta.templateId);
     const messages = sessionMessages(session);
-    const prose = messages
-        .filter((message) => message.role === 'assistant')
-        .map((message) => extractStoryBody(message.text))
-        .join('\n');
+    const prose = collectExportSource(session);
+    if (!prose.trim())
+        return { kind: 'error', text: exportNoProse() };
     const suggestions = suggestExportTitles(world, meta.protagonist, prose);
     let title = suggestions[0] || sessionTitle(world, meta.protagonist);
     const answers = await askUser(ctx, inv, [{
@@ -330,8 +329,6 @@ export async function handleExport(ctx, config, inv) {
         if (picked)
             title = picked;
     }
-    if (!prose.trim())
-        return { kind: 'error', text: exportNoProse() };
     const destDir = session.header?.cwd || process.cwd();
     saveMeta(root, {
         ...meta,

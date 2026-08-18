@@ -3,7 +3,6 @@ import {
   KEEP_DEFAULT_PROTAGONIST,
   TOPIC_CHOICES,
   bookNameForTemplate,
-  extractStoryBody,
   defaultProtagonist,
   exportTranscript,
   isKeepDefaultChoice,
@@ -66,7 +65,7 @@ import {
   saveNamedExport,
   seedStory,
 } from './story-files.js'
-import { sessionMessages } from './transcript.js'
+import { collectExportSource, sessionMessages } from './transcript.js'
 import { polishPrompt } from './polish.js'
 import { revealFile } from './reveal.js'
 import { wakeSoon } from './wake.js'
@@ -405,10 +404,8 @@ export async function handleExport(
   if (!meta) return { kind: 'error', text: noWorldYet() }
   const world = bookNameForTemplate(meta.templateId)
   const messages = sessionMessages(session)
-  const prose = messages
-    .filter((message) => message.role === 'assistant')
-    .map((message) => extractStoryBody(message.text))
-    .join('\n')
+  const prose = collectExportSource(session)
+  if (!prose.trim()) return { kind: 'error', text: exportNoProse() }
   const suggestions = suggestExportTitles(world, meta.protagonist, prose)
   let title = suggestions[0] || sessionTitle(world, meta.protagonist)
   const answers = await askUser(ctx, inv, [{
@@ -425,7 +422,6 @@ export async function handleExport(
     const picked = pickAnswer(answers, 'title')
     if (picked) title = picked
   }
-  if (!prose.trim()) return { kind: 'error', text: exportNoProse() }
   const destDir = session.header?.cwd || process.cwd()
   saveMeta(root, {
     ...meta,
