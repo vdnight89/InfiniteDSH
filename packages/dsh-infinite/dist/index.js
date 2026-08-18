@@ -3,12 +3,19 @@ import { registerCoverServer } from './covers-host.js';
 import { installUserPreset } from './install-preset.js';
 import { onSessionEvent } from './lifecycle.js';
 import { registerPrompt } from './prompt.js';
+import { repairLegacyBindEvents } from './repair-sessions.js';
 import { resolveConfig } from './types.js';
 export const name = 'dsh-infinite';
 export const inject = ['commands', 'systemPrompt', 'userQuestions'];
 /** Named exports only. Cordis unwraps `default` and would drop `inject`. */
 export function apply(ctx, raw) {
     const config = resolveConfig(raw);
+    try {
+        repairLegacyBindEvents(config);
+    }
+    catch {
+        // A broken walk must not prevent the plugin from loading.
+    }
     installUserPreset(config);
     registerCoverServer(ctx, config);
     registerCommands(ctx, config);

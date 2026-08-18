@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.8 — 2026-08-18
+
+- 不再往会话日志写 `infinite/bind`。DSH 不认识这个类型，Ctrl+C 后再开会直接拒绝读历史。
+- 插件启动时扫描 `~/.dsh/sessions`，把旧日志里的 `infinite/bind` 标成 `ignorable: true`，原文件留 `.bak-infinite`。不用另开新会话。
+
 ## 0.4.7 — 2026-08-18
 
 - 誊书读会话时优先走 `deriveMessages`。构思和小说挤在同一段时，仍抽出中文叙述。

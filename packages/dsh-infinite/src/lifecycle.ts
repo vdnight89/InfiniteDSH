@@ -4,7 +4,7 @@ import { offerForks } from './forks-host.js'
 import { infiniteRoot, resolveSessionDir } from './paths.js'
 import { finalizeManuscript } from './polish.js'
 import { revealFile } from './reveal.js'
-import { appendStoryBind, loadArchive, loadMeta, loadWorldbook, saveArchive, saveExport, saveMeta, saveNamedExport } from './story-files.js'
+import { loadArchive, loadMeta, loadWorldbook, saveArchive, saveExport, saveMeta, saveNamedExport } from './story-files.js'
 import { lastAssistantRaw, recentText, summaryFromCompaction } from './transcript.js'
 import type { DuckEvent, DuckSession, InfiniteContext, PluginConfig } from './types.js'
 
@@ -44,13 +44,6 @@ export function onSessionEvent(
         pendingEventId: null,
       }
       saveMeta(root, next)
-      appendStoryBind(session, {
-        templateId: next.templateId,
-        protagonist: next.protagonist,
-        pendingEventId: next.pendingEventId,
-        pickedEventIds: next.pickedEventIds,
-        dir: 'infinite',
-      })
     }
     void offerForks(ctx, session)
     return

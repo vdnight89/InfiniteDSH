@@ -21,9 +21,14 @@ export declare function loadArchive(root: string): string;
 export declare function saveArchive(root: string, text: string): void;
 /** Keep only this name as the constant hero; other cards become NPCs. */
 export declare function applyProtagonistIdentity(root: string, name: string): string;
-export declare function appendStoryBind(session: {
+/**
+ * Do not write custom session events. DSH refuses unknown required types on
+ * the next cold load (`SessionFormatUnsupportedError`). Bind state lives in
+ * `meta.yml`.
+ */
+export declare function appendStoryBind(_session: {
     append?: (type: string, data?: Record<string, unknown>) => void;
-}, data: Record<string, unknown>): void;
+}, _data: Record<string, unknown>): void;
 export declare function saveExport(root: string, text: string): string;
 export declare function saveNamedExport(dir: string, fileName: string, text: string): string;
 export declare function templatePath(config: Required<PluginConfig>, templateId: TemplateId): string;

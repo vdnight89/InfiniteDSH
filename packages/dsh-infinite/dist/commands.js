@@ -2,7 +2,7 @@ import { KEEP_DEFAULT_OPENING, KEEP_DEFAULT_PROTAGONIST, TOPIC_CHOICES, bookName
 import { askUser, pickAnswer } from './ask.js';
 import { ASK_HEADER, BIND_QUESTION, CANCELLED, COMMANDS_COPY, EMBARK, FIRST_STEP_TEXT, isEmbarkChoice, OPENING_QUESTION, OVERWRITE_NO, OVERWRITE_QUESTION, OVERWRITE_YES, PROTAGONIST_QUESTION, REPICK_OPENING, REPICK_PROTAGONIST, TOPIC_DETAIL, TITLE_DETAIL, TITLE_QUESTION, TOPIC_QUESTION, boundTo, castDone, castNeedName, defaultBodyHint, embarkDetail, exportDone, exportNoProse, exportPolishing, needForceText, noWorldYet, openedEmbarked, openedWaiting, pickWorldHint, sessionTitle, unknownWorld, } from './copy.js';
 import { infiniteRoot, resolveSessionDir, templatesDir } from './paths.js';
-import { appendStoryBind, applyOpening, applyProtagonistIdentity, hasStory, listTemplateCharacters, listTemplatePlots, loadCharacters, loadMeta, saveExport, saveMeta, saveNamedExport, seedStory, } from './story-files.js';
+import { applyOpening, applyProtagonistIdentity, hasStory, listTemplateCharacters, listTemplatePlots, loadCharacters, loadMeta, saveExport, saveMeta, saveNamedExport, seedStory, } from './story-files.js';
 import { collectExportSource, sessionMessages } from './transcript.js';
 import { polishPrompt } from './polish.js';
 import { revealFile } from './reveal.js';
@@ -103,21 +103,6 @@ function applyProtagonist(root, templateId, chosen) {
         saveMeta(root, { ...meta, protagonist: name });
     return applyProtagonistIdentity(root, name);
 }
-function bindSnapshot(root, session) {
-    const meta = loadMeta(root);
-    if (!meta)
-        return;
-    appendStoryBind(session, {
-        templateId: meta.templateId,
-        protagonist: meta.protagonist,
-        narrativeGuard: meta.narrativeGuard,
-        progressionGuard: meta.progressionGuard,
-        randomEvent: meta.randomEvent,
-        pendingEventId: meta.pendingEventId,
-        pickedEventIds: meta.pickedEventIds,
-        dir: 'infinite',
-    });
-}
 function pinSessionTitle(session, world, protagonist) {
     try {
         session.append?.('session/title', {
@@ -165,7 +150,6 @@ async function afterGate(ctx, config, inv, root, templateId, protagonist) {
     if (picked === REPICK_PROTAGONIST) {
         const next = await askUser(ctx, inv, [protagonistQuestion(templateId, config)]);
         const name = next ? applyProtagonist(root, templateId, pickAnswer(next, 'protagonist')) : protagonist;
-        bindSnapshot(root, sessionOf(inv));
         return afterGate(ctx, config, inv, root, templateId, name);
     }
     if (!isEmbarkChoice(picked)) {
@@ -219,7 +203,6 @@ export async function handleNew(ctx, config, inv) {
             if (plot)
                 applyOpening(root, plot);
         }
-        bindSnapshot(root, sessionOf(inv));
         return afterGate(ctx, config, inv, root, templateId, name);
     }
     catch (error) {
@@ -257,7 +240,6 @@ export async function handleBind(ctx, config, inv) {
             return { kind: 'error', text: needForceText() };
         try {
             const next = seedStory(root, picked, config, true);
-            bindSnapshot(root, sessionOf(inv));
             return { kind: 'success', text: boundTo(bookNameForTemplate(next.templateId)) };
         }
         catch (error) {
@@ -274,7 +256,6 @@ export async function handleBind(ctx, config, inv) {
         return { kind: 'error', text: needForceText() };
     try {
         seedStory(root, templateId, config, true);
-        bindSnapshot(root, sessionOf(inv));
         return { kind: 'success', text: boundTo(bookNameForTemplate(templateId)) };
     }
     catch (error) {
@@ -296,7 +277,6 @@ export async function handleCast(ctx, config, inv) {
             return { kind: 'error', text: '未选定天命之人。' };
     }
     const applied = applyProtagonist(root, meta.templateId, name);
-    bindSnapshot(root, sessionOf(inv));
     const cards = loadCharacters(root);
     return { kind: 'success', text: castDone(applied, cards.length) };
 }

@@ -130,13 +130,13 @@ export function applyProtagonistIdentity(root, name) {
         writeProtagonistCard(root, name);
     return name;
 }
-export function appendStoryBind(session, data) {
-    try {
-        session.append?.('infinite/bind', data);
-    }
-    catch {
-        // Host may reject unknown event types; meta.yml remains the working copy.
-    }
+/**
+ * Do not write custom session events. DSH refuses unknown required types on
+ * the next cold load (`SessionFormatUnsupportedError`). Bind state lives in
+ * `meta.yml`.
+ */
+export function appendStoryBind(_session, _data) {
+    return;
 }
 export function saveExport(root, text) {
     mkdirSync(root, { recursive: true });

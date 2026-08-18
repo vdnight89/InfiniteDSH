@@ -403,7 +403,7 @@ describe('dsh-infinite plugin', () => {
     expect(loadMeta(infiniteRoot(resolveSessionDir(headless, session('hd'), config)))?.templateId).toBe('cultivation')
   })
 
-  it('records infinite/bind on the session and appends archive sections', async () => {
+  it('does not write infinite/bind and still appends archive sections', async () => {
     const { ctx, config } = setup()
     const binds: Array<{ type: string; data?: Record<string, unknown> }> = []
     const sess = session('ev')
@@ -415,7 +415,7 @@ describe('dsh-infinite plugin', () => {
       rawInput: '修仙',
       signal: new AbortController().signal,
     })
-    expect(binds.some((item) => item.type === 'infinite/bind' && item.data?.templateId === 'cultivation')).toBe(true)
+    expect(binds.some((item) => item.type === 'infinite/bind')).toBe(false)
     expect(binds.some((item) => item.type === 'session/title' && String(item.data?.title).includes('修仙'))).toBe(true)
     onSessionEvent(ctx, config, sess, {
       type: 'compaction/summary',

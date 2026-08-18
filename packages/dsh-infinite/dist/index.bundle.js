@@ -143,11 +143,11 @@ function buildWorldContext(entries, recentText2, bookName, options) {
   if (enabled.length === 0)
     return empty;
   const opts = { ...DEFAULT_WORLD_OPTIONS, ...options };
-  const constants = enabled.filter((e) => e.constant).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+  const constants2 = enabled.filter((e) => e.constant).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
   const matched = findMatchingEntries(enabled, recentText2).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
   const header = `\u3010\u4E16\u754C\u89C4\u5219\xB7${bookName}\u3011\uFF08\u4E16\u754C\u57FA\u7840\u89C4\u5219\uFF1A\u4EC5\u5B9A\u4E49\u821E\u53F0\u4E0E\u5E95\u5C42\u8BBE\u5B9A\uFF09`;
   const lines = [];
-  for (const e of constants.slice(0, opts.maxConstantEntries)) {
+  for (const e of constants2.slice(0, opts.maxConstantEntries)) {
     lines.push(`\u3010${e.category}\xB7${e.title}\u3011${e.content}`);
   }
   const matchedEntryIds = [];
@@ -169,7 +169,7 @@ function buildWorldContext(entries, recentText2, bookName, options) {
     text: `${header}
 ${included.join("\n")}`,
     matchedEntryIds,
-    constantCount: constants.length
+    constantCount: constants2.length
   };
 }
 function buildCharacterContext(entries, recentText2, protagonist) {
@@ -1117,12 +1117,6 @@ function applyProtagonistIdentity(root, name2) {
     writeProtagonistCard(root, name2);
   return name2;
 }
-function appendStoryBind(session, data) {
-  try {
-    session.append?.("infinite/bind", data);
-  } catch {
-  }
-}
 function saveExport(root, text) {
   mkdirSync(root, { recursive: true });
   const path = join2(root, EXPORT_FILE);
@@ -1523,21 +1517,6 @@ function applyProtagonist(root, templateId, chosen) {
     saveMeta(root, { ...meta, protagonist: name2 });
   return applyProtagonistIdentity(root, name2);
 }
-function bindSnapshot(root, session) {
-  const meta = loadMeta(root);
-  if (!meta)
-    return;
-  appendStoryBind(session, {
-    templateId: meta.templateId,
-    protagonist: meta.protagonist,
-    narrativeGuard: meta.narrativeGuard,
-    progressionGuard: meta.progressionGuard,
-    randomEvent: meta.randomEvent,
-    pendingEventId: meta.pendingEventId,
-    pickedEventIds: meta.pickedEventIds,
-    dir: "infinite"
-  });
-}
 function pinSessionTitle(session, world, protagonist) {
   try {
     session.append?.("session/title", {
@@ -1583,7 +1562,6 @@ async function afterGate(ctx, config, inv, root, templateId, protagonist) {
   if (picked === REPICK_PROTAGONIST) {
     const next = await askUser(ctx, inv, [protagonistQuestion(templateId, config)]);
     const name2 = next ? applyProtagonist(root, templateId, pickAnswer(next, "protagonist")) : protagonist;
-    bindSnapshot(root, sessionOf(inv));
     return afterGate(ctx, config, inv, root, templateId, name2);
   }
   if (!isEmbarkChoice(picked)) {
@@ -1637,7 +1615,6 @@ async function handleNew(ctx, config, inv) {
       if (plot)
         applyOpening(root, plot);
     }
-    bindSnapshot(root, sessionOf(inv));
     return afterGate(ctx, config, inv, root, templateId, name2);
   } catch (error) {
     return { kind: "error", text: error instanceof Error ? error.message : String(error) };
@@ -1672,7 +1649,6 @@ async function handleBind(ctx, config, inv) {
       return { kind: "error", text: needForceText() };
     try {
       const next = seedStory(root, picked, config, true);
-      bindSnapshot(root, sessionOf(inv));
       return { kind: "success", text: boundTo(bookNameForTemplate(next.templateId)) };
     } catch (error) {
       return { kind: "error", text: error instanceof Error ? error.message : String(error) };
@@ -1688,7 +1664,6 @@ async function handleBind(ctx, config, inv) {
     return { kind: "error", text: needForceText() };
   try {
     seedStory(root, templateId, config, true);
-    bindSnapshot(root, sessionOf(inv));
     return { kind: "success", text: boundTo(bookNameForTemplate(templateId)) };
   } catch (error) {
     return { kind: "error", text: error instanceof Error ? error.message : String(error) };
@@ -1709,7 +1684,6 @@ async function handleCast(ctx, config, inv) {
       return { kind: "error", text: "\u672A\u9009\u5B9A\u5929\u547D\u4E4B\u4EBA\u3002" };
   }
   const applied = applyProtagonist(root, meta.templateId, name2);
-  bindSnapshot(root, sessionOf(inv));
   const cards = loadCharacters(root);
   return { kind: "success", text: castDone(applied, cards.length) };
 }
@@ -1992,13 +1966,6 @@ function onSessionEvent(ctx, config, session, event) {
         pendingEventId: null
       };
       saveMeta(root, next);
-      appendStoryBind(session, {
-        templateId: next.templateId,
-        protagonist: next.protagonist,
-        pendingEventId: next.pendingEventId,
-        pickedEventIds: next.pickedEventIds,
-        dir: "infinite"
-      });
     }
     void offerForks(ctx, session);
     return;
@@ -2126,6 +2093,183 @@ ${archive}`;
   });
 }
 
+// packages/dsh-infinite/dist/repair-sessions.js
+import { copyFileSync, existsSync as existsSync2, readdirSync as readdirSync4, readFileSync as readFileSync4, renameSync, unlinkSync, writeFileSync as writeFileSync3 } from "node:fs";
+import { join as join5 } from "node:path";
+import { constants, zstdCompressSync, zstdDecompressSync } from "node:zlib";
+var LEGACY_BIND_TYPE = "infinite/bind";
+var BACKUP_SUFFIX = ".bak-infinite";
+var TMP_SUFFIX = ".tmp-infinite";
+var ZSTD_MAGIC = 4247762216;
+var CHECKSUM_OPTIONS = { params: { [constants.ZSTD_c_checksumFlag]: 1 } };
+function isSessionLogName(name2) {
+  return name2 === "session.jsonl" || name2 === "session.jsonl.zstd";
+}
+function repairLegacyBindEvents(config) {
+  return repairSessionTree(join5(resolveDshHome(config), "sessions"));
+}
+function repairSessionTree(root) {
+  const files = [];
+  const repaired = [];
+  let failed = 0;
+  collectSessionLogs(root, files);
+  for (const file of files) {
+    try {
+      if (repairSessionLog(file) === "repaired")
+        repaired.push(file);
+    } catch {
+      failed += 1;
+    }
+  }
+  return { scanned: files.length, repaired: repaired.length, failed, files: repaired };
+}
+function repairSessionLog(path) {
+  const raw = readFileSync4(path);
+  if (path.endsWith(".zstd") || isZstd(raw)) {
+    const next = patchZstd(raw);
+    if (!next)
+      return "clean";
+    replaceFile(path, next);
+    return "repaired";
+  }
+  const patched = patchJsonl(raw.toString("utf8"));
+  if (patched.changed === 0)
+    return "clean";
+  replaceFile(path, Buffer.from(patched.text, "utf8"));
+  return "repaired";
+}
+function patchJsonl(text) {
+  const lines = text.split("\n");
+  let changed = 0;
+  const next = lines.map((line) => {
+    if (!line)
+      return line;
+    try {
+      const parsed = JSON.parse(line);
+      if (parsed.type === LEGACY_BIND_TYPE && parsed.ignorable !== true) {
+        parsed.ignorable = true;
+        changed += 1;
+        return JSON.stringify(parsed);
+      }
+    } catch {
+    }
+    return line;
+  });
+  return { text: next.join("\n"), changed };
+}
+function collectSessionLogs(root, acc) {
+  let names;
+  try {
+    names = readdirSync4(root, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  for (const entry of names) {
+    const full = join5(root, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name === "node_modules" || entry.name === ".git")
+        continue;
+      collectSessionLogs(full, acc);
+      continue;
+    }
+    if (entry.isFile() && isSessionLogName(entry.name))
+      acc.push(full);
+  }
+}
+function isZstd(buffer) {
+  return buffer.length >= 4 && buffer.readUInt32LE(0) === ZSTD_MAGIC;
+}
+function patchZstd(buffer) {
+  const { frames, tornStart } = scanZstdFrames(buffer);
+  const out = [];
+  let changed = 0;
+  for (const frame of frames) {
+    const raw = buffer.subarray(frame.start, frame.end);
+    const plain = zstdDecompressSync(raw).toString("utf8");
+    const patched = patchJsonl(plain);
+    if (patched.changed === 0) {
+      out.push(Buffer.from(raw));
+      continue;
+    }
+    changed += patched.changed;
+    out.push(zstdCompressSync(Buffer.from(patched.text, "utf8"), CHECKSUM_OPTIONS));
+  }
+  if (tornStart !== void 0)
+    out.push(buffer.subarray(tornStart));
+  if (changed === 0)
+    return null;
+  return Buffer.concat(out);
+}
+function scanZstdFrames(buffer, maxFrames = Number.POSITIVE_INFINITY) {
+  const frames = [];
+  let offset = 0;
+  while (offset < buffer.length) {
+    const start = offset;
+    if (buffer.length - offset < 4)
+      return { frames, tornStart: start };
+    if (buffer.readUInt32LE(offset) !== ZSTD_MAGIC) {
+      throw new Error(`corrupt Zstandard session log: invalid frame magic at byte ${offset}`);
+    }
+    offset += 4;
+    if (offset === buffer.length)
+      return { frames, tornStart: start };
+    const descriptor = buffer.readUInt8(offset);
+    offset += 1;
+    if ((descriptor & 24) !== 0) {
+      throw new Error(`corrupt Zstandard session log: reserved frame-header bit at byte ${offset - 1}`);
+    }
+    const contentSizeFlag = descriptor >>> 6;
+    const singleSegment = (descriptor & 32) !== 0;
+    const checksum = (descriptor & 4) !== 0;
+    const dictionaryFlag = descriptor & 3;
+    const dictionaryBytes = dictionaryFlag === 3 ? 4 : dictionaryFlag;
+    const contentSizeBytes = contentSizeFlag === 0 ? singleSegment ? 1 : 0 : 1 << contentSizeFlag;
+    const remainingHeaderBytes = (singleSegment ? 0 : 1) + dictionaryBytes + contentSizeBytes;
+    if (buffer.length - offset < remainingHeaderBytes)
+      return { frames, tornStart: start };
+    offset += remainingHeaderBytes;
+    for (; ; ) {
+      if (buffer.length - offset < 3)
+        return { frames, tornStart: start };
+      const blockHeader = buffer.readUIntLE(offset, 3);
+      offset += 3;
+      const lastBlock = (blockHeader & 1) !== 0;
+      const blockType = blockHeader >>> 1 & 3;
+      const blockSize = blockHeader >>> 3;
+      if (blockType === 3) {
+        throw new Error(`corrupt Zstandard session log: reserved block type at byte ${offset - 3}`);
+      }
+      const payloadBytes = blockType === 1 ? 1 : blockSize;
+      if (buffer.length - offset < payloadBytes)
+        return { frames, tornStart: start };
+      offset += payloadBytes;
+      if (lastBlock)
+        break;
+    }
+    if (checksum) {
+      if (buffer.length - offset < 4)
+        return { frames, tornStart: start };
+      offset += 4;
+    }
+    frames.push({ start, end: offset });
+    if (frames.length === maxFrames)
+      return { frames };
+  }
+  return { frames };
+}
+function replaceFile(path, data) {
+  const backup = path + BACKUP_SUFFIX;
+  const tmp = path + TMP_SUFFIX;
+  writeFileSync3(tmp, data);
+  if (existsSync2(path) && !existsSync2(backup))
+    copyFileSync(path, backup);
+  try {
+    unlinkSync(path);
+  } catch {
+  }
+  renameSync(tmp, path);
+}
+
 // packages/dsh-infinite/dist/types.js
 function resolveConfig(raw) {
   return {
@@ -2141,6 +2285,10 @@ var name = "dsh-infinite";
 var inject = ["commands", "systemPrompt", "userQuestions"];
 function apply(ctx, raw) {
   const config = resolveConfig(raw);
+  try {
+    repairLegacyBindEvents(config);
+  } catch {
+  }
   installUserPreset(config);
   registerCoverServer(ctx, config);
   registerCommands(ctx, config);

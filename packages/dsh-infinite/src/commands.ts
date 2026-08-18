@@ -52,7 +52,6 @@ import {
 } from './copy.js'
 import { infiniteRoot, resolveSessionDir, templatesDir } from './paths.js'
 import {
-  appendStoryBind,
   applyOpening,
   applyProtagonistIdentity,
   hasStory,
@@ -178,21 +177,6 @@ function applyProtagonist(root: string, templateId: TemplateId, chosen: string):
   return applyProtagonistIdentity(root, name)
 }
 
-function bindSnapshot(root: string, session: DuckSession): void {
-  const meta = loadMeta(root)
-  if (!meta) return
-  appendStoryBind(session, {
-    templateId: meta.templateId,
-    protagonist: meta.protagonist,
-    narrativeGuard: meta.narrativeGuard,
-    progressionGuard: meta.progressionGuard,
-    randomEvent: meta.randomEvent,
-    pendingEventId: meta.pendingEventId,
-    pickedEventIds: meta.pickedEventIds,
-    dir: 'infinite',
-  })
-}
-
 function pinSessionTitle(session: DuckSession, world: string, protagonist: string): void {
   try {
     session.append?.('session/title', {
@@ -253,7 +237,6 @@ async function afterGate(
   if (picked === REPICK_PROTAGONIST) {
     const next = await askUser(ctx, inv, [protagonistQuestion(templateId, config)])
     const name = next ? applyProtagonist(root, templateId, pickAnswer(next, 'protagonist')) : protagonist
-    bindSnapshot(root, sessionOf(inv))
     return afterGate(ctx, config, inv, root, templateId, name)
   }
   if (!isEmbarkChoice(picked)) {
@@ -311,7 +294,6 @@ export async function handleNew(
       const plot = listTemplatePlots(config, templateId).find((item) => item.title === opening)
       if (plot) applyOpening(root, plot)
     }
-    bindSnapshot(root, sessionOf(inv))
     return afterGate(ctx, config, inv, root, templateId, name)
   } catch (error) {
     return { kind: 'error', text: error instanceof Error ? error.message : String(error) }
@@ -350,7 +332,6 @@ export async function handleBind(
     if (overwrite === 'need-force') return { kind: 'error', text: needForceText() }
     try {
       const next = seedStory(root, picked, config, true)
-      bindSnapshot(root, sessionOf(inv))
       return { kind: 'success', text: boundTo(bookNameForTemplate(next.templateId as TemplateId)) }
     } catch (error) {
       return { kind: 'error', text: error instanceof Error ? error.message : String(error) }
@@ -364,7 +345,6 @@ export async function handleBind(
   if (overwrite === 'need-force') return { kind: 'error', text: needForceText() }
   try {
     seedStory(root, templateId, config, true)
-    bindSnapshot(root, sessionOf(inv))
     return { kind: 'success', text: boundTo(bookNameForTemplate(templateId)) }
   } catch (error) {
     return { kind: 'error', text: error instanceof Error ? error.message : String(error) }
@@ -387,7 +367,6 @@ export async function handleCast(
     if (!name) return { kind: 'error', text: '未选定天命之人。' }
   }
   const applied = applyProtagonist(root, meta.templateId as TemplateId, name)
-  bindSnapshot(root, sessionOf(inv))
   const cards = loadCharacters(root)
   return { kind: 'success', text: castDone(applied, cards.length) }
 }
