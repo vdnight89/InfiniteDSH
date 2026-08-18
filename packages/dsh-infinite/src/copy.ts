@@ -1,6 +1,6 @@
 export const WORLD_NAME = '诸天万界'
 
-export const PRESET_NAME = '诸天万界'
+export const PRESET_NAME = '诸天万界DSH'
 export const PRESET_DESCRIPTION = '穿越诸天，一书一界。不执刀斧，只写正文。'
 
 export const ASK_HEADER = '诸天万界'

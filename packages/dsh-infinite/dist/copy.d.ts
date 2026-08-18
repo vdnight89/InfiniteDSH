@@ -1,5 +1,5 @@
 export declare const WORLD_NAME = "\u8BF8\u5929\u4E07\u754C";
-export declare const PRESET_NAME = "\u8BF8\u5929\u4E07\u754C";
+export declare const PRESET_NAME = "\u8BF8\u5929\u4E07\u754CDSH";
 export declare const PRESET_DESCRIPTION = "\u7A7F\u8D8A\u8BF8\u5929\uFF0C\u4E00\u4E66\u4E00\u754C\u3002\u4E0D\u6267\u5200\u65A7\uFF0C\u53EA\u5199\u6B63\u6587\u3002";
 export declare const ASK_HEADER = "\u8BF8\u5929\u4E07\u754C";
 export declare const TOPIC_QUESTION = "\u8E0F\u5165\u54EA\u4E00\u754C\uFF1F";

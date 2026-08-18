@@ -13,7 +13,7 @@ function copyTree(from: string, to: string): void {
   }
 }
 
-/** Copy infinite-play once. Refresh official 诸天万界 copy if the dest is still the old English name. */
+/** Copy infinite-play once. Refresh official name/persona if dest is still Infinite Play or 诸天万界. */
 export function installUserPreset(config: Required<PluginConfig>): string | null {
   const src = defaultPresetDir()
   try {
@@ -36,8 +36,10 @@ export function installUserPreset(config: Required<PluginConfig>): string | null
       } catch {
         destPersona = ''
       }
-      if (!/诸天万界/.test(destPreset) || !/禁止把思考/.test(destPersona)) {
+      if (!/诸天万界DSH/.test(destPreset)) {
         writeFileSync(join(dest, 'preset.yml'), readFileSync(join(src, 'preset.yml')))
+      }
+      if (!/禁止把思考/.test(destPersona)) {
         writeFileSync(join(dest, 'agent.cordis.yml'), readFileSync(join(src, 'agent.cordis.yml')))
       }
       return dest

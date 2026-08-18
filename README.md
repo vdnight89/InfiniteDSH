@@ -1,4 +1,4 @@
-# 诸天万界
+# 诸天万界DSH
 
 **DeepSeek Harness · AI 文字世界冒险**
 
@@ -9,10 +9,10 @@
 > 一个会话，就是一扇门。  
 > 推开它，你不是在聊天。你是在写，在杀，在活，在死，在诸天万界里把自己活成主角。
 
-这是 DeepSeek Harness 上的文学插件。仓库名 InfiniteDSH，组合包名 `dsh-infinite`。当前 **0.4.12**。  
+这是 DeepSeek Harness 上的文学插件，项目名 **诸天万界DSH**。仓库名 InfiniteDSH，组合包名 `dsh-infinite`。当前 **0.4.12**。  
 不另做 App，不另做书架。DSH 侧栏里的一项会话，就是你脚下这一整本。切会话，就是切界。
 
-文学预设叫 **诸天万界**：模型只许吐小说正文。bash、改文件、子代理，全部收刀。你要的不是助手。你要的是世界自己在呼吸。
+文学预设也叫 **诸天万界DSH**：模型只许吐小说正文。bash、改文件、子代理，全部收刀。你要的不是助手。你要的是世界自己在呼吸。
 
 ---
 
@@ -25,7 +25,7 @@ dsh plugin --profile web add github:vdnight89/InfiniteDSH
 dsh web
 ```
 
-然后：**新开一个会话** → preset 选 **诸天万界** → 输入 `/new` → 点界图 → 点 **启程**。
+然后：**新开一个会话** → preset 选 **诸天万界DSH** → 输入 `/new` → 点界图 → 点 **启程**。
 
 | 你卡在哪 | 怎么办 |
 |---|---|
@@ -123,7 +123,7 @@ dsh --profile web --dump-config
 ```
 
 看见 `dsh-infinite` 这一层，就是界立住了。  
-插件首次加载会把 **诸天万界** 拷到 `~/.dsh/.agent-presets/infinite-play`。若你还停在旧英文名 Infinite Play，下次加载会改成诸天万界。已经含「诸天万界」的改稿，不会被覆盖。
+插件首次加载会把 **诸天万界DSH** 拷到 `~/.dsh/.agent-presets/infinite-play`。若你还停在 Infinite Play 或旧名「诸天万界」，下次加载会改成诸天万界DSH。已经含「诸天万界DSH」且你改过的 persona，不会被覆盖。
 
 ---
 
@@ -131,7 +131,7 @@ dsh --profile web --dump-config
 
 1. 点亮 DSH Web。
 2. **新开一个会话。** 一本新书，一具新身体。
-3. preset 选 **诸天万界**。默认编程预设会去跑命令，那是另一条命。
+3. preset 选 **诸天万界DSH**。默认编程预设会去跑命令，那是另一条命。
 4. 输入：
 
 ```
@@ -166,7 +166,7 @@ dsh --profile web --dump-config
 - 「跳过旅途，直接写到夜宴开席。」
 - 「这一段改成更冷、更短的句子。」
 
-它若开始解释规则、列举选项、自称助手——检查两件事：是不是 **诸天万界**，本会话有没有 `meta.yml`。
+它若开始解释规则、列举选项、自称助手——检查两件事：是不是 **诸天万界DSH**，本会话有没有 `meta.yml`。
 
 | 令 | 事 |
 |---|---|
@@ -257,7 +257,7 @@ order: 10
 |---|---|
 | `infinite-core` | 匹配、抽卡、护栏、导出。不依赖 Cordis。 |
 | 根包 `dsh-infinite` | 对外组合包：命令、提示词、档案、封面路由。 |
-| `dsh-infinite-preset` | 诸天万界预设与十九套模板。 |
+| `dsh-infinite-preset` | 诸天万界DSH 预设与十九套模板。 |
 
 规格 / 质询 / 变更：`docs/superpowers/specs/`、`docs/grill-airp-on-dsh.md`、[`CHANGELOG.md`](CHANGELOG.md)。
 
@@ -266,7 +266,7 @@ order: 10
 ## 卡关
 
 **`/new` 没弹窗。** 没有问答 UI。手打：`/new 修仙`。  
-**模型在列选项、跑命令。** 切到诸天万界。  
+**模型在列选项、跑命令。** 切到诸天万界DSH。  
 **卡片没封面。** 确认 Web UI 且 `/infinite/covers` 活着。  
 **想同时活两本。** 再开一个会话。同一会话里来回 `/bind`，是撕书，不是分身。  
 **找不到稿。** 先看会话目录下的 `infinite/`，再看 `~/.dsh/infinite/stories/`。

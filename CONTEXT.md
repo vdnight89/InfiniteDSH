@@ -1,6 +1,6 @@
-# InfiniteDSH
+# 诸天万界DSH
 
-DSH 上的叙事插件：把灵叙式文字冒险 / 文学创作的引擎挂进 DeepSeek Harness。它是插件，不是独立软件。
+DSH 上的叙事插件（仓库名 InfiniteDSH）：把灵叙式文字冒险 / 文学创作的引擎挂进 DeepSeek Harness。它是插件，不是独立软件。产品名 **诸天万界DSH**；书里题记仍写「诸天万界」。
 
 ## Language
 

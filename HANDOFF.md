@@ -3,7 +3,7 @@
 给下一个 agent：读完这份就能开工。词汇以 [`CONTEXT.md`](CONTEXT.md) 为准。产品口吻以 [`README.md`](README.md) 为准。历史决策见 [`docs/grill-airp-on-dsh.md`](docs/grill-airp-on-dsh.md) 与 [`docs/grill-ux-2026-08-17.md`](docs/grill-ux-2026-08-17.md)。规格原稿 [`docs/superpowers/specs/2026-08-16-dsh-infinite-design.md`](docs/superpowers/specs/2026-08-16-dsh-infinite-design.md) 已过时（命令名、题材数、导出流程都变了），只当考古。
 
 **当前船：** `v0.4.12`。GitHub：https://github.com/vdnight89/InfiniteDSH  
-**组合包名：** `dsh-infinite`。产品中文名：**诸天万界**。  
+**组合包名：** `dsh-infinite`。产品中文名：**诸天万界DSH**（书里题记仍写诸天万界）。  
 **主人：** vdnight89。本机 Windows，仓库 `F:\DocProject\InfiniteDSH`。
 
 ---
@@ -13,7 +13,7 @@
 这是 **DeepSeek Harness 的文学插件**，不是独立 App，不是 DSH fork。
 
 - 一个 DSH 会话 = 一本书。切会话就是切界。
-- 用户选 preset **诸天万界** → `/new` → 点界图 / 天命之人 / 开局 → 点 **启程** → 模型只写小说正文 → 文末【歧路】三条可点 → `/export-story` 先落草稿再请叙事者润色排版。
+- 用户选 preset **诸天万界DSH** → `/new` → 点界图 / 天命之人 / 开局 → 点 **启程** → 模型只写小说正文 → 文末【歧路】三条可点 → `/export-story` 先落草稿再请叙事者润色排版。
 - 文学会话应收掉 bash / 改文件 / 子代理。UI 上仍可能显示 Full access，那是 DSH 壳，不是我们授权了刀斧。
 
 没开过 `/new`（没有 `infinite/meta.yml`）的会话，插件必须当编码会话：不注入文学上下文。
@@ -72,7 +72,7 @@ InfiniteDSH/                          根包名 dsh-infinite（对外安装的�
 2. 入口是 **named** `apply` + `inject = ['commands', 'systemPrompt', 'userQuestions']` + `name = 'dsh-infinite'`。
 3. `apply()` 顺序：
    1. `repairLegacyBindEvents` — 扫描 `~/.dsh/sessions/**/session.jsonl(.zstd)`，把旧 `infinite/bind` 标成 `ignorable: true`，备份 `.bak-infinite`
-   2. `installUserPreset` — 拷 / 刷新文学 preset（已含「诸天万界」且 persona 含「禁止把思考」则不覆盖用户改过的文件）
+   2. `installUserPreset` — 拷 / 刷新文学 preset（已含「诸天万界DSH」且 persona 含「禁止把思考」则不覆盖）
    3. 封面静态服务 `/infinite/covers`、`cards.css`、`cards.js`
    4. 注册四个斜杠命令
    5. 注册 systemPrompt section/context
@@ -340,7 +340,7 @@ GitHub About 描述已是诸天万界那句。Topics 优先级（货架扫前面
 
 ## 主人怎么玩（验收口径）
 
-1. `dsh web` → 新会话 → preset **诸天万界**
+1. `dsh web` → 新会话 → preset **诸天万界DSH**
 2. `/new` → 点界 → 点人 → 点开局 → **启程**
 3. 应立刻出现小说正文，不是「界门已开请手打开始」
 4. 正文后弹【歧路】三择，点一条就续写；自己走写在「输入你的答案」

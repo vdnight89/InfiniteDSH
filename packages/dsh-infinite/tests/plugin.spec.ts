@@ -563,7 +563,7 @@ describe('dsh-infinite plugin', () => {
     writeFileSync(join(dest!, 'preset.yml'), 'name: Infinite Play\ndescription: Literary session.\n')
     writeFileSync(join(dest!, 'agent.cordis.yml'), 'old-english-persona\n')
     installUserPreset(config)
-    expect(readFileSync(join(dest!, 'preset.yml'), 'utf8')).toContain('诸天万界')
+    expect(readFileSync(join(dest!, 'preset.yml'), 'utf8')).toContain('诸天万界DSH')
     expect(readFileSync(join(dest!, 'agent.cordis.yml'), 'utf8')).toContain('诸天万界')
   })
 

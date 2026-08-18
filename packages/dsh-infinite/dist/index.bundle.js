@@ -1956,8 +1956,10 @@ function installUserPreset(config) {
       } catch {
         destPersona = "";
       }
-      if (!/诸天万界/.test(destPreset) || !/禁止把思考/.test(destPersona)) {
+      if (!/诸天万界DSH/.test(destPreset)) {
         writeFileSync2(join4(dest, "preset.yml"), readFileSync4(join4(src, "preset.yml")));
+      }
+      if (!/禁止把思考/.test(destPersona)) {
         writeFileSync2(join4(dest, "agent.cordis.yml"), readFileSync4(join4(src, "agent.cordis.yml")));
       }
       return dest;
