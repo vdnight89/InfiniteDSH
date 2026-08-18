@@ -75,6 +75,16 @@ export function sessionTitle(world: string, protagonist: string): string {
 
 export const FIRST_STEP_TEXT = '启程。'
 
+export const FORK_QUESTION = '走哪一条歧路？'
+export const FORK_DETAIL = '点一条继续。也可在下方自己写一条别的路。'
+export const WRITE_OWN = '自己写一条别的路'
+
+export function isEmbarkChoice(picked: string): boolean {
+  const t = picked.trim()
+  return t === EMBARK || t === FIRST_STEP_TEXT || t.startsWith(EMBARK)
+}
+
+
 export const COMMANDS_COPY = {
   new: {
     description: '进入新世界：弹出界图选题材与天命之人',

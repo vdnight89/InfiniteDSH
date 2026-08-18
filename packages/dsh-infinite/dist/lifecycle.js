@@ -1,4 +1,5 @@
 import { formatArchive, pickRandomEventEntry } from 'infinite-core';
+import { offerForks } from './forks-host.js';
 import { infiniteRoot, resolveSessionDir } from './paths.js';
 import { appendStoryBind, loadArchive, loadMeta, loadWorldbook, saveArchive, saveMeta } from './story-files.js';
 import { recentText, summaryFromCompaction } from './transcript.js';
@@ -15,21 +16,22 @@ export function onSessionEvent(ctx, config, session, event) {
     }
     if (event.type === 'turn/end') {
         const latest = loadMeta(root);
-        if (!latest?.pendingEventId)
-            return;
-        const next = {
-            ...latest,
-            pickedEventIds: [...latest.pickedEventIds, latest.pendingEventId],
-            pendingEventId: null,
-        };
-        saveMeta(root, next);
-        appendStoryBind(session, {
-            templateId: next.templateId,
-            protagonist: next.protagonist,
-            pendingEventId: next.pendingEventId,
-            pickedEventIds: next.pickedEventIds,
-            dir: 'infinite',
-        });
+        if (latest?.pendingEventId) {
+            const next = {
+                ...latest,
+                pickedEventIds: [...latest.pickedEventIds, latest.pendingEventId],
+                pendingEventId: null,
+            };
+            saveMeta(root, next);
+            appendStoryBind(session, {
+                templateId: next.templateId,
+                protagonist: next.protagonist,
+                pendingEventId: next.pendingEventId,
+                pickedEventIds: next.pickedEventIds,
+                dir: 'infinite',
+            });
+        }
+        void offerForks(ctx, session);
         return;
     }
     if (event.type === 'compaction/summary') {

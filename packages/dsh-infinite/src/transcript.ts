@@ -67,6 +67,14 @@ export function hasAssistantProse(session: DuckSession): boolean {
   return sessionMessages(session).some((m) => m.role === 'assistant' && cleanProse(m.text).length > 0)
 }
 
+export function lastAssistantRaw(session: DuckSession): string {
+  const msgs = sessionMessages(session)
+  for (let i = msgs.length - 1; i >= 0; i -= 1) {
+    if (msgs[i]?.role === 'assistant') return msgs[i]!.text
+  }
+  return ''
+}
+
 export function summaryFromCompaction(data: Record<string, unknown> | undefined): string {
   if (!data) return ''
   if (typeof data.summary === 'string') return data.summary

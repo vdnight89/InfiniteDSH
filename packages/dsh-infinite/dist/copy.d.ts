@@ -28,6 +28,10 @@ export declare function castDone(name: string, count: number): string;
 export declare function exportDone(chars: number, path: string): string;
 export declare function sessionTitle(world: string, protagonist: string): string;
 export declare const FIRST_STEP_TEXT = "\u542F\u7A0B\u3002";
+export declare const FORK_QUESTION = "\u8D70\u54EA\u4E00\u6761\u6B67\u8DEF\uFF1F";
+export declare const FORK_DETAIL = "\u70B9\u4E00\u6761\u7EE7\u7EED\u3002\u4E5F\u53EF\u5728\u4E0B\u65B9\u81EA\u5DF1\u5199\u4E00\u6761\u522B\u7684\u8DEF\u3002";
+export declare const WRITE_OWN = "\u81EA\u5DF1\u5199\u4E00\u6761\u522B\u7684\u8DEF";
+export declare function isEmbarkChoice(picked: string): boolean;
 export declare const COMMANDS_COPY: {
     readonly new: {
         readonly description: "进入新世界：弹出界图选题材与天命之人";

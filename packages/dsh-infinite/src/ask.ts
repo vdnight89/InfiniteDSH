@@ -1,4 +1,4 @@
-import type { AskAnswerItem, AskItem, CommandInvocation, InfiniteContext } from './types.js'
+import type { AskAnswerItem, AskItem, DuckAgent, InfiniteContext } from './types.js'
 
 export function isNoAskProvider(error: unknown): boolean {
   if (error && typeof error === 'object' && 'code' in error && (error as { code?: string }).code === 'NO_PROVIDER') {
@@ -30,7 +30,7 @@ export function pickAnswer(answers: readonly AskAnswerItem[], id: string): strin
 
 export async function askUser(
   ctx: InfiniteContext,
-  inv: CommandInvocation,
+  inv: { agent: DuckAgent; signal: AbortSignal },
   questions: readonly AskItem[],
 ): Promise<readonly AskAnswerItem[] | null> {
   if (typeof ctx.userQuestions?.ask !== 'function') return null

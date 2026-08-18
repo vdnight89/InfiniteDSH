@@ -20,6 +20,7 @@ import {
   COMMANDS_COPY,
   EMBARK,
   FIRST_STEP_TEXT,
+  isEmbarkChoice,
   OPENING_QUESTION,
   OVERWRITE_NO,
   OVERWRITE_QUESTION,
@@ -58,6 +59,7 @@ import {
   seedStory,
 } from './story-files.js'
 import { sessionMessages } from './transcript.js'
+import { wakeSoon } from './wake.js'
 import type {
   AskItem,
   CommandInvocation,
@@ -195,19 +197,7 @@ function pinSessionTitle(session: DuckSession, world: string, protagonist: strin
 }
 
 function wakeEmbark(inv: CommandInvocation): boolean {
-  const followup = inv.agent.followup
-  if (typeof followup !== 'function') return false
-  try {
-    followup({
-      id: crypto.randomUUID(),
-      role: 'user',
-      content: [{ type: 'text', text: FIRST_STEP_TEXT }],
-      source: { kind: 'plugin', plugin: 'dsh-infinite' },
-    })
-    return true
-  } catch {
-    return false
-  }
+  return wakeSoon(inv.agent, FIRST_STEP_TEXT)
 }
 
 async function confirmOverwrite(
@@ -257,7 +247,7 @@ async function afterGate(
     bindSnapshot(root, sessionOf(inv))
     return afterGate(ctx, config, inv, root, templateId, name)
   }
-  if (picked !== EMBARK) {
+  if (!isEmbarkChoice(picked)) {
     return { kind: 'success', text: openedWaiting(world, protagonist) }
   }
 

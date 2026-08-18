@@ -283,6 +283,25 @@ ${section}`;
 ${section}`;
 }
 
+// packages/infinite-core/dist/forks.js
+function parseForkOptions(text) {
+  const matched = text.match(/【歧路】([\s\S]*)$/);
+  if (!matched)
+    return [];
+  const out = [];
+  for (const line of matched[1].split(/\r?\n/)) {
+    const row = line.match(/^\s*(?:[1-3][.)、]|[-*])\s+(.+?)\s*$/);
+    if (!row)
+      continue;
+    const label = row[1].replace(/亦可自己写.*$/, "").trim();
+    if (label)
+      out.push(label);
+    if (out.length >= 3)
+      break;
+  }
+  return out;
+}
+
 // packages/infinite-core/dist/catalog.generated.js
 var TEMPLATE_CATALOG = [
   {
@@ -681,6 +700,13 @@ function sessionTitle(world, protagonist) {
   return `${world}\xB7${protagonist}`;
 }
 var FIRST_STEP_TEXT = "\u542F\u7A0B\u3002";
+var FORK_QUESTION = "\u8D70\u54EA\u4E00\u6761\u6B67\u8DEF\uFF1F";
+var FORK_DETAIL = "\u70B9\u4E00\u6761\u7EE7\u7EED\u3002\u4E5F\u53EF\u5728\u4E0B\u65B9\u81EA\u5DF1\u5199\u4E00\u6761\u522B\u7684\u8DEF\u3002";
+var WRITE_OWN = "\u81EA\u5DF1\u5199\u4E00\u6761\u522B\u7684\u8DEF";
+function isEmbarkChoice(picked) {
+  const t = picked.trim();
+  return t === EMBARK || t === FIRST_STEP_TEXT || t.startsWith(EMBARK);
+}
 var COMMANDS_COPY = {
   new: {
     description: "\u8FDB\u5165\u65B0\u4E16\u754C\uFF1A\u5F39\u51FA\u754C\u56FE\u9009\u9898\u6750\u4E0E\u5929\u547D\u4E4B\u4EBA",
@@ -1036,12 +1062,69 @@ function recentText(session, last = 4) {
 function hasAssistantProse(session) {
   return sessionMessages(session).some((m) => m.role === "assistant" && cleanProse(m.text).length > 0);
 }
+function lastAssistantRaw(session) {
+  const msgs = sessionMessages(session);
+  for (let i = msgs.length - 1; i >= 0; i -= 1) {
+    if (msgs[i]?.role === "assistant")
+      return msgs[i].text;
+  }
+  return "";
+}
 function summaryFromCompaction(data) {
   if (!data)
     return "";
   if (typeof data.summary === "string")
     return data.summary;
   return blocksToText(data.summary);
+}
+
+// packages/dsh-infinite/dist/wake.js
+function pluginUserMessage(text) {
+  return {
+    id: crypto.randomUUID(),
+    role: "user",
+    content: [{ type: "text", text }],
+    source: { kind: "plugin", plugin: "dsh-infinite" }
+  };
+}
+function wakeAgent(agent, text) {
+  if (!agent || !text.trim())
+    return false;
+  const message = pluginUserMessage(text);
+  if (tryCall(() => agent.followup?.(message)))
+    return true;
+  if (tryCall(() => agent.send?.(message, "next-turn", true)))
+    return true;
+  if (tryCall(() => agent.steer?.(message)))
+    return true;
+  return false;
+}
+function wakeSoon(agent, text) {
+  if (wakeAgent(agent, text))
+    return true;
+  if (!agent)
+    return false;
+  setTimeout(() => {
+    wakeAgent(agent, text);
+  }, 0);
+  return true;
+}
+function liveAgent(ctx, session) {
+  const agents = typeof ctx.get === "function" ? ctx.get("agents") : void 0;
+  if (session.id && typeof agents?.get === "function") {
+    const found = agents.get(session.id);
+    if (found)
+      return found;
+  }
+  return void 0;
+}
+function tryCall(fn) {
+  try {
+    fn();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // packages/dsh-infinite/dist/commands.js
@@ -1164,20 +1247,7 @@ function pinSessionTitle(session, world, protagonist) {
   }
 }
 function wakeEmbark(inv) {
-  const followup = inv.agent.followup;
-  if (typeof followup !== "function")
-    return false;
-  try {
-    followup({
-      id: crypto.randomUUID(),
-      role: "user",
-      content: [{ type: "text", text: FIRST_STEP_TEXT }],
-      source: { kind: "plugin", plugin: "dsh-infinite" }
-    });
-    return true;
-  } catch {
-    return false;
-  }
+  return wakeSoon(inv.agent, FIRST_STEP_TEXT);
 }
 async function confirmOverwrite(ctx, inv, root, force) {
   if (!hasStory(root) || force)
@@ -1214,7 +1284,7 @@ async function afterGate(ctx, config, inv, root, templateId, protagonist) {
     bindSnapshot(root, sessionOf(inv));
     return afterGate(ctx, config, inv, root, templateId, name2);
   }
-  if (picked !== EMBARK) {
+  if (!isEmbarkChoice(picked)) {
     return { kind: "success", text: openedWaiting(world, protagonist) };
   }
   const woke = wakeEmbark(inv);
@@ -1520,6 +1590,44 @@ function installUserPreset(config) {
   return dest;
 }
 
+// packages/dsh-infinite/dist/forks-host.js
+var inFlight = /* @__PURE__ */ new Set();
+async function offerForks(ctx, session) {
+  const key = session.id;
+  if (!key || inFlight.has(key))
+    return;
+  const options = parseForkOptions(lastAssistantRaw(session));
+  if (options.length === 0)
+    return;
+  const agent = liveAgent(ctx, session);
+  if (!agent)
+    return;
+  inFlight.add(key);
+  try {
+    const answers = await askUser(ctx, { agent, signal: new AbortController().signal }, [{
+      id: "fork",
+      header: ASK_HEADER,
+      question: FORK_QUESTION,
+      detail: FORK_DETAIL,
+      options: [
+        ...options.map((label, index) => ({
+          label,
+          description: `\u6B67\u8DEF ${index + 1}`
+        })),
+        { label: WRITE_OWN, description: "\u4E0D\u8D70\u5217\u51FA\u7684\u8DEF\uFF0C\u5199\u4E0B\u4F60\u7684\u884C\u52A8\u3002" }
+      ]
+    }]);
+    if (!answers)
+      return;
+    const picked = pickAnswer(answers, "fork");
+    if (!picked || picked === WRITE_OWN)
+      return;
+    wakeSoon(agent, picked);
+  } finally {
+    inFlight.delete(key);
+  }
+}
+
 // packages/dsh-infinite/dist/lifecycle.js
 function onSessionEvent(ctx, config, session, event) {
   const root = infiniteRoot(resolveSessionDir(ctx, session, config));
@@ -1534,21 +1642,22 @@ function onSessionEvent(ctx, config, session, event) {
   }
   if (event.type === "turn/end") {
     const latest = loadMeta(root);
-    if (!latest?.pendingEventId)
-      return;
-    const next = {
-      ...latest,
-      pickedEventIds: [...latest.pickedEventIds, latest.pendingEventId],
-      pendingEventId: null
-    };
-    saveMeta(root, next);
-    appendStoryBind(session, {
-      templateId: next.templateId,
-      protagonist: next.protagonist,
-      pendingEventId: next.pendingEventId,
-      pickedEventIds: next.pickedEventIds,
-      dir: "infinite"
-    });
+    if (latest?.pendingEventId) {
+      const next = {
+        ...latest,
+        pickedEventIds: [...latest.pickedEventIds, latest.pendingEventId],
+        pendingEventId: null
+      };
+      saveMeta(root, next);
+      appendStoryBind(session, {
+        templateId: next.templateId,
+        protagonist: next.protagonist,
+        pendingEventId: next.pendingEventId,
+        pickedEventIds: next.pickedEventIds,
+        dir: "infinite"
+      });
+    }
+    void offerForks(ctx, session);
     return;
   }
   if (event.type === "compaction/summary") {

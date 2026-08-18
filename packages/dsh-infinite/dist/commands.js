@@ -1,9 +1,10 @@
 import { KEEP_DEFAULT_OPENING, KEEP_DEFAULT_PROTAGONIST, TOPIC_CHOICES, bookNameForTemplate, defaultProtagonist, exportTranscript, isKeepDefaultChoice, parseCommandArgs, resolveTemplateId, templateIdFromLabel, topicChoice, } from 'infinite-core';
 import { askUser, pickAnswer } from './ask.js';
-import { ASK_HEADER, BIND_QUESTION, CANCELLED, COMMANDS_COPY, EMBARK, FIRST_STEP_TEXT, OPENING_QUESTION, OVERWRITE_NO, OVERWRITE_QUESTION, OVERWRITE_YES, PROTAGONIST_QUESTION, REPICK_OPENING, REPICK_PROTAGONIST, TOPIC_DETAIL, TOPIC_QUESTION, boundTo, castDone, castNeedName, defaultBodyHint, embarkDetail, exportDone, needForceText, noWorldYet, openedEmbarked, openedWaiting, pickWorldHint, sessionTitle, unknownWorld, } from './copy.js';
+import { ASK_HEADER, BIND_QUESTION, CANCELLED, COMMANDS_COPY, EMBARK, FIRST_STEP_TEXT, isEmbarkChoice, OPENING_QUESTION, OVERWRITE_NO, OVERWRITE_QUESTION, OVERWRITE_YES, PROTAGONIST_QUESTION, REPICK_OPENING, REPICK_PROTAGONIST, TOPIC_DETAIL, TOPIC_QUESTION, boundTo, castDone, castNeedName, defaultBodyHint, embarkDetail, exportDone, needForceText, noWorldYet, openedEmbarked, openedWaiting, pickWorldHint, sessionTitle, unknownWorld, } from './copy.js';
 import { infiniteRoot, resolveSessionDir, templatesDir } from './paths.js';
 import { appendStoryBind, applyOpening, applyProtagonistIdentity, hasStory, listTemplateCharacters, listTemplatePlots, loadCharacters, loadMeta, saveExport, saveMeta, seedStory, } from './story-files.js';
 import { sessionMessages } from './transcript.js';
+import { wakeSoon } from './wake.js';
 import { readdirSync } from 'node:fs';
 function sessionOf(inv) {
     return inv.agent.session;
@@ -128,21 +129,7 @@ function pinSessionTitle(session, world, protagonist) {
     }
 }
 function wakeEmbark(inv) {
-    const followup = inv.agent.followup;
-    if (typeof followup !== 'function')
-        return false;
-    try {
-        followup({
-            id: crypto.randomUUID(),
-            role: 'user',
-            content: [{ type: 'text', text: FIRST_STEP_TEXT }],
-            source: { kind: 'plugin', plugin: 'dsh-infinite' },
-        });
-        return true;
-    }
-    catch {
-        return false;
-    }
+    return wakeSoon(inv.agent, FIRST_STEP_TEXT);
 }
 async function confirmOverwrite(ctx, inv, root, force) {
     if (!hasStory(root) || force)
@@ -179,7 +166,7 @@ async function afterGate(ctx, config, inv, root, templateId, protagonist) {
         bindSnapshot(root, sessionOf(inv));
         return afterGate(ctx, config, inv, root, templateId, name);
     }
-    if (picked !== EMBARK) {
+    if (!isEmbarkChoice(picked)) {
         return { kind: 'success', text: openedWaiting(world, protagonist) };
     }
     const woke = wakeEmbark(inv);

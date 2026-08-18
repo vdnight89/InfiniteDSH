@@ -5,7 +5,8 @@ import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it } from 'vitest'
 import { apply, inject, name as pluginName } from '../src/index.ts'
 import { handleBind, handleCast, handleExport, handleNew } from '../src/commands.ts'
-import { COMMANDS_COPY } from '../src/copy.ts'
+import { COMMANDS_COPY, isEmbarkChoice } from '../src/copy.ts'
+import { offerForks } from '../src/forks-host.ts'
 import { installUserPreset } from '../src/install-preset.ts'
 import { onSessionEvent } from '../src/lifecycle.ts'
 import { safeCoverName } from '../src/covers-host.ts'
@@ -501,6 +502,49 @@ describe('dsh-infinite plugin', () => {
     installUserPreset(config)
     expect(readFileSync(join(dest!, 'preset.yml'), 'utf8')).toContain('诸天万界')
     expect(readFileSync(join(dest!, 'agent.cordis.yml'), 'utf8')).toContain('诸天万界')
+  })
+
+  it('treats 启程 variants as embark', () => {
+    expect(isEmbarkChoice('启程')).toBe(true)
+    expect(isEmbarkChoice('启程。')).toBe(true)
+    expect(isEmbarkChoice('启程 踏入')).toBe(true)
+    expect(isEmbarkChoice('另择开局')).toBe(false)
+  })
+
+  it('offers parsed 歧路 as a clickable ask and wakes the chosen road', async () => {
+    const { ctx, config } = setup()
+    await handleNew(ctx, config, inv('forks', '修仙'))
+    const followups: string[] = []
+    const agent = {
+      session: session('forks', [
+        {
+          type: 'assistant/message',
+          data: {
+            message: {
+              content: [{ type: 'text', text: '山门开了。\n\n【歧路】\n1. 推门进去\n2. 先问守门人\n3. 绕到侧廊\n亦可自己写一条别的路。' }],
+            },
+          },
+        },
+      ]),
+      followup(message: { content: Array<{ text: string }> }) {
+        followups.push(message.content[0]?.text ?? '')
+      },
+    }
+    const asking = {
+      ...ctx,
+      get(name: string) {
+        if (name === 'agents') return { get: (id: string) => (id === 'forks' ? agent : undefined) }
+        return undefined
+      },
+      userQuestions: {
+        async ask() {
+          return { answers: [{ id: 'fork', selected: ['推门进去'] }] }
+        },
+      },
+    }
+    await offerForks(asking, agent.session)
+    expect(followups).toEqual(['推门进去'])
+    onSessionEvent(asking, config, agent.session, { type: 'turn/end' })
   })
 
   it('styles a single radio option as a cover card', () => {

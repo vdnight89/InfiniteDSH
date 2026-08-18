@@ -5,6 +5,7 @@ export { findMatchingEntries, buildWorldContext, buildCharacterContext } from '.
 export { pickRandomEventEntry, formatRandomEvent } from './random-event.js';
 export { buildNarrativeGuard, buildProgressionGuard, buildProseOnlyGuard, } from './guards.js';
 export { cleanProse, isOpeningInstruction, exportTranscript, formatArchive } from './export.js';
+export { parseForkOptions } from './forks.js';
 export { TEMPLATE_IDS, TOPIC_CHOICES, KEEP_DEFAULT_PROTAGONIST, KEEP_DEFAULT_OPENING, resolveTemplateId, defaultProtagonist, parseCommandArgs, topicChoice, templateIdFromLabel, catalogEntry, bookNameForTemplate, isKeepDefaultChoice, } from './topics.js';
 export type { TopicChoice } from './topics.js';
 export { coverFileForLabel, buildCoverManifest } from './covers.js';

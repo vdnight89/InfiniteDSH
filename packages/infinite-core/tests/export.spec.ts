@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { cleanProse, exportTranscript, formatArchive, isOpeningInstruction } from '../src/export.ts'
+import { parseForkOptions } from '../src/forks.ts'
 
 describe('cleanProse', () => {
   it('strips the 歧路 block from exported prose', () => {
@@ -43,6 +44,22 @@ describe('exportTranscript', () => {
     ], true)
     expect(txt).toContain('（你）推门')
     expect(txt).toContain('门轴吱呀。')
+  })
+})
+
+describe('parseForkOptions', () => {
+  it('reads numbered 歧路 lines and drops the free-write trailer', () => {
+    const raw = `山门开了。
+
+【歧路】
+1. 推门进去
+2. 先问守门人
+3. 绕到侧廊 亦可自己写一条别的路。`
+    expect(parseForkOptions(raw)).toEqual(['推门进去', '先问守门人', '绕到侧廊'])
+  })
+
+  it('returns empty when there is no 歧路 block', () => {
+    expect(parseForkOptions('只有正文。')).toEqual([])
   })
 })
 

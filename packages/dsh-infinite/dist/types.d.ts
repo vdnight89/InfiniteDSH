@@ -35,7 +35,11 @@ export interface FollowupMessage {
 }
 export interface DuckAgent {
     readonly session: DuckSession;
+    readonly id?: string;
+    readonly status?: string;
     followup?: (message: FollowupMessage) => void;
+    steer?: (message: FollowupMessage) => void;
+    send?: (message: FollowupMessage, target: string, wakeup: boolean) => void;
 }
 export interface SessionLocation {
     readonly path: string;

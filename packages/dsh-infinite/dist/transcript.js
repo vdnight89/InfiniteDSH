@@ -69,6 +69,14 @@ export function recentText(session, last = 4) {
 export function hasAssistantProse(session) {
     return sessionMessages(session).some((m) => m.role === 'assistant' && cleanProse(m.text).length > 0);
 }
+export function lastAssistantRaw(session) {
+    const msgs = sessionMessages(session);
+    for (let i = msgs.length - 1; i >= 0; i -= 1) {
+        if (msgs[i]?.role === 'assistant')
+            return msgs[i].text;
+    }
+    return '';
+}
 export function summaryFromCompaction(data) {
     if (!data)
         return '';
