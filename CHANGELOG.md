@@ -1,7 +1,8 @@
 # Changelog
 
-## 未发版
+## 0.4.13 — 2026-08-18
 
+- 文学预设目录带上 `"type": "module"`，`dsh web` 不再为 `restrict.js` 报 MODULE_TYPELESS_PACKAGE_JSON。
 - 项目名定为 **诸天万界DSH**。预设列表里也显示这个名字。书里题记仍写诸天万界。
 
 ## 0.4.12 — 2026-08-18

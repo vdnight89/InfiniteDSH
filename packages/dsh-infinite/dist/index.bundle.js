@@ -1962,6 +1962,7 @@ function installUserPreset(config) {
       if (!/禁止把思考/.test(destPersona)) {
         writeFileSync2(join4(dest, "agent.cordis.yml"), readFileSync4(join4(src, "agent.cordis.yml")));
       }
+      ensurePresetModuleType(src, dest);
       return dest;
     }
   } catch {
@@ -1969,6 +1970,25 @@ function installUserPreset(config) {
   mkdirSync2(dirname4(dest), { recursive: true });
   copyTree2(src, dest);
   return dest;
+}
+function ensurePresetModuleType(src, dest) {
+  const pkg = join4(dest, "package.json");
+  let raw = "";
+  try {
+    raw = readFileSync4(pkg, "utf8");
+  } catch {
+    raw = "";
+  }
+  if (!/"type"\s*:\s*"module"/.test(raw)) {
+    writeFileSync2(pkg, readFileSync4(join4(src, "package.json")));
+  }
+  const restrict = join4(dest, "restrict.js");
+  try {
+    if (!statSync4(restrict).isFile())
+      throw new Error("missing");
+  } catch {
+    writeFileSync2(restrict, readFileSync4(join4(src, "restrict.js")));
+  }
 }
 
 // packages/dsh-infinite/dist/forks-host.js

@@ -77,6 +77,16 @@ describe('dsh-infinite plugin', () => {
     expect(readFileSync(marker, 'utf8')).toContain('# user-edit')
   })
 
+  it('writes type module so the preset restrict.js does not warn', () => {
+    const { config } = setup()
+    const dest = installUserPreset(config)
+    expect(dest).toBeTruthy()
+    expect(readFileSync(join(dest!, 'package.json'), 'utf8')).toMatch(/"type"\s*:\s*"module"/)
+    rmSync(join(dest!, 'package.json'))
+    installUserPreset(config)
+    expect(readFileSync(join(dest!, 'package.json'), 'utf8')).toMatch(/"type"\s*:\s*"module"/)
+  })
+
   it('rejects unsafe cover paths', () => {
     expect(safeCoverName('cultivation.jpg')).toBe('cultivation.jpg')
     expect(safeCoverName('../etc/passwd')).toBeNull()

@@ -2,7 +2,7 @@
 
 给下一个 agent：读完这份就能开工。词汇以 [`CONTEXT.md`](CONTEXT.md) 为准。产品口吻以 [`README.md`](README.md) 为准。历史决策见 [`docs/grill-airp-on-dsh.md`](docs/grill-airp-on-dsh.md) 与 [`docs/grill-ux-2026-08-17.md`](docs/grill-ux-2026-08-17.md)。规格原稿 [`docs/superpowers/specs/2026-08-16-dsh-infinite-design.md`](docs/superpowers/specs/2026-08-16-dsh-infinite-design.md) 已过时（命令名、题材数、导出流程都变了），只当考古。
 
-**当前船：** `v0.4.12`。GitHub：https://github.com/vdnight89/InfiniteDSH  
+**当前船：** `v0.4.13`。GitHub：https://github.com/vdnight89/InfiniteDSH  
 **组合包名：** `dsh-infinite`。产品中文名：**诸天万界DSH**（书里题记仍写诸天万界）。  
 **主人：** vdnight89。本机 Windows，仓库 `F:\DocProject\InfiniteDSH`。
 

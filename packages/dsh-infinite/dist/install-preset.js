@@ -45,6 +45,7 @@ export function installUserPreset(config) {
             if (!/禁止把思考/.test(destPersona)) {
                 writeFileSync(join(dest, 'agent.cordis.yml'), readFileSync(join(src, 'agent.cordis.yml')));
             }
+            ensurePresetModuleType(src, dest);
             return dest;
         }
     }
@@ -54,4 +55,26 @@ export function installUserPreset(config) {
     mkdirSync(dirname(dest), { recursive: true });
     copyTree(src, dest);
     return dest;
+}
+/** Node warns if restrict.js is ESM and the nearest package.json has no "type": "module". */
+function ensurePresetModuleType(src, dest) {
+    const pkg = join(dest, 'package.json');
+    let raw = '';
+    try {
+        raw = readFileSync(pkg, 'utf8');
+    }
+    catch {
+        raw = '';
+    }
+    if (!/"type"\s*:\s*"module"/.test(raw)) {
+        writeFileSync(pkg, readFileSync(join(src, 'package.json')));
+    }
+    const restrict = join(dest, 'restrict.js');
+    try {
+        if (!statSync(restrict).isFile())
+            throw new Error('missing');
+    }
+    catch {
+        writeFileSync(restrict, readFileSync(join(src, 'restrict.js')));
+    }
 }
