@@ -1,11 +1,16 @@
 const META_LINE = /^\s*【(?:章节名|场景信息|对话推荐|开局|世界规则|叙事护栏|剧情推进|输出要求|随机世界事件|角色|当前场景|歧路)】.*$/;
 const BODY_TAG = /【正文】/g;
 const FENCE_BLOCK = /```[\s\S]*?```/g;
-const FORK_BLOCK = /【歧路】[\s\S]*$/;
+const FORK_MARK = '【歧路】';
 /** Drop template labels and author notes from one assistant blob. */
+/** Drop only the trailing 歧路 menu, not an earlier mention inside a draft. */
+export function stripTrailingFork(text) {
+    const at = text.lastIndexOf(FORK_MARK);
+    return at < 0 ? text : text.slice(0, at);
+}
 export function cleanProse(text) {
     const withoutFences = text.replace(FENCE_BLOCK, '');
-    const withoutFork = withoutFences.replace(FORK_BLOCK, '');
+    const withoutFork = stripTrailingFork(withoutFences);
     const withoutMeta = withoutFork
         .split(/\r?\n/)
         .filter((line) => !META_LINE.test(line) && !/^(?:亦可自己写一条)/.test(line.trim()))
@@ -101,7 +106,7 @@ export function extractStoryBody(text) {
 }
 /** Strip 歧路 and planning, but keep Markdown headings for a polished book. */
 export function cleanManuscript(text) {
-    const withoutFork = text.replace(FENCE_BLOCK, '').replace(FORK_BLOCK, '');
+    const withoutFork = stripTrailingFork(text.replace(FENCE_BLOCK, ''));
     const kept = withoutFork
         .split(/\n\s*\n/)
         .filter((para) => !isPlanningParagraph(para) && !/^(?:亦可自己写一条)/.test(para.trim()))

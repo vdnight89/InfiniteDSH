@@ -10,6 +10,20 @@ describe('cleanProse', () => {
     expect(cleanProse(raw)).not.toContain('歧路')
   })
 
+  it('keeps the story when an earlier draft also mentions 歧路', () => {
+    const raw = [
+      'Need maybe include 【歧路】 later. Final.',
+      '',
+      '门轴在掌下发出枯骨般的响。谢无妄把门后那根木闩一点一点推上。',
+      '',
+      '【歧路】',
+      '1. 先挪人进柜台后',
+      '2. 捡起告示',
+    ].join('\n')
+    expect(cleanProse(raw)).toContain('门轴在掌下发出枯骨般的响')
+    expect(cleanProse(raw)).not.toContain('先挪人进柜台后')
+  })
+
   it('strips template tags, headings, and fences', () => {
     const raw = '【正文】山门开了\n【对话推荐】去藏经阁\n## 第一章\n```js\nx\n```\n留下'
     expect(cleanProse(raw)).toContain('山门开了')
@@ -127,6 +141,11 @@ describe('parseForkOptions', () => {
 
   it('returns empty when there is no 歧路 block', () => {
     expect(parseForkOptions('只有正文。')).toEqual([])
+  })
+
+  it('reads the last 歧路 menu when a draft mentioned it earlier', () => {
+    const raw = 'Need include 【歧路】 later.\n\n门开了。\n\n【歧路】\n1. 应门\n2. 藏尸\n3. 拔剑'
+    expect(parseForkOptions(raw)).toEqual(['应门', '藏尸', '拔剑'])
   })
 })
 

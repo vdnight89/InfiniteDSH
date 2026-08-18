@@ -1,10 +1,11 @@
 /** Pull up to three concrete actions from a trailing 【歧路】 block. */
 export function parseForkOptions(text) {
-    const matched = text.match(/【歧路】([\s\S]*)$/);
-    if (!matched)
+    const at = text.lastIndexOf('【歧路】');
+    if (at < 0)
         return [];
+    const tail = text.slice(at + '【歧路】'.length);
     const out = [];
-    for (const line of matched[1].split(/\r?\n/)) {
+    for (const line of tail.split(/\r?\n/)) {
         const row = line.match(/^\s*(?:[1-3][.)、]|[-*])\s+(.+?)\s*$/);
         if (!row)
             continue;

@@ -1,5 +1,7 @@
 import type { TranscriptMessage } from './types.js';
 /** Drop template labels and author notes from one assistant blob. */
+/** Drop only the trailing 歧路 menu, not an earlier mention inside a draft. */
+export declare function stripTrailingFork(text: string): string;
 export declare function cleanProse(text: string): string;
 /** True when a paragraph is a writing plan, not fiction. */
 export declare function isPlanningParagraph(text: string): boolean;

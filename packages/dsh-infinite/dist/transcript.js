@@ -1,4 +1,11 @@
 import { cleanProse, extractStoryBody } from 'infinite-core';
+function isNarrativeBlock(block) {
+    if (typeof block.text !== 'string' || !block.text)
+        return false;
+    if (!block.type || block.type === 'text')
+        return true;
+    return false;
+}
 function blocksToText(value) {
     if (typeof value === 'string')
         return value;
@@ -9,10 +16,10 @@ function blocksToText(value) {
         if (!block || typeof block !== 'object')
             continue;
         const rec = block;
-        if (typeof rec.text === 'string')
+        if (isNarrativeBlock(rec))
             parts.push(rec.text);
     }
-    return parts.join('');
+    return parts.join('\n\n');
 }
 function messageText(message) {
     if (!message || typeof message !== 'object')

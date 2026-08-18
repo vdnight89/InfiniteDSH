@@ -234,10 +234,14 @@ function buildProseOnlyGuard() {
 var META_LINE = /^\s*【(?:章节名|场景信息|对话推荐|开局|世界规则|叙事护栏|剧情推进|输出要求|随机世界事件|角色|当前场景|歧路)】.*$/;
 var BODY_TAG = /【正文】/g;
 var FENCE_BLOCK = /```[\s\S]*?```/g;
-var FORK_BLOCK = /【歧路】[\s\S]*$/;
+var FORK_MARK = "\u3010\u6B67\u8DEF\u3011";
+function stripTrailingFork(text) {
+  const at = text.lastIndexOf(FORK_MARK);
+  return at < 0 ? text : text.slice(0, at);
+}
 function cleanProse(text) {
   const withoutFences = text.replace(FENCE_BLOCK, "");
-  const withoutFork = withoutFences.replace(FORK_BLOCK, "");
+  const withoutFork = stripTrailingFork(withoutFences);
   const withoutMeta = withoutFork.split(/\r?\n/).filter((line) => !META_LINE.test(line) && !/^(?:亦可自己写一条)/.test(line.trim())).join("\n").replace(BODY_TAG, "");
   return withoutMeta.replace(/^\s*#{1,6}\s+.*$/gm, "").replace(/\n{3,}/g, "\n\n").trim();
 }
@@ -322,7 +326,7 @@ function extractStoryBody(text) {
   return cleaned;
 }
 function cleanManuscript(text) {
-  const withoutFork = text.replace(FENCE_BLOCK, "").replace(FORK_BLOCK, "");
+  const withoutFork = stripTrailingFork(text.replace(FENCE_BLOCK, ""));
   const kept = withoutFork.split(/\n\s*\n/).filter((para) => !isPlanningParagraph(para) && !/^(?:亦可自己写一条)/.test(para.trim())).join("\n\n").replace(BODY_TAG, "").replace(/\n{3,}/g, "\n\n").trim();
   return isPlanningDump(kept) ? "" : kept;
 }
@@ -441,11 +445,12 @@ ${section}`;
 
 // packages/infinite-core/dist/forks.js
 function parseForkOptions(text) {
-  const matched = text.match(/【歧路】([\s\S]*)$/);
-  if (!matched)
+  const at = text.lastIndexOf("\u3010\u6B67\u8DEF\u3011");
+  if (at < 0)
     return [];
+  const tail = text.slice(at + "\u3010\u6B67\u8DEF\u3011".length);
   const out = [];
-  for (const line of matched[1].split(/\r?\n/)) {
+  for (const line of tail.split(/\r?\n/)) {
     const row = line.match(/^\s*(?:[1-3][.)、]|[-*])\s+(.+?)\s*$/);
     if (!row)
       continue;
@@ -1187,6 +1192,13 @@ function writeProtagonistCard(root, name2) {
 }
 
 // packages/dsh-infinite/dist/transcript.js
+function isNarrativeBlock(block) {
+  if (typeof block.text !== "string" || !block.text)
+    return false;
+  if (!block.type || block.type === "text")
+    return true;
+  return false;
+}
 function blocksToText(value) {
   if (typeof value === "string")
     return value;
@@ -1197,10 +1209,10 @@ function blocksToText(value) {
     if (!block || typeof block !== "object")
       continue;
     const rec = block;
-    if (typeof rec.text === "string")
+    if (isNarrativeBlock(rec))
       parts.push(rec.text);
   }
-  return parts.join("");
+  return parts.join("\n\n");
 }
 function messageText(message) {
   if (!message || typeof message !== "object")

@@ -1,6 +1,12 @@
 import { cleanProse, extractStoryBody, type TranscriptMessage } from 'infinite-core'
 import type { DuckEvent, DuckSession } from './types.js'
 
+function isNarrativeBlock(block: { type?: string; text?: string }): boolean {
+  if (typeof block.text !== 'string' || !block.text) return false
+  if (!block.type || block.type === 'text') return true
+  return false
+}
+
 function blocksToText(value: unknown): string {
   if (typeof value === 'string') return value
   if (!Array.isArray(value)) return ''
@@ -8,9 +14,9 @@ function blocksToText(value: unknown): string {
   for (const block of value) {
     if (!block || typeof block !== 'object') continue
     const rec = block as { type?: string; text?: string }
-    if (typeof rec.text === 'string') parts.push(rec.text)
+    if (isNarrativeBlock(rec)) parts.push(rec.text as string)
   }
-  return parts.join('')
+  return parts.join('\n\n')
 }
 
 function messageText(message: unknown): string {

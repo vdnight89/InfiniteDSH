@@ -537,6 +537,27 @@ describe('dsh-infinite plugin', () => {
     expect(source).not.toContain('command')
   })
 
+  it('ignores reasoning blocks when collecting export source', () => {
+    const sess = session('reason')
+    sess.events = [{
+      type: 'assistant/message',
+      data: {
+        message: {
+          role: 'assistant',
+          content: [
+            { type: 'reasoning', text: 'We need respond in Chinese. Need maybe include 【歧路】 later. Final.' },
+            { type: 'text', text: '门轴在掌下发出枯骨般的响。\n\n谢无妄把歇业木牌翻了个面，又落回原位。老掌柜塞给他的钥匙还带着酒渍。\n\n【歧路】\n1. 先挪人进柜台后\n2. 捡起告示\n3. 卸他残甲' },
+          ],
+        },
+      },
+    }]
+    const source = collectExportSource(sess)
+    expect(source).toContain('门轴在掌下发出枯骨般的响')
+    expect(source).toContain('歇业木牌')
+    expect(source).not.toContain('We need respond')
+    expect(source).not.toContain('先挪人进柜台后')
+  })
+
   it('treats 启程 variants as embark', () => {
     expect(isEmbarkChoice('启程')).toBe(true)
     expect(isEmbarkChoice('启程。')).toBe(true)
